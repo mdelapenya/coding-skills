@@ -1,0 +1,78 @@
+# Coding Skills
+
+Reusable AI agent skills for software development workflows.
+
+## Skills
+
+| Skill | Purpose | Trigger phrases |
+|---|---|---|
+| **describe-pr** | Generate a concise PR description from a GitHub pull request diff | "describe this PR", "add PR description", "fill in PR body", "summarize PR changes" |
+
+## Platform Support
+
+These skills work with multiple AI coding agents. The repo includes symlinks for automatic discovery:
+
+| Platform | Discovery path | How to install |
+|---|---|---|
+| **Claude Code** | `.claude/skills/` | Clone repo, or install as plugin |
+| **GitHub Copilot** | `.github/skills/` | Clone repo into your project |
+| **OpenAI Codex** | `.agents/skills/` | Clone repo into your project |
+| **Gemini CLI** | `.gemini/skills/` or `.agents/skills/` | Clone repo, or install as extension |
+
+All four paths are symlinks to the canonical `skills/` directory, so skills stay in sync.
+
+## Quick Start
+
+### Option 1: Clone into your project
+
+```bash
+git clone https://github.com/mdelapenya/coding-skills.git
+```
+
+The symlinks inside the repo handle platform discovery automatically.
+
+### Option 2: Copy skills to your agent's discovery path
+
+```bash
+# For Claude Code
+cp -r skills/* ~/.claude/skills/
+
+# For Copilot
+cp -r skills/* .github/skills/
+
+# For Codex
+cp -r skills/* .agents/skills/
+
+# For Gemini CLI
+cp -r skills/* .gemini/skills/
+```
+
+### Option 3: Symlink for single source of truth
+
+```bash
+REPO=/path/to/coding-skills/skills
+
+# Claude Code (user-global)
+ln -s $REPO/describe-pr ~/.claude/skills/describe-pr
+```
+
+## Repo Structure
+
+```
+coding-skills/
+├── skills/                          # Canonical skill files
+│   └── describe-pr/
+│       └── SKILL.md
+├── .agents/skills -> ../skills      # Codex + Gemini CLI
+├── .claude/skills -> ../skills      # Claude Code
+├── .github/skills -> ../skills      # Copilot
+├── .gemini/skills -> ../skills      # Gemini CLI
+├── .claude-plugin/
+│   └── plugin.json                  # Claude Code plugin manifest
+├── gemini-extension.json            # Gemini CLI extension manifest
+└── README.md
+```
+
+## License
+
+MIT

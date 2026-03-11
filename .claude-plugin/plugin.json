@@ -1,0 +1,10 @@
+{
+  "name": "coding-skills",
+  "version": "1.0.0",
+  "description": "Reusable Claude Code skills for software development workflows",
+  "author": "Manuel de la Peña",
+  "links": {
+    "repository": "https://github.com/mdelapenya/coding-skills"
+  },
+  "tags": ["development", "github", "pull-requests", "workflow"]
+}
