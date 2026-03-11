@@ -18,20 +18,17 @@ Generate a concise description for a GitHub pull request by analyzing its diff.
 Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs.
 
 - **Single remote**: use it automatically.
-- **Multiple remotes**: prompt the user with a numbered list, default to the first:
-  ```
-  Multiple remotes found:
-  1. origin  → org/repo
-  2. upstream → org/repo
-  Which remote? [1]:
-  ```
+- **Multiple remotes**: use `AskUserQuestion` to prompt with a numbered list, default to the first:
+  > Multiple remotes found:
+  > 1. origin  → org/repo
+  > 2. upstream → org/repo
+  > Which remote? [1]
 
 ### Step 2: Get the PR number
 
-If `$ARGUMENTS` contains a number, use it. Otherwise ask:
-```
-PR number:
-```
+If `$ARGUMENTS` contains a number, use it. Otherwise use `AskUserQuestion` to ask:
+
+> PR number:
 
 ### Step 3: Fetch PR metadata and diff
 
@@ -99,11 +96,9 @@ Analyze the diff and fill the template. Follow these rules:
 
 ### Step 7: Preview and confirm
 
-Show the generated description and ask:
+Show the generated description, then use `AskUserQuestion` to confirm:
 
-```
-Update PR #<number> with this description? [Y/n]:
-```
+> Update PR #<number> with this description? [Y/n]
 
 - **Confirmed**: write the description to a temp file and run:
   ```bash
