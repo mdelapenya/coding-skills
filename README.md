@@ -7,6 +7,7 @@ Reusable AI agent skills for software development workflows.
 | Skill | Purpose | Trigger phrases |
 |---|---|---|
 | **babysit-pr** | Monitor CI builds and merge conflicts for a PR, diagnose failures, merge main, and push fixes | "babysit this PR", "check CI", "fix the build", "why is CI failing", "resolve conflicts" |
+| **ci-detective** | Investigate CI failures by cross-referencing against other recent runs to determine if failures are pre-existing or introduced by the PR | "investigate CI failure", "is this test flaky", "why is this test failing", "ci detective" |
 | **describe-pr** | Generate a concise PR description from a GitHub pull request diff | "describe this PR", "add PR description", "fill in PR body", "summarize PR changes" |
 
 ## Platform Support
@@ -55,6 +56,7 @@ REPO=/path/to/coding-skills/skills
 
 # Claude Code (user-global)
 ln -s $REPO/babysit-pr ~/.claude/skills/babysit-pr
+ln -s $REPO/ci-detective ~/.claude/skills/ci-detective
 ln -s $REPO/describe-pr ~/.claude/skills/describe-pr
 ```
 
@@ -65,6 +67,10 @@ coding-skills/
 ├── skills/                          # Canonical skill files
 │   ├── babysit-pr/
 │   │   └── SKILL.md
+│   ├── ci-detective/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── github-actions.md
 │   └── describe-pr/
 │       └── SKILL.md
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
