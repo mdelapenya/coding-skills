@@ -9,6 +9,7 @@ Reusable AI agent skills for software development workflows.
 | **babysit-pr** | Monitor CI builds and merge conflicts for a PR, diagnose failures, merge main, and push fixes | "babysit this PR", "check CI", "fix the build", "why is CI failing", "resolve conflicts" |
 | **ci-detective** | Investigate CI failures by cross-referencing against other recent runs to determine if failures are pre-existing or introduced by the PR | "investigate CI failure", "is this test flaky", "why is this test failing", "ci detective" |
 | **describe-pr** | Generate a concise PR description from a GitHub pull request diff | "describe this PR", "add PR description", "fill in PR body", "summarize PR changes" |
+| **pr-lawyer** | Address PR review comments by fixing valid feedback or challenging debatable ones with a reasoned argument | "address PR comments", "respond to review", "challenge this comment", "fight back on review", "pr lawyer" |
 
 ## Platform Support
 
@@ -58,6 +59,7 @@ REPO=/path/to/coding-skills/skills
 ln -s $REPO/babysit-pr ~/.claude/skills/babysit-pr
 ln -s $REPO/ci-detective ~/.claude/skills/ci-detective
 ln -s $REPO/describe-pr ~/.claude/skills/describe-pr
+ln -s $REPO/pr-lawyer ~/.claude/skills/pr-lawyer
 ```
 
 ## Repo Structure
@@ -73,10 +75,15 @@ coding-skills/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── github-actions.md
-│   └── describe-pr/
+│   ├── describe-pr/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── github.md
+│   └── pr-lawyer/
 │       ├── SKILL.md
 │       └── references/
-│           └── github.md
+│           ├── github.md
+│           └── gitlab.md
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
 ├── .claude/skills -> ../skills      # Claude Code
 ├── .github/skills -> ../skills      # Copilot
