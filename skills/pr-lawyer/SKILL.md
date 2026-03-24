@@ -111,11 +111,10 @@ git push
 
 ### Step 4: Respond to challenged and clarifying comments
 
-For each challenged or clarifying comment, draft a reply using the platform-specific reply command from the loaded reference. Replies must:
-- Be direct and professional — no passive aggression
-- State the position clearly: "I disagree because…" or "This is intentional because…"
-- Reference the relevant code, spec, or prior discussion if applicable
-- Invite further discussion: "Happy to discuss further if you see it differently"
+For every comment — accepted, challenged, or clarifying — post a reply using the platform-specific reply command from the loaded reference. Replies must:
+- **Accepted**: acknowledge the fix briefly — `Fixed in <commit-sha>: <one-line description>`
+- **Challenged**: be direct and professional — state the position clearly: "I disagree because…" or "This is intentional because…", reference the relevant code or spec, and invite further discussion: "Happy to discuss if you see it differently"
+- **Clarified**: answer the question concisely without over-explaining
 
 For challenges, do not make a code change. Stand firm unless the reviewer makes a new argument.
 
