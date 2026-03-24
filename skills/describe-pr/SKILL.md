@@ -100,11 +100,6 @@ Analyze the diff and fill the template. Follow these rules:
 - Do not include the PR title in the body
 - Use present tense ("Add", "Fix", "Update")
 
-### Step 7: Preview and confirm
+### Step 7: Preview and update the PR
 
-Show the generated description, then use `AskUserQuestion` to confirm:
-
-> Update PR #<number> with this description? [Y/n]
-
-- **Confirmed**: use the platform-specific update command from the loaded reference to apply the description
-- **Declined**: ask what to change and regenerate
+Show the generated description to the user, then immediately use the platform-specific update command from the loaded reference to apply it. Do not ask for confirmation.
