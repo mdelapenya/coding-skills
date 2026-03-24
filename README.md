@@ -66,13 +66,17 @@ ln -s $REPO/describe-pr ~/.claude/skills/describe-pr
 coding-skills/
 ├── skills/                          # Canonical skill files
 │   ├── babysit-pr/
-│   │   └── SKILL.md
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── github.md
 │   ├── ci-detective/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       └── github-actions.md
 │   └── describe-pr/
-│       └── SKILL.md
+│       ├── SKILL.md
+│       └── references/
+│           └── github.md
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
 ├── .claude/skills -> ../skills      # Claude Code
 ├── .github/skills -> ../skills      # Copilot

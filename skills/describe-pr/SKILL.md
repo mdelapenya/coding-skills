@@ -9,13 +9,26 @@ metadata:
 
 # Describe PR
 
-Generate a concise description for a GitHub pull request by analyzing its diff.
+Generate a concise description for a pull request by analyzing its diff.
+
+## Supported Platforms
+
+This skill supports multiple code hosting platforms. Each platform has its own reference file under `references/` with platform-specific commands.
+
+Currently supported:
+- **GitHub** — see `references/github.md`
+
+Planned:
+- GitLab
+- Bitbucket
+
+When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands.
 
 ## Workflow
 
-### Step 1: Determine the repository
+### Step 1: Detect platform and determine the repository
 
-Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs.
+Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs. Detect the platform (GitHub, GitLab, etc.) from the URL and load the matching reference file.
 
 - **Single remote**: use it automatically.
 - **Multiple remotes**: use `AskUserQuestion` to prompt with a numbered list, default to the first:
@@ -23,6 +36,8 @@ Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs.
   > 1. origin  → org/repo
   > 2. upstream → org/repo
   > Which remote? [1]
+
+If the platform is not yet supported, inform the user and stop.
 
 ### Step 2: Get the PR number
 
@@ -32,22 +47,13 @@ If `$ARGUMENTS` contains a number, use it. Otherwise use `AskUserQuestion` to as
 
 ### Step 3: Fetch PR metadata and diff
 
-Run in sequence:
-```bash
-gh pr view <number> --repo <org>/<repo> --json title,body,baseRefName,headRefName,commits
-gh pr diff <number> --repo <org>/<repo>
-```
+Using the platform-specific commands from the loaded reference, fetch the PR metadata (title, body, base/head branches, commits) and the full diff.
 
-Keep the full response — commit messages from `commits` are reused in Step 5.
+Keep the full response — commit messages are reused in Step 5.
 
 ### Step 4: Check for a PR template
 
-Look for a template in this order:
-1. `.github/PULL_REQUEST_TEMPLATE.md`
-2. `.github/pull_request_template.md`
-3. `PULL_REQUEST_TEMPLATE.md`
-4. `pull_request_template.md`
-5. `.github/PULL_REQUEST_TEMPLATE/` directory (use first `.md` file)
+Using the platform-specific template paths from the loaded reference, look for a PR template.
 
 If found, use its structure (headings, sections, checkboxes) as the skeleton. Fill each section from the diff analysis. Preserve checkbox items from the template.
 
@@ -73,8 +79,8 @@ Do not include a `## Related issues` section in the template — Step 5 appends 
 Search for issues this PR might address using three signals:
 
 1. **Branch name**: run `git branch --show-current` and extract issue numbers from patterns like `fix/123`, `issue-456`, `gh-789`, `feat/PROJ-42`
-2. **Commit messages**: scan the `commits` data already fetched in Step 3 for `#<number>`, `fixes #`, `closes #`, `resolves #`
-3. **Keyword search**: extract key terms from the PR title and diff, then run `gh issue list --repo <org>/<repo> --state open --search "<terms>" --limit 5`
+2. **Commit messages**: scan the commits data already fetched in Step 3 for `#<number>`, `fixes #`, `closes #`, `resolves #`
+3. **Keyword search**: extract key terms from the PR title and diff, then use the platform-specific issue search command from the loaded reference
 
 If related issues are found:
 - Append a `## Related issues` section to the description (or fill the equivalent section if the PR template has one)
@@ -100,8 +106,5 @@ Show the generated description, then use `AskUserQuestion` to confirm:
 
 > Update PR #<number> with this description? [Y/n]
 
-- **Confirmed**: write the description to a temp file and run:
-  ```bash
-  gh pr edit <number> --repo <org>/<repo> --body-file /tmp/pr-description.md
-  ```
+- **Confirmed**: use the platform-specific update command from the loaded reference to apply the description
 - **Declined**: ask what to change and regenerate

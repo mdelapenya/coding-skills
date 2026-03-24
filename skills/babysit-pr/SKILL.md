@@ -14,6 +14,19 @@ Monitor and fix CI failures and merge conflicts for the current branch's pull re
 
 **NEVER use `git push --force` or `git push --force-with-lease`.** Always use a regular `git push`. If a push is rejected, stop and ask the user.
 
+## Supported Platforms
+
+This skill supports multiple code hosting platforms. Each platform has its own reference file under `references/` with platform-specific commands.
+
+Currently supported:
+- **GitHub** — see `references/github.md`
+
+Planned:
+- GitLab
+- Bitbucket
+
+When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands. If the platform is not yet supported, inform the user and stop.
+
 ## Context: Worktree Setup
 
 This skill is typically invoked from a **git worktree**, not the root repository. Understand the two paths:
@@ -37,18 +50,17 @@ If confirmed, start the loop. If declined, run once and stop.
 
 ## Workflow
 
-### Step 1: Identify the PR
+### Step 1: Detect platform and identify the PR
 
-Determine the current branch and its associated PR:
-```bash
-gh pr view --json number,title,headRefName,baseRefName,mergeable,mergeStateStatus,statusCheckRollup
-```
+Run `git remote -v` to detect the platform, then load the corresponding reference file.
+
+Using the platform-specific commands from the loaded reference, identify the current branch's PR and fetch its metadata (number, title, branches, mergeable status, CI status).
 
 If no PR exists for the current branch, stop and inform the user.
 
 ### Step 2: Check CI status
 
-Inspect the `statusCheckRollup` from Step 1. Categorize each check as passing, failing, or pending.
+Inspect the CI status from Step 1. Categorize each check as passing, failing, or pending.
 
 - If all checks pass and the PR is mergeable, report success and stop.
 - If checks are still pending, report which ones and stop — do not wait.
@@ -57,10 +69,7 @@ Inspect the `statusCheckRollup` from Step 1. Categorize each check as passing, f
 
 ### Step 3: Diagnose and fix CI failures
 
-Fetch the failing check logs:
-```bash
-gh run view <run-id> --log-failed
-```
+Using the platform-specific commands from the loaded reference, fetch the failing check logs.
 
 Analyze the failure and determine the root cause:
 
