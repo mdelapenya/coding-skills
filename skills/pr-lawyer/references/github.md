@@ -10,14 +10,16 @@ The repository uses GitHub if `git remote -v` shows `github.com` URLs.
 
 ```bash
 gh api repos/<org>/<repo>/pulls/<number>/comments \
-  --jq '[.[] | {id, path, line, body, user: .user.login, in_reply_to_id}]'
+  --jq '[.[] | {id, path, line, body, user: .user.login, html_url, in_reply_to_id}]'
 ```
 
 For PR-level (issue) comments:
 ```bash
 gh api repos/<org>/<repo>/issues/<number>/comments \
-  --jq '[.[] | {id, body, user: .user.login}]'
+  --jq '[.[] | {id, body, user: .user.login, html_url}]'
 ```
+
+The `html_url` field is the permalink to the comment — use it when replying to link back to the original comment.
 
 ## Fetch PR diff for context
 

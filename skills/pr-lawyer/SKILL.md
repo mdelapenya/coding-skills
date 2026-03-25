@@ -64,18 +64,20 @@ Otherwise, present the clusters using `AskUserQuestion` in this format:
 > Here's how I've grouped the review feedback:
 >
 > **To fix (3 clusters):**
-> 1. `fix` — Null-safety issues (comments #3, #7, #12 — auth.go, session.go)
-> 2. `refactor` — Extract helper methods (comments #5, #9 — parser.go)
-> 3. `style` — Naming conventions (comments #2, #11 — multiple files)
+> 1. `fix` — Null-safety issues (comments by @reviewer in auth.go, session.go)
+> 2. `refactor` — Extract helper methods (comments by @reviewer in parser.go)
+> 3. `style` — Naming conventions (comments by @reviewer in multiple files)
 >
 > **To challenge (no code change):**
-> - #4 — I'll argue this approach is intentional because…
-> - #8 — I'll push back on this as out of scope for this PR
+> - "Use a factory pattern here" — I'll argue this approach is intentional because…
+> - "This should be split into two PRs" — I'll push back on this as out of scope
 >
 > **To clarify (reply only):**
-> - #6 — I'll explain why the timeout is set to 30s
+> - "Why is the timeout set to 30s?" — I'll explain the rationale
 >
 > Does this grouping look right? You can adjust clusters, merge them, or skip any. [Y/n or instructions]
+
+**Important:** Do not prefix numbers with `#` in replies or summaries unless intentionally linking to a real GitHub issue or PR. On GitHub, `#123` auto-links to issue/PR 123. Use the reviewer's name, a quote of the comment, or a plain number without `#`.
 
 Wait for the user's response before proceeding. If they suggest changes (merge clusters, skip one, reorder), apply them before moving to Step 3.
 
@@ -111,8 +113,12 @@ git push
 
 ### Step 4: Respond to challenged and clarifying comments
 
-For every comment — accepted, challenged, or clarifying — post a reply using the platform-specific reply command from the loaded reference. Replies must:
-- **Accepted**: acknowledge the fix briefly — `Fixed in <commit-sha>: <one-line description>`
+For every comment — accepted, challenged, or clarifying — post a reply using the platform-specific reply command from the loaded reference.
+
+Each reply must include a link to the original comment(s) that triggered the response (use the `html_url` or constructed permalink from the fetched comment data). This gives reviewers traceability back to what was addressed.
+
+Reply format by verdict:
+- **Accepted**: acknowledge the fix briefly — `Fixed in <commit-sha>: <one-line description>` with link to original comment
 - **Challenged**: be direct and professional — state the position clearly: "I disagree because…" or "This is intentional because…", reference the relevant code or spec, and invite further discussion: "Happy to discuss if you see it differently"
 - **Clarified**: answer the question concisely without over-explaining
 

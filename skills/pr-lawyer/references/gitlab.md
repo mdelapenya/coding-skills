@@ -13,6 +13,13 @@ glab api projects/<project-id>/merge_requests/<iid>/discussions \
   --jq '[.[] | select(.resolved == false) | {id, notes: [.notes[] | {id, body, author: .author.username, resolvable, resolved}]}]'
 ```
 
+To get note permalinks, construct them from the MR web URL:
+```
+https://gitlab.com/<namespace>/<repo>/-/merge_requests/<iid>#note_<note-id>
+```
+
+Use these links when replying to reference the original comment.
+
 Where `<project-id>` is the URL-encoded `namespace/repo` (e.g. `org%2Frepo`).
 
 ## Fetch MR diff for context
