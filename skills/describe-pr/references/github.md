@@ -30,7 +30,7 @@ gh issue list --repo <org>/<repo> --state open --search "<terms>" --limit 5
 
 ## Update PR description
 
-Write the description to a temp file, then:
+Write the description to a temp file named with the PR number to avoid collisions, then:
 ```bash
-gh pr edit <number> --repo <org>/<repo> --body-file /tmp/pr-description.md
+gh pr edit <number> --repo <org>/<repo> --body-file /tmp/pr-description-<number>.md
 ```
