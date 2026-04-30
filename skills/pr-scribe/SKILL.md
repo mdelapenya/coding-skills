@@ -1,6 +1,6 @@
 ---
 name: pr-scribe
-description: Generate a concise PR description from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates the PR via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", or "summarize PR changes".
+description: Generate a concise PR description and a Conventional Commits title from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates both title and body via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", "summarize PR changes", or "update the PR title".
 allowed-tools: Read Glob Bash(gh *) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
@@ -100,6 +100,27 @@ Analyze the diff and fill the template. Follow these rules:
 - Do not include the PR title in the body
 - Use present tense ("Add", "Fix", "Update")
 
-### Step 7: Preview and update the PR
+### Step 7: Generate the title (Conventional Commits)
 
-Show the generated description to the user, then immediately use the platform-specific update command from the loaded reference to apply it. Do not ask for confirmation.
+Produce a title that follows the [Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```
+<type>(<scope>): <subject>
+```
+
+Rules:
+- **Type** — pick one: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Infer from the diff (new behavior → `feat`, bug fix → `fix`, docs only → `docs`, etc.).
+- **Scope** — optional. Use the primary affected area (package, module, skill name). Omit when the change spans many areas.
+- **Subject** — imperative mood, lowercase, no trailing period, ≤72 chars total title length.
+- **Breaking changes** — append `!` after the scope (e.g., `feat(api)!: ...`) when the change is breaking.
+
+Examples (matching this repo's style):
+- `feat(pr-scribe): generate Conventional Commits title`
+- `fix(pr-nurse): handle missing CI runs`
+- `chore: refine pr-lawyer responses`
+
+If the existing PR title already follows Conventional Commits and accurately reflects the diff, keep it.
+
+### Step 8: Preview and update the PR
+
+Show the generated title and description to the user, then immediately use the platform-specific update command from the loaded reference to apply both. Do not ask for confirmation.

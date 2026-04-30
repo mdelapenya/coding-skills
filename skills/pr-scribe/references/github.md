@@ -28,9 +28,18 @@ Check in this order:
 gh issue list --repo <org>/<repo> --state open --search "<terms>" --limit 5
 ```
 
-## Update PR description
+## Update PR title and description
 
-Write the description to a temp file named with the PR number to avoid collisions, then:
+Write the description to a temp file named with the PR number to avoid collisions, then update both fields in a single call:
+
 ```bash
-gh pr edit <number> --repo <org>/<repo> --body-file /tmp/pr-description-<number>.md
+gh pr edit <number> --repo <org>/<repo> \
+  --title "<conventional-commits-title>" \
+  --body-file /tmp/pr-description-<number>.md
+```
+
+To update only the title (e.g., when the existing description is fine):
+
+```bash
+gh pr edit <number> --repo <org>/<repo> --title "<conventional-commits-title>"
 ```
