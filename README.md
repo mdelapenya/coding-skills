@@ -36,6 +36,8 @@ The symlinks inside the repo handle platform discovery automatically.
 
 ### Option 2: Copy skills to your agent's discovery path
 
+**macOS / Linux:**
+
 ```bash
 # For Claude Code
 cp -r skills/* ~/.claude/skills/
@@ -50,7 +52,15 @@ cp -r skills/* .agents/skills/
 cp -r skills/* .gemini/skills/
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+Copy-Item -Recurse skills\* "$env:USERPROFILE\.claude\skills\"
+```
+
 ### Option 3: Symlink for single source of truth
+
+**macOS / Linux:**
 
 ```bash
 REPO=/path/to/coding-skills/skills
@@ -62,13 +72,15 @@ ln -s $REPO/pr-nurse ~/.claude/skills/pr-nurse
 ln -s $REPO/pr-scribe ~/.claude/skills/pr-scribe
 ```
 
-On Windows, true symlinks require admin rights or Developer Mode. Use directory junctions instead — they don't need admin and the harness follows them transparently:
+**Windows (PowerShell):**
+
+True symlinks require admin rights or Developer Mode. Use directory junctions instead — they don't need admin and the harness follows them transparently:
 
 ```powershell
 $repo = "C:\path\to\coding-skills\skills"
 $home_skills = "$env:USERPROFILE\.claude\skills"
 
-foreach ($n in 'babysit-pr','ci-detective','describe-pr','pr-lawyer') {
+foreach ($n in 'ci-detective','pr-lawyer','pr-nurse','pr-scribe') {
     New-Item -ItemType Junction -Path (Join-Path $home_skills $n) -Target (Join-Path $repo $n)
 }
 ```
