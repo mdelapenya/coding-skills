@@ -1,7 +1,7 @@
 ---
 name: pr-scribe
 description: Generate a concise PR description and a Conventional Commits title from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates both title and body via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", "summarize PR changes", or "update the PR title".
-allowed-tools: Read Glob Bash(gh *) Bash(git remote*) Bash(git branch*) AskUserQuestion
+allowed-tools: Read Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
   version: "1.0.0"
@@ -17,9 +17,9 @@ This skill supports multiple code hosting platforms. Each platform has its own r
 
 Currently supported:
 - **GitHub** — see `references/github.md`
+- **GitLab** — see `references/gitlab.md`
 
 Planned:
-- GitLab
 - Bitbucket
 
 When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands.

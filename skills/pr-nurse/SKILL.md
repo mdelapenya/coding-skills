@@ -1,7 +1,7 @@
 ---
 name: pr-nurse
 description: Monitor CI builds and mergeable status for the current branch's PR. Diagnoses failures, merges main to resolve conflicts or pick up fixes, and pushes. Use when user says "nurse this PR", "check CI", "fix the build", "why is CI failing", "merge main", or "resolve conflicts".
-allowed-tools: Read Edit Grep Glob Bash(gh *) Bash(git *) Bash(cd *) AskUserQuestion
+allowed-tools: Read Edit Grep Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git *) Bash(cd *) AskUserQuestion
 disable-model-invocation: true
 metadata:
   author: mdelapenya
@@ -20,9 +20,9 @@ This skill supports multiple code hosting platforms. Each platform has its own r
 
 Currently supported:
 - **GitHub** — see `references/github.md`
+- **GitLab** — see `references/gitlab.md`
 
 Planned:
-- GitLab
 - Bitbucket
 
 When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands. If the platform is not yet supported, inform the user and stop.

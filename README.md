@@ -93,7 +93,8 @@ coding-skills/
 │   ├── ci-detective/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── github-actions.md
+│   │       ├── github-actions.md
+│   │       └── gitlab-ci.md
 │   ├── pr-lawyer/
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -102,11 +103,13 @@ coding-skills/
 │   ├── pr-nurse/
 │   │   ├── SKILL.md
 │   │   └── references/
-│   │       └── github.md
+│   │       ├── github.md
+│   │       └── gitlab.md
 │   └── pr-scribe/
 │       ├── SKILL.md
 │       └── references/
-│           └── github.md
+│           ├── github.md
+│           └── gitlab.md
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
 ├── .claude/skills -> ../skills      # Claude Code
 ├── .github/skills -> ../skills      # Copilot

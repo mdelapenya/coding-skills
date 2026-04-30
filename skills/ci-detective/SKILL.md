@@ -1,7 +1,7 @@
 ---
 name: ci-detective
 description: Investigate CI failures on a PR by cross-referencing failing tests against other recent runs to determine if failures are pre-existing or caused by the PR's changes. Use when user says "investigate CI failure", "is this test flaky", "why is this test failing", "cross-reference builds", "check if failure is pre-existing", or "ci detective".
-allowed-tools: Read Grep Glob Bash(gh *) Bash(git *)
+allowed-tools: Read Grep Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git *)
 metadata:
   author: mdelapenya
   version: "1.0.0"
@@ -19,9 +19,9 @@ This skill supports multiple CI platforms. Each platform has its own reference f
 
 Currently supported:
 - **GitHub Actions** — see `references/github-actions.md`
+- **GitLab CI** — see `references/gitlab-ci.md`
 
 Planned:
-- GitLab CI
 - Jenkins
 
 When investigating, first detect which CI system the repository uses, then load the corresponding reference file for platform-specific commands.
@@ -36,6 +36,7 @@ When investigating, first detect which CI system the repository uses, then load 
 
 Check the repository for CI configuration:
 - `.github/workflows/` → GitHub Actions (load `references/github-actions.md`)
+- `.gitlab-ci.yml` → GitLab CI (load `references/gitlab-ci.md`)
 
 If the CI system is not yet supported, inform the user and stop.
 
