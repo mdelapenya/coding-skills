@@ -1,5 +1,5 @@
 ---
-name: describe-pr
+name: pr-scribe
 description: Generate a concise PR description from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates the PR via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", or "summarize PR changes".
 allowed-tools: Read Glob Bash(gh *) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
@@ -7,7 +7,7 @@ metadata:
   version: "1.0.0"
 ---
 
-# Describe PR
+# PR Scribe
 
 Generate a concise description for a pull request by analyzing its diff.
 

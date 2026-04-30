@@ -1,6 +1,6 @@
 ---
-name: babysit-pr
-description: Monitor CI builds and mergeable status for the current branch's PR. Diagnoses failures, merges main to resolve conflicts or pick up fixes, and pushes. Use when user says "babysit this PR", "check CI", "fix the build", "why is CI failing", "merge main", or "resolve conflicts".
+name: pr-nurse
+description: Monitor CI builds and mergeable status for the current branch's PR. Diagnoses failures, merges main to resolve conflicts or pick up fixes, and pushes. Use when user says "nurse this PR", "check CI", "fix the build", "why is CI failing", "merge main", or "resolve conflicts".
 allowed-tools: Read Edit Grep Glob Bash(gh *) Bash(git *) Bash(cd *) AskUserQuestion
 disable-model-invocation: true
 metadata:
@@ -8,7 +8,7 @@ metadata:
   version: "1.0.0"
 ---
 
-# Babysit PR
+# PR Nurse
 
 Monitor and fix CI failures and merge conflicts for the current branch's pull request.
 
@@ -38,12 +38,12 @@ Always return to the workspace after any operation in the root repo.
 
 ## Looping
 
-After completing a single run (Steps 1–5), start a `/loop 5m /babysit-pr` to continuously monitor the PR. This ensures CI re-runs and new merge conflicts are caught automatically.
+After completing a single run (Steps 1–5), start a `/loop 5m /pr-nurse` to continuously monitor the PR. This ensures CI re-runs and new merge conflicts are caught automatically.
 
 If the user invokes this skill directly (not already inside a loop), ask:
 
 ```
-Want me to keep babysitting this PR on a 5-minute loop? [Y/n]:
+Want me to keep nursing this PR on a 5-minute loop? [Y/n]:
 ```
 
 If confirmed, start the loop. If declined, run once and stop.

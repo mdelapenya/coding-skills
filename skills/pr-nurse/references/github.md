@@ -1,6 +1,6 @@
 # GitHub
 
-Platform-specific commands for babysitting pull requests on GitHub.
+Platform-specific commands for nursing pull requests on GitHub.
 
 ## Detect
 
