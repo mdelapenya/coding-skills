@@ -62,6 +62,17 @@ ln -s $REPO/describe-pr ~/.claude/skills/describe-pr
 ln -s $REPO/pr-lawyer ~/.claude/skills/pr-lawyer
 ```
 
+On Windows, true symlinks require admin rights or Developer Mode. Use directory junctions instead — they don't need admin and the harness follows them transparently:
+
+```powershell
+$repo = "C:\path\to\coding-skills\skills"
+$home_skills = "$env:USERPROFILE\.claude\skills"
+
+foreach ($n in 'babysit-pr','ci-detective','describe-pr','pr-lawyer') {
+    New-Item -ItemType Junction -Path (Join-Path $home_skills $n) -Target (Join-Path $repo $n)
+}
+```
+
 ## Repo Structure
 
 ```
