@@ -1,7 +1,7 @@
 ---
 name: pr-scribe
 description: Generate a concise PR description and a Conventional Commits title from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates both title and body via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", "summarize PR changes", or "update the PR title".
-allowed-tools: Read Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git remote*) Bash(git branch*) AskUserQuestion
+allowed-tools: Read Write Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
   version: "1.0.0"
@@ -18,17 +18,20 @@ This skill supports multiple code hosting platforms. Each platform has its own r
 Currently supported:
 - **GitHub** — see `references/github.md`
 - **GitLab** — see `references/gitlab.md`
+- **biomelab** — see `references/biomelab.md` (special context: writes outputs to `.biomelab/` files instead of updating PRs remotely)
 
 Planned:
 - Bitbucket
 
-When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands.
+When invoked, first detect the platform from `git remote -v` and check for biomelab context (`.biomelab/` directory), then load the corresponding reference file for platform-specific commands.
 
 ## Workflow
 
-### Step 1: Detect platform and determine the repository
+### Step 1: Detect platform and biomelab context
 
-Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs. Detect the platform (GitHub, GitLab, etc.) from the URL and load the matching reference file.
+Check if `.biomelab/` directory exists in the repository root. If yes, load `.biomelab/topic.md` (which defines biomelab-specific instructions and naming conventions).
+
+Then detect the platform from `git remote -v` and parse unique `org/repo` pairs from fetch URLs. Detect the platform (GitHub, GitLab, etc.) from the URL and load the matching reference file.
 
 - **Single remote**: use it automatically.
 - **Multiple remotes**: use `AskUserQuestion` to prompt with a numbered list, default to the first:
@@ -39,7 +42,7 @@ Run `git remote -v` and parse unique `org/repo` pairs from fetch URLs. Detect th
 
 If the platform is not yet supported, inform the user and stop.
 
-### Step 2: Get the PR number
+### Step 2: Determine the PR number
 
 If `$ARGUMENTS` contains a number, use it. Otherwise use `AskUserQuestion` to ask:
 
@@ -121,6 +124,13 @@ Examples (matching this repo's style):
 
 If the existing PR title already follows Conventional Commits and accurately reflects the diff, keep it.
 
-### Step 8: Preview and update the PR
+### Step 8: Output the results
 
+**If `.biomelab/` was detected in Step 1:**
+Write the generated results to the biomelab context directory without updating the PR remotely:
+- Write the title to `.biomelab/pr-title.md`
+- Write the description to `.biomelab/note.md`
+- Inform the user that outputs have been written for the biomelab GUI app to consume
+
+**Otherwise:**
 Show the generated title and description to the user, then immediately use the platform-specific update command from the loaded reference to apply both. Do not ask for confirmation.

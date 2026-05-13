@@ -108,6 +108,7 @@ coding-skills/
 │   └── pr-scribe/
 │       ├── SKILL.md
 │       └── references/
+│           ├── biomelab.md
 │           ├── github.md
 │           └── gitlab.md
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
