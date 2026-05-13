@@ -77,7 +77,13 @@ If not found, use this default structure:
 
 Do not include a `## Related issues` section in the template — Step 5 appends it only when issues are found.
 
-### Step 5: Look for related issues
+### Step 5: Read existing biomelab context (if applicable)
+
+If `.biomelab/` was detected in Step 1 and `.biomelab/note.md` exists, read its content. This file may contain user-refined description text from previous iterations that should inform the new generation.
+
+Keep this content for reference during Step 6 (generating the description).
+
+### Step 6: Look for related issues
 
 Search for issues this PR might address using three signals:
 
@@ -93,9 +99,11 @@ If related issues are found:
 
 If no issues are found, do not add the section — no empty placeholders.
 
-### Step 6: Generate the description
+### Step 7: Generate the description
 
-Analyze the diff and fill the template. Follow these rules:
+Analyze the diff and fill the template. If existing content from `.biomelab/note.md` (Step 5) is available, use it as context to inform the generation — preserve good user-refined sections and incorporate insights from the existing text.
+
+Follow these rules:
 - Lead with **what** and **why**, not how
 - Group related changes together
 - Mention breaking changes or migration steps if applicable
@@ -103,7 +111,31 @@ Analyze the diff and fill the template. Follow these rules:
 - Do not include the PR title in the body
 - Use present tense ("Add", "Fix", "Update")
 
-### Step 7: Generate the title (Conventional Commits)
+### Step 8: Resolve conflicts with existing biomelab content (if applicable)
+
+If `.biomelab/` context was detected and existing content from Step 5 is available, compare the newly generated description with the existing `.biomelab/note.md` content.
+
+Analyze the differences and identify specific conflicts:
+- **Added sections** in existing: sections the user added that pr-scribe didn't generate
+- **Removed sections** in existing: sections that were in the template but user deleted
+- **Rewording conflicts**: same sections but significantly different language or structure
+- **Missing sections**: sections pr-scribe generated but don't exist in the existing content
+
+If there are significant differences, use `AskUserQuestion` to interview the user about specific conflicts. Ask targeted questions, not generic choices:
+
+- For each added section: "I found a custom '[Section Name]' section in the existing content. Keep it?"
+- For each removed section: "The generated description includes '[Section Name]', but it's not in your existing content. Add it?"
+- For each rewording conflict: "The '[Section Name]' section has been rewritten. Which version do you prefer?"
+
+Collect user answers and merge intelligently:
+- Preserve user-added sections
+- Omit user-removed sections
+- Use user's preferred wording when there are rewording conflicts
+- Incorporate new sections the user didn't object to
+
+If there are no significant differences or the user confirms all changes, use the merged result for Step 9.
+
+### Step 9: Generate the title (Conventional Commits)
 
 Produce a title that follows the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
@@ -124,12 +156,12 @@ Examples (matching this repo's style):
 
 If the existing PR title already follows Conventional Commits and accurately reflects the diff, keep it.
 
-### Step 8: Output the results
+### Step 10: Output the results
 
 **If `.biomelab/` was detected in Step 1:**
-Write the generated results to the biomelab context directory without updating the PR remotely:
+Write the results to the biomelab context directory without updating the PR remotely:
 - Write the title to `.biomelab/pr-title.md`
-- Write the description to `.biomelab/note.md`
+- Write the (possibly merged) description to `.biomelab/note.md`
 - Inform the user that outputs have been written for the biomelab GUI app to consume
 
 **Otherwise:**
