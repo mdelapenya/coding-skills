@@ -60,12 +60,18 @@ When pr-scribe detects the `.biomelab/` directory:
 1. Load `.biomelab/topic.md` to understand the project's conventions
 2. Detect the git platform (GitHub, GitLab) from `git remote -v`
 3. Fetch PR metadata and diff (same as standard workflow)
-4. Generate the PR title and description, applying any conventions from the topic file
-5. Write outputs to:
+4. **Read existing content** — If `.biomelab/note.md` exists, read it. This file may contain user-refined descriptions from previous iterations that should inform the new generation
+5. Generate the PR title and description, applying conventions from the topic file and incorporating insights from existing content (if present)
+6. **Resolve conflicts dynamically** — If existing content differs significantly from the newly generated description, analyze the specific conflicts and interview the user with targeted questions:
+   - For custom sections the user added: "Keep this section?"
+   - For sections the user deleted: "Add this new section?"
+   - For rewording conflicts: "Which version of this section do you prefer?"
+   - Merge intelligently based on user answers: preserve user additions, respect deletions, use preferred wording
+7. Write the final outputs to:
    - `.biomelab/pr-title.md` — the title
-   - `.biomelab/note.md` — the description
-6. Skip the standard platform-specific update step (do not run `gh` or `glab`)
-7. Inform the user that files have been written for the GUI app to consume
+   - `.biomelab/note.md` — the description (possibly merged with existing content)
+8. Skip the standard platform-specific update step (do not run `gh` or `glab`)
+9. Inform the user that files have been written for the GUI app to consume
 
 ## Integration with biomelab GUI
 
@@ -75,3 +81,17 @@ The biomelab application reads the output files from `.biomelab/` and uses them 
 - Track PR state and metadata separately from the git hosting platform
 
 This allows pr-scribe to focus on analysis and description generation while the GUI handles actual PR creation/updates.
+
+## Iterative Refinement
+
+The biomelab workflow supports iterative refinement:
+
+1. User runs pr-scribe, which analyzes the diff and generates an initial PR description
+2. User reviews and refines the description in the biomelab GUI, editing `.biomelab/note.md` directly or through the application
+3. User runs pr-scribe again (e.g., after new commits or to regenerate based on latest diff)
+4. pr-scribe detects the existing refined content and either:
+   - Incorporates it if it's still relevant
+   - Asks the user how to resolve conflicts if the diff has changed significantly
+5. Final merged output is written back to the files for the GUI app
+
+This iterative loop allows pr-scribe to serve as both an initial generator and a regenerator that respects user edits.
