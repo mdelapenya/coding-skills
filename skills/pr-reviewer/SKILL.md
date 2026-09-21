@@ -232,7 +232,7 @@ If `converged: true`, `--no-loop` was passed, or the round count has reached `--
 
 This skill is built to be re-invoked. Each invocation runs one full pass (Steps 1–8) and reads/writes the same state file. The clone is reused (refreshed via `git fetch && git reset --hard`) on subsequent rounds.
 
-The loop primitive depends on the agent. Read the relevant `references/agents/<agent>.md` for the exact syntax. The skill's job is only to **decide whether another round is warranted** — it never starts a loop automatically. After writing findings, present:
+The loop primitive depends on the agent. Read the relevant `references/agents/<agent>.md` for the exact syntax, where `<agent>` is `claude-code`, `codex`, `copilot`, `gemini`, or `generic`. The skill's job is only to **decide whether another round is warranted** — it never starts a loop automatically. After writing findings, present:
 
 ```
 Round <N> finished — converged: <yes|no>, changed-from-previous: <count>.

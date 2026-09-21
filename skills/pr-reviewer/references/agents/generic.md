@@ -8,7 +8,7 @@ The skill drives its own fetch. If the agent has shell access, `gh` (GitHub) and
 
 ## Looping primitive
 
-Most coding agents do not have a built-in loop primitive today (Claude Code is the exception — see `claude.md`). For everything else, pick the most automation-friendly option your agent supports, in increasing order of automation:
+Most coding agents do not have a built-in loop primitive today (Claude Code is the exception — see `claude-code.md`). For everything else, pick the most automation-friendly option your agent supports, in increasing order of automation:
 
 1. **Manual** — the user re-invokes `/pr-reviewer [<num>]` after each round until the skill reports convergence or `--rounds=N` is hit.
 2. **Agent task description** — tell the agent in plain language: "Run `/pr-reviewer [<num>]` up to 3 times, stopping early on `converged: true`." Multi-step agents will sequence this correctly.
