@@ -14,6 +14,7 @@ coding-skills/
 │   └── <skill-name>/
 │       ├── SKILL.md           # Required: frontmatter + instructions
 │       └── references/        # Optional: detailed docs (loaded on-demand)
+├── agents/                    # Claude Code agent definitions, plugin-discovered (used by the-mister)
 ├── .claude/skills -> ../skills    # Claude Code discovery
 ├── .agents/skills -> ../skills    # OpenAI Codex / GitHub Copilot
 ├── .github/skills -> ../skills    # GitHub Copilot

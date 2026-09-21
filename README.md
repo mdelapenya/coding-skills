@@ -9,7 +9,9 @@ Reusable AI agent skills for software development workflows.
 | **ci-detective** | Investigate CI failures by cross-referencing against other recent runs to determine if failures are pre-existing or introduced by the PR | "investigate CI failure", "is this test flaky", "why is this test failing", "ci detective" |
 | **pr-lawyer** | Address PR review comments by fixing valid feedback or challenging debatable ones with a reasoned argument | "address PR comments", "respond to review", "challenge this comment", "fight back on review", "pr lawyer" |
 | **pr-nurse** | Monitor CI builds and merge conflicts for a PR, diagnose failures, merge main, and push fixes | "nurse this PR", "check CI", "fix the build", "why is CI failing", "resolve conflicts" |
+| **pr-reviewer** | Multi-pass adversarial review of a pull request that challenges its own findings to drop false positives, designed to be looped until findings converge | "review this PR", "adversarial review", "deep PR review", "audit this pull request", "pr reviewer" |
 | **pr-scribe** | Generate a concise PR description from a GitHub pull request diff | "describe this PR", "add PR description", "fill in PR body", "summarize PR changes" |
+| **the-mister** | Plan an implementation as a DAG and dispatch every node to a cheaper subagent by difficulty (Opus/Sol, Sonnet/Terra, Haiku/Luna), with all git operations always on Haiku/Luna; the mister only orchestrates and verifies | "orchestrate this", "plan and delegate", "use the squad", "mister", "ask the mister", "delegate to cheaper models" |
 
 ## Platform Support
 
@@ -69,7 +71,15 @@ REPO=/path/to/coding-skills/skills
 ln -s $REPO/ci-detective ~/.claude/skills/ci-detective
 ln -s $REPO/pr-lawyer ~/.claude/skills/pr-lawyer
 ln -s $REPO/pr-nurse ~/.claude/skills/pr-nurse
+ln -s $REPO/pr-reviewer ~/.claude/skills/pr-reviewer
 ln -s $REPO/pr-scribe ~/.claude/skills/pr-scribe
+ln -s $REPO/the-mister ~/.claude/skills/the-mister
+
+# Agents used by the-mister (Claude Code reads ~/.claude/agents/ at session start)
+mkdir -p ~/.claude/agents
+ln -s $REPO/../agents/git-operator.md ~/.claude/agents/git-operator.md
+ln -s $REPO/../agents/mechanic.md ~/.claude/agents/mechanic.md
+ln -s $REPO/../agents/the-mister.md ~/.claude/agents/the-mister.md
 ```
 
 **Windows (PowerShell):**
@@ -80,7 +90,7 @@ True symlinks require admin rights or Developer Mode. Use directory junctions in
 $repo = "C:\path\to\coding-skills\skills"
 $home_skills = "$env:USERPROFILE\.claude\skills"
 
-foreach ($n in 'ci-detective','pr-lawyer','pr-nurse','pr-scribe') {
+foreach ($n in 'ci-detective','pr-lawyer','pr-nurse','pr-reviewer','pr-scribe','the-mister') {
     New-Item -ItemType Junction -Path (Join-Path $home_skills $n) -Target (Join-Path $repo $n)
 }
 ```
@@ -105,12 +115,33 @@ coding-skills/
 │   │   └── references/
 │   │       ├── github.md
 │   │       └── gitlab.md
-│   └── pr-scribe/
+│   ├── pr-reviewer/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       └── agents/
+│   │           ├── claude-code.md
+│   │           ├── codex.md
+│   │           ├── copilot.md
+│   │           ├── gemini.md
+│   │           └── generic.md
+│   ├── pr-scribe/
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── biomelab.md
+│   │       ├── github.md
+│   │       └── gitlab.md
+│   └── the-mister/
 │       ├── SKILL.md
 │       └── references/
-│           ├── biomelab.md
-│           ├── github.md
-│           └── gitlab.md
+│           ├── plan-and-orders.md
+│           └── agents/
+│               ├── claude-code.md
+│               ├── codex.md
+│               └── generic.md
+├── agents/                          # Claude Code agent definitions (plugin-discovered)
+│   ├── git-operator.md              # the-mister: every Git node
+│   ├── mechanic.md                  # the-mister: Easy nodes
+│   └── the-mister.md                # the-mister: optional no-Bash orchestrator (context: fork)
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
 ├── .claude/skills -> ../skills      # Claude Code
 ├── .github/skills -> ../skills      # Copilot

@@ -1,10 +1,11 @@
 {
   "name": "coding-skills",
-  "version": "1.0.0",
-  "description": "Reusable Claude Code skills for software development workflows",
+  "version": "1.1.0",
+  "description": "Reusable Claude Code skills for software development workflows: pull-request roles and a DAG-based subagent orchestrator",
   "author": "Manuel de la Peña",
   "links": {
     "repository": "https://github.com/mdelapenya/coding-skills"
   },
-  "tags": ["development", "github", "pull-requests", "workflow"]
+  "agents": ["./agents"],
+  "tags": ["development", "github", "pull-requests", "workflow", "orchestration", "subagents"]
 }
