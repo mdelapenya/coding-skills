@@ -38,17 +38,17 @@ glab ci trace <job-id>
 
 ## List recent pipelines
 
-Use `$1` (default: 10) as the `--per-page` value. To find pipelines on branches other than the current one, list and filter with `jq`:
+Use the run count `N` from the skill (default: 10) as the `--per-page` value. To find pipelines on branches other than the current one, list and filter with `jq`:
 
 ```bash
-glab ci list --per-page <$1 or 10> --output json \
+glab ci list --per-page <N> --output json \
   | jq '[.[] | select(.status != "running" and .status != "pending" and .ref != "<current-branch>")] | .[0:5]'
 ```
 
 To pre-filter by status (e.g., only failed pipelines):
 
 ```bash
-glab ci list --status failed --per-page <$1 or 10> --output json
+glab ci list --status failed --per-page <N> --output json
 ```
 
 Available statuses: `running`, `pending`, `success`, `failed`, `canceled`, `skipped`, `created`, `manual`, `scheduled`.
