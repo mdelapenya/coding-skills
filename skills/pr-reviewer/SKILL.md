@@ -21,14 +21,16 @@ The review passes are read-only. No reviewer, assessor, or summary agent edits f
 
 ## Where you can invoke this skill from
 
-- **From inside the matching repo**: pass a bare PR number, or omit `$1` to review the currently checked-out PR branch. Platform, org and repo come from `git remote -v`.
+- **From inside the matching repo**: pass a bare PR number, or omit the PR identifier to review the currently checked-out PR branch. Platform, org and repo come from `git remote -v`.
 - **From anywhere else**: pass a PR URL or `org/repo#num` / `group/project!num` shorthand. The skill clones into its own cache directory.
 
 The agent drives `gh` / `glab` for metadata and clone. Each runtime's file under `references/agents/` covers its fan-out primitive, model aliases and loop command.
 
 ## Arguments
 
-- `$1`: PR identifier. **Optional**. Bare number (`123`), URL (`https://github.com/<org>/<repo>/pull/<n>`, GitLab MR URLs including self-managed hosts), shorthand (`<org>/<repo>#<n>` GitHub, `<group>/<project>!<n>` GitLab), or omitted (current branch, inside the repo only).
+Take the arguments from the invocation itself (in Claude Code, the `ARGUMENTS:` line appended to this skill). The PR identifier is the first token that does not start with `--`, wherever it appears; everything else is a flag. This file deliberately contains no positional placeholders: runtimes substitute them inconsistently (Claude Code numbers them from zero, so "the first one" would be the second argument).
+
+- PR identifier: **Optional**. Bare number (`123`), URL (`https://github.com/<org>/<repo>/pull/<n>`, GitLab MR URLs including self-managed hosts), shorthand (`<org>/<repo>#<n>` GitHub, `<group>/<project>!<n>` GitLab), or omitted (current branch, inside the repo only).
 - `--rounds=N`: Maximum rounds on one revision (default **3**). The loop also exits early on convergence. An invocation that finds the stored round count already at its `N` renders the report and does not run a pass; a larger `N` on a later invocation runs more rounds.
 - `--no-loop`: Run one round and stop.
 - `--single`: One reviewer (you) does the first pass and the steel-man, no subagents. Also the automatic fallback when the runtime has no fan-out primitive; the report records which.
@@ -45,9 +47,9 @@ Model and effort overrides ("use high effort", "sonnet for all passes", "opus fo
 
 ### Step 1: Resolve platform / org / repo / number
 
-- `$1` is a URL or shorthand → parse it. The cwd need not be a git repo. `#` means GitHub, `!` means GitLab.
-- `$1` is a bare number → the cwd must be inside a git repo. First fetch URL of `git remote -v` gives platform and `org/repo`.
-- `$1` omitted → as above, then take the PR number from the checked-out branch (`gh pr view --json number,headRefName`, `glab mr view --output json`). If the branch has no PR, stop: the skill never invents a PR to review.
+- The PR identifier is a URL or shorthand → parse it. The cwd need not be a git repo. `#` means GitHub, `!` means GitLab.
+- The PR identifier is a bare number → the cwd must be inside a git repo. First fetch URL of `git remote -v` gives platform and `org/repo`.
+- No PR identifier → as above, then take the PR number from the checked-out branch (`gh pr view --json number,headRefName`, `glab mr view --output json`). If the branch has no PR, stop: the skill never invents a PR to review.
 
 `repo-slug` is the `basename` of `org/repo`.
 
@@ -89,7 +91,7 @@ This is the only place the successor logic runs; a restart from Step 8 comes bac
 
 ### Step 4: Resolve the review tree
 
-**Current directory is the matching repo with the PR checked out** (`git rev-parse HEAD` equals `headRefOid` **and** `git status --porcelain` is empty **and** `git cat-file -e <baseRefOid>` succeeds): the review tree is the cwd. Do not modify it, do not fetch into it. If any of the three checks fails, fall through to the clone; never fetch, deepen or reset inside the user's repository. With `$1` omitted and HEAD not equal to the PR head, stop and say so: reviewing a tree nobody pushed is not a review of the PR.
+**Current directory is the matching repo with the PR checked out** (`git rev-parse HEAD` equals `headRefOid` **and** `git status --porcelain` is empty **and** `git cat-file -e <baseRefOid>` succeeds): the review tree is the cwd. Do not modify it, do not fetch into it. If any of the three checks fails, fall through to the clone; never fetch, deepen or reset inside the user's repository. With no PR identifier and HEAD not equal to the PR head, stop and say so: reviewing a tree nobody pushed is not a review of the PR.
 
 **Otherwise clone into the clone root**, keyed by head so two revisions never share a tree:
 
@@ -153,7 +155,7 @@ If this is round 1 of a new revision and its header is not written yet, write it
 Convergence is decided per revision:
 
 - **Round 1 never converges**, since there is nothing to compare against. Exception: when round 1 ends with zero surviving findings (everything retracted, or none found), there is nothing left to challenge; record `converged: true` and the loop ends at round 1.
-- **Rounds 2 and later** converge when all of these hold against the previous round: no finding changed `status`, no finding changed `severity`, no `fresh` finding was added. A round that ends with zero survivors also converges.
+- **Rounds 2 and later** converge when all of these hold against the previous round: no finding changed `status`, `severity` or `reachability`, no `fresh` finding was added. A round that ends with zero survivors also converges.
 
 Record `changed-from-previous`, `converged`, and `rounds-cap: <this invocation's --rounds>`. A revision is **finished** when it converged or when its round count reached the cap; record `finished: true` then, since Step 3 resets the refresh budget on it. `--no-loop` ends this invocation but leaves the revision unfinished, so a later invocation can continue it. If the revision is not finished and `--no-loop` was not passed, print after the report:
 

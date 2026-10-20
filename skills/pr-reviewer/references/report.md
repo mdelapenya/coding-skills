@@ -42,6 +42,7 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 ## Blockers
 - [file:line] CLAIM (SOURCES, evidence: EVIDENCE_KIND)
   - Evidence: QUOTED_CODE
+  - Reachability: proven | plausible | unknown - CITATION_OR_WHAT_WOULD_SETTLE_IT
   - Why it matters: ONE_LINE
   - Suggested action: ONE_LINE
 
@@ -73,6 +74,7 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 - "Reviewed revision" is the pinned head, never a later one. If the PR has moved, say so in Freshness and nowhere else pretend otherwise. On GitLab, where a target-only move is invisible to the metadata, append `(head only)` to the Freshness line.
 - Every section is present. Empty finding sections read `None identified`.
 - Each finding shows which reviewers raised it and how its evidence was obtained, so the author can weigh a `static` claim from one reviewer differently from an `executed` claim three reviewers converged on.
+- Every finding shows its reachability next to its severity, never folded into it. A `major` with `reachability: unknown` stays in Major; the reachability line tells the author how much weight to give it.
 - In "Validation and limits", separate the four kinds strictly. Nothing in the review tree was built or run, so "Executed locally" lists read-only git and grep commands only. A test that exists, is skipped, is pending, or ran against another head is not validation of this target. Hosted CI counts only when its result is tied to this exact head.
 - Incomplete runs: prefix every finding with `(provisional)`, name the missing pass or gap in "Validation and limits", and record downstream passes as not run.
 - The report ends after "Open questions for the author". No "Posting this review", "Next steps" or "How to use this" section, ever. Posting is Step 11 and is a question to the user, not part of the artifact.

@@ -28,7 +28,7 @@ When investigating, first detect which CI system the repository uses, then load 
 
 ## Arguments
 
-- `$1` — Number of recent runs to query (default: **10**). Example: `/ci-detective 20`
+- Run count `N` — the first numeric argument the skill was invoked with (default: **10**). Example: `/ci-detective 20` gives N = 20. Read it from the invocation itself (in Claude Code, the `ARGUMENTS:` line appended to this skill); this file uses no positional placeholders because runtimes substitute them inconsistently.
 
 ## Workflow
 
@@ -46,7 +46,7 @@ Using the platform-specific commands from the loaded reference, identify the cur
 
 ### Step 3: Find recent completed runs of the same workflow on other branches
 
-Query the last **`$1`** runs (default: 10) and filter to completed runs on branches other than the current PR's branch. Select 3–5 from the results with a mix of conclusions (prefer at least one passing and one failing if available).
+Query the last **N** runs (default: 10) and filter to completed runs on branches other than the current PR's branch. Select 3–5 from the results with a mix of conclusions (prefer at least one passing and one failing if available).
 
 ### Step 4: Check if the same jobs/tests fail in those runs
 

@@ -27,7 +27,7 @@ When invoked, detect the platform from `git remote -v`, then load the correspond
 
 ## Arguments
 
-- `$1` — PR number (optional). If not provided, uses the current branch's PR.
+- PR number (optional): the first argument that is not a `--` flag, read from the invocation itself (in Claude Code, the `ARGUMENTS:` line appended to this skill). If not provided, uses the current branch's PR.
 - `--single-commit` — Commit all fixes in one commit instead of one per cluster.
 
 ## Workflow

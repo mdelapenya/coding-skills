@@ -26,10 +26,10 @@ gh run view <run-id> --log-failed
 
 ## List recent runs of a workflow
 
-Use `$1` (default: 10) as the `--limit` value, filtering to completed runs on other branches:
+Use the run count `N` from the skill (default: 10) as the `--limit` value, filtering to completed runs on other branches:
 
 ```bash
-gh run list --repo <org>/<repo> --limit <$1 or 10> \
+gh run list --repo <org>/<repo> --limit <N> \
   --json databaseId,conclusion,workflowName,headBranch \
   --jq '[.[] | select(.workflowName == "<workflow>" and .conclusion != "" and .headBranch != "<current-branch>")] | .[0:5]'
 ```
