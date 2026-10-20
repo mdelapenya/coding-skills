@@ -9,7 +9,7 @@ Reusable AI agent skills for software development workflows.
 | **ci-detective** | Investigate CI failures by cross-referencing against other recent runs to determine if failures are pre-existing or introduced by the PR | "investigate CI failure", "is this test flaky", "why is this test failing", "ci detective" |
 | **pr-lawyer** | Address PR review comments by fixing valid feedback or challenging debatable ones with a reasoned argument | "address PR comments", "respond to review", "challenge this comment", "fight back on review", "pr lawyer" |
 | **pr-nurse** | Monitor CI builds and merge conflicts for a PR, diagnose failures, merge main, and push fixes | "nurse this PR", "check CI", "fix the build", "why is CI failing", "resolve conflicts" |
-| **pr-reviewer** | Multi-pass adversarial review of a pull request that challenges its own findings to drop false positives, designed to be looped until findings converge | "review this PR", "adversarial review", "deep PR review", "audit this pull request", "pr reviewer" |
+| **pr-reviewer** | Staged adversarial review pinned to an exact PR revision: three independent reviewers, an assessor that steel-mans every finding, a summary agent, and a convergence loop that restarts when the PR moves | "review this PR", "adversarial review", "deep PR review", "audit this pull request", "pr reviewer" |
 | **pr-scribe** | Generate a concise PR description from a GitHub pull request diff | "describe this PR", "add PR description", "fill in PR body", "summarize PR changes" |
 | **the-mister** | Plan an implementation as a DAG and dispatch every node to a cheaper subagent by difficulty (Opus/Sol, Sonnet/Terra, Haiku/Luna), with all git operations always on Haiku/Luna; the mister only orchestrates and verifies | "orchestrate this", "plan and delegate", "use the squad", "mister", "ask the mister", "delegate to cheaper models" |
 
@@ -118,6 +118,10 @@ coding-skills/
 │   ├── pr-reviewer/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   │       ├── passes.md
+│   │       ├── publication.md
+│   │       ├── report.md
+│   │       ├── state.md
 │   │       └── agents/
 │   │           ├── claude-code.md
 │   │           ├── codex.md
