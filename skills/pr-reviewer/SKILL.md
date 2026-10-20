@@ -155,7 +155,7 @@ If this is round 1 of a new revision and its header is not written yet, write it
 Convergence is decided per revision:
 
 - **Round 1 never converges**, since there is nothing to compare against. Exception: when round 1 ends with zero surviving findings (everything retracted, or none found), there is nothing left to challenge; record `converged: true` and the loop ends at round 1.
-- **Rounds 2 and later** converge when all of these hold against the previous round: no finding changed `status`, no finding changed `severity`, no `fresh` finding was added. A round that ends with zero survivors also converges.
+- **Rounds 2 and later** converge when all of these hold against the previous round: no finding changed `status`, `severity` or `reachability`, no `fresh` finding was added. A round that ends with zero survivors also converges.
 
 Record `changed-from-previous`, `converged`, and `rounds-cap: <this invocation's --rounds>`. A revision is **finished** when it converged or when its round count reached the cap; record `finished: true` then, since Step 3 resets the refresh budget on it. `--no-loop` ends this invocation but leaves the revision unfinished, so a later invocation can continue it. If the revision is not finished and `--no-loop` was not passed, print after the report:
 

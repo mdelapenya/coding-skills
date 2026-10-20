@@ -62,6 +62,7 @@ Every finding, in every round, in this shape. Field order fixed so rounds can be
   file: <path>:<line-or-range>
   category: <correctness|regression|tests|security|performance|api|maintainability|scope|hygiene>
   severity: <blocker|major|minor|nit>
+  reachability: <proven|plausible|unknown> - <the caller, config or input that reaches the path, cited; or what is missing>
   sources: [A, C]                 # staged mode: which reviewers raised it; single mode: [self]
   claim: <one sentence>
   evidence: <the exact code or behaviour reacted to, quoted>
@@ -75,6 +76,7 @@ Every finding, in every round, in this shape. Field order fixed so rounds can be
 
 - `id` is stable across rounds and across the assessor's merge. When two reviewers raise the same underlying defect under different slugs, the assessor keeps the first slug and lists both in `sources`.
 - `evidence-kind` says how the evidence was obtained. `static`: read from the code. `executed`: a **read-only** command the reviewer ran in the review tree and quoted (the `git` subcommands and `grep` that RULES in `passes.md` allows); building, installing or running the PR's tests is not allowed, so it is never `executed`. `ci@<sha>`: a hosted CI result the coordinator fetched for exactly this head. `unverified`: rests on reasoning alone (for example "a test exists" without showing it runs against this head). A `confirmed` finding with `unverified` evidence stays `confirmed`, but the report carries the kind so the author can weigh it.
+- `severity` and `reachability` are two separate claims, never merged into one. `severity` rates the defect **as if the path is reached**; `reachability` says whether it is. `proven` needs a cited, real caller, configuration or input in the review tree that reaches the changed path; `plausible` means a route exists but nothing shown triggers it; `unknown` means the reviewer could not tell, with what would settle it. "This branch is wrong" can be certain while "this branch ever runs" is unknown: keep both, and let the reader weigh them. `evidence` and `evidence-kind` describe the defect; the reachability line carries its own citation.
 - `stability`: `stable` when the status matched the previous round, `unstable` when it flipped (the assessor must then pick a side with explicit reasoning), `fresh` when the finding first appeared this round.
 - `challenge` and `verdict` are written by the assessor (single mode: by you) and are mandatory on anything that is not `pending-challenge`.
 

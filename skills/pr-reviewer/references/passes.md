@@ -65,7 +65,7 @@ Return:
 1. `coverage: full` or `coverage: partial: <which files or hunks you could not inspect and why>`.
 2. Findings in exactly this schema, one block each:
 FINDING_SCHEMA
-   Use `revision: REVISION`, `status: pending-challenge` and `sources: [ROLE]`. Quote the exact code in `evidence`. Set `evidence-kind` honestly: `executed` only for a read-only command you ran and whose output you quote; `unverified` when the claim rests on reasoning alone.
+   Use `revision: REVISION`, `status: pending-challenge` and `sources: [ROLE]`. Quote the exact code in `evidence`. Set `evidence-kind` honestly: `executed` only for a read-only command you ran and whose output you quote; `unverified` when the claim rests on reasoning alone. Set `reachability` separately from `severity`: rate severity as if the path is reached, and mark reachability `proven` only when you cite the caller, configuration or input that reaches it.
 3. `checks-run:` the read-only commands you executed, or `none`.
 4. `limits:` what you could not verify and what would verify it.
 If you truly find nothing after reading the whole diff, return `findings: none` with your coverage and checks.
@@ -97,7 +97,8 @@ Do all of the following for every finding, and write down what you did:
 5. Look at the tests: is the path already exercised? Show the test, do not assume it.
 6. Steel-man. Become the PR author and write the strongest defence of the change, verbatim, in `challenge:`. Then rule on it in `verdict:` with evidence.
 7. Cross-reference. `grep` the review tree for the pattern you flagged. If it is the codebase's established convention, downgrade or retract: the codebase has spoken. If the same bug exists elsewhere, note it as a related risk in `reasoning`; do not expand the PR's scope.
-8. Classify: `confirmed` (the defence fails and you have evidence), `weakened` (real but smaller; rewrite the claim precisely and usually lower the severity), `retracted` (the defence wins; one-line reason), `needs-info` (only the author or runtime evidence can settle it; say what would).
+8. Reachability. Trace whether the changed path is reached in this codebase: find the callers, configuration or inputs that lead to it. Set `reachability` (`proven` with the citation, `plausible`, or `unknown` with what would settle it). Do not lower `severity` because reachability is unproven, and do not raise it because reachability is proven: they stay separate.
+9. Classify: `confirmed` (the defence fails and you have evidence), `weakened` (real but smaller; rewrite the claim precisely and usually lower the severity), `retracted` (the defence wins; one-line reason), `needs-info` (only the author or runtime evidence can settle it; say what would).
 
 Set `evidence-kind` from what you actually did: `executed` if you ran a read-only command and quote it, `static` if you read it, `unverified` if it still rests on reasoning.
 
@@ -122,9 +123,9 @@ Inputs: the findings that survived round PREVIOUS_ROUND (`confirmed`, `weakened`
 PREVIOUS_FINDINGS
 Open question from the previous assessor, if any: OPEN_QUESTION
 
-For every input finding: re-read the code around it once more, including callers and tests; re-run the steel-man against the previous `verdict`; then set `status` again and set `stability`: `stable` if the status is unchanged, `unstable` if it flipped. For anything `unstable`, read once more and pick a side with explicit reasoning in `verdict`. You may change `severity` when the re-read justifies it; say why. Add a finding with `stability: fresh` and `status: pending-challenge` only if the re-read surfaces a concrete new problem; steel-man it in the same pass and classify it.
+For every input finding: re-read the code around it once more, including callers and tests; re-run the steel-man against the previous `verdict`; then set `status` again and set `stability`: `stable` if the status is unchanged, `unstable` if it flipped. For anything `unstable`, read once more and pick a side with explicit reasoning in `verdict`. You may change `severity` or `reachability` when the re-read justifies it; say why. Add a finding with `stability: fresh` and `status: pending-challenge` only if the re-read surfaces a concrete new problem; steel-man it in the same pass and classify it.
 
-Return: every input finding plus any fresh ones, in the schema, each exactly once; `changed:` the list of ids whose status or severity changed, or `none`; `disagreements:` or `none`; `checks-run:`.
+Return: every input finding plus any fresh ones, in the schema, each exactly once; `changed:` the list of ids whose status, severity or reachability changed, or `none`; `disagreements:` or `none`; `checks-run:`.
 
 RULES
 ```
@@ -143,7 +144,7 @@ CHECKS_RUN
 Render the report using exactly this template, headings and order preserved, directly as Markdown (no enclosing code fence):
 REPORT_TEMPLATE
 
-Rules: every `confirmed` or `weakened` finding appears once, in the section its severity dictates, with its claim, sources, evidence, evidence-kind, why it matters and one suggested action. Retracted findings go to "Retracted on review" with their reason. `needs-info` findings go to "Open questions for the author" and to no severity section. Do not invent, drop, merge, re-rank or soften a finding. Write "None identified" for an empty section. The verdict follows the verdict rules in the template. Do not add a section about posting, next steps, or how to use this report. Return the Markdown and nothing else.
+Rules: every `confirmed` or `weakened` finding appears once, in the section its severity dictates, with its claim, sources, evidence, evidence-kind, reachability, why it matters and one suggested action. Retracted findings go to "Retracted on review" with their reason. `needs-info` findings go to "Open questions for the author" and to no severity section. Do not invent, drop, merge, re-rank or soften a finding. Write "None identified" for an empty section. The verdict follows the verdict rules in the template. Do not add a section about posting, next steps, or how to use this report. Return the Markdown and nothing else.
 
 RULES
 ```
