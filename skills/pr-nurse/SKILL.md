@@ -32,7 +32,7 @@ When invoked, first detect the platform from `git remote -v`, then load the corr
 This skill is typically invoked from a **git worktree**, not the root repository. Understand the two paths:
 
 - **Workspace** (current directory): the worktree where you are editing code — `pwd`
-- **Root repo**: the main checkout where `main` branch lives — determined by `git worktree list | head -1 | awk '{print $1}'`
+- **Root repo**: the main checkout where `main` branch lives — determined by `git worktree list --porcelain | sed -n '1s/^worktree //p'`
 
 Always return to the workspace after any operation in the root repo.
 
@@ -76,7 +76,7 @@ Analyze the failure and determine the root cause:
 #### 3a: Fix is likely in main (e.g., flaky infra, CI config change, dependency update merged upstream)
 
 1. Save the workspace path: `WORKSPACE=$(pwd)`
-2. Get the root repo: `ROOT=$(git worktree list | head -1 | awk '{print $1}')`
+2. Get the root repo: `ROOT=$(git worktree list --porcelain | sed -n '1s/^worktree //p')`
 3. `cd "$ROOT"` and verify no local changes with `git status --porcelain`
    - If there are local changes, **stop** and ask the user — do not discard their work
 4. `git pull`
@@ -98,7 +98,7 @@ After fixing, report what was done. Do not re-check CI — the user can invoke t
 If `mergeable` is `CONFLICTING` or the merge in Step 3a produced conflicts:
 
 1. Save the workspace path: `WORKSPACE=$(pwd)`
-2. Get the root repo: `ROOT=$(git worktree list | head -1 | awk '{print $1}')`
+2. Get the root repo: `ROOT=$(git worktree list --porcelain | sed -n '1s/^worktree //p')`
 3. `cd "$ROOT"` and verify no local changes with `git status --porcelain`
    - If there are local changes, **stop** and ask the user
 4. `git pull`
