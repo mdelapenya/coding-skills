@@ -1,39 +1,49 @@
 # OpenAI Codex
 
-Topic file for running `pr-reviewer` from inside OpenAI Codex (CLI / cloud agent).
+Topic file for running `pr-reviewer` from inside OpenAI Codex (CLI / app). Not yet exercised end to end in staged mode; the dispatch shape below matches the `collaboration.spawn_agent` schema observed in one Codex session (2026-09). Read your Codex's actual tool schema and model list before dispatching.
 
 ## Fetch tooling
 
-The skill drives its own fetch. Codex has shell access in its sandboxed workspace and is competent with `gh` (GitHub) and `glab` (GitLab).
+Codex has shell access in its sandboxed workspace and is competent with `gh` and `glab`. **Network requirement**: Steps 2 and 4 need outbound network. If the sandbox is offline, the user must check out the PR head beforehand and the skill can only run the "current branch" path, verifying `HEAD == headRefOid` against metadata the user pastes in. Codex must not invent metadata it could not fetch. The default workspace-write sandbox may not allow `$HOME/.cache`; Step 3's temp-dir fallback covers that.
 
-**Network requirement**: the skill needs outbound network to clone the PR and run platform commands. If the sandbox is offline (the default for many Codex environments), the user must check out the PR before invoking — or paste the PR context (metadata, commits, diff, linked issues, files) into the task. Codex should refuse to invent data it cannot fetch.
+## Models
+
+Same aliases as `the-mister`'s Codex file.
+
+| Tier | `model` | `reasoning_effort` | Used for |
+|---|---|---|---|
+| Hard | `gpt-5.6-sol` | `high` | assessor; escalated reviewer |
+| Medium | `gpt-5.6-terra` | `medium` | reviewers A, B, C by default |
+| Easy | `gpt-5.6-luna` | `low` | summary |
+
+Codex takes effort as a dispatch parameter, so "high effort" is `reasoning_effort: "high"` rather than prompt text. Record the model and effort you passed.
+
+## Fan-out primitive
+
+`spawn_agent` takes `task_name`, `message`, `fork_turns`, `model`, `reasoning_effort`. Three calls for the reviewers, then `wait_agent` repeatedly until all three have returned (it returns on the first completion); only then spawn the assessor:
+
+```json
+{
+  "task_name": "pr_reviewer_a_correctness",
+  "message": "<reviewer prompt from references/passes.md, fully instantiated>",
+  "fork_turns": "none",
+  "model": "gpt-5.6-terra",
+  "reasoning_effort": "medium"
+}
+```
+
+`fork_turns` must be `"none"`: a model override requires a non-full-history fork, and a clean slate is what keeps one reviewer's context out of another. Reviewers must not be able to see each other's results; do not fork from a turn that already contains one.
+
+If the sandbox has no `spawn_agent`, fall back to single mode and record `mode: single (fallback: <reason>)` in `findings.md` so the report says so.
 
 ## Looping primitive
 
-As of writing, **OpenAI Codex CLI does not have a `/loop` primitive** — it is an open feature request ([codex#15679](https://github.com/openai/codex/issues/15679); a broader scheduling proposal sits at [codex#25466](https://github.com/openai/codex/issues/25466) / [codex#8317](https://github.com/openai/codex/issues/8317)). The Codex *cloud app* has Automations for recurring tasks, but those are scheduled outside the CLI session and are coarse-grained, not per-iteration of a review.
+Codex CLI has no `/loop` primitive at the time of writing ([codex#15679](https://github.com/openai/codex/issues/15679); broader scheduling at [codex#25466](https://github.com/openai/codex/issues/25466)). Use one of:
 
-Until a real loop primitive ships, use one of:
+- **Iteration prompt**: "Run `/pr-reviewer <num> --rounds=3` and keep invoking it until `findings.md` records `converged: true` for the current revision."
+- **External driver (CLI)**: a shell `while` loop that breaks on the convergence marker (see the `awk` check in `generic.md`). Always pass `--rounds=N`.
+- **Codex app Automations** for coarse scheduled re-reviews.
 
-- **Iteration prompt** — instruct Codex up front: "Run `/pr-reviewer [<num>]` up to 3 times, stopping when `findings.md` records `converged: true`." Codex will sequence the rounds itself.
-- **External driver (Codex CLI)** — wrap the CLI in a shell `while` loop that breaks on the convergence marker. Cap with `--rounds=N`.
-- **Codex Automations (cloud app)** — if scheduling is required externally (e.g., a nightly re-review), set up an automation that re-runs the task. Much coarser than per-iteration looping.
+## Posting
 
-`--rounds=N` is the universal hard stop. Always pass it.
-
-## Posting the final report
-
-If outbound network is available:
-
-```bash
-gh pr review <pr-number> --comment --body-file <path-the-skill-printed>
-```
-
-If the sandbox is offline, print the report and let the user post it themselves. Do not "simulate" posting.
-
-Always confirm with the user before posting.
-
-## References
-
-- [Feature: in-session scheduling + /loop (codex#25466)](https://github.com/openai/codex/issues/25466)
-- [Feature: /loop recurring prompt in Codex TUI (codex#15679)](https://github.com/openai/codex/issues/15679)
-- [Codex app Automations](https://developers.openai.com/codex/app/automations)
+Step 11 of the skill. If the sandbox is offline, print the report and let the user post it; do not simulate posting.

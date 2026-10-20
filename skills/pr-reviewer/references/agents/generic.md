@@ -1,27 +1,41 @@
-# Generic / Unknown Agent
+# Generic / unknown runtime
 
-Fallback topic file for any agent that does not have a dedicated entry under `references/agents/`.
+Fallback for any agent without a dedicated file here.
 
 ## Fetch tooling
 
-The skill drives its own fetch. If the agent has shell access, `gh` (GitHub) and `glab` (GitLab) are the canonical tools. If the agent only has an MCP server for the host (e.g., GitHub MCP), use that for metadata/diff/issues — but `git clone` for Step 2c of the skill still requires shell access. If the agent has neither shell nor a relevant MCP, the user must check out the PR before invoking; the skill cannot manufacture data.
+With a shell, `gh` and `glab` are the canonical tools and the skill runs as written. With only a host MCP server, use it for Step 2 metadata (head and base SHA must come from one response) and for linked issues; Step 4's clone still needs a shell. With neither, the user must check out the PR head and paste the metadata; the skill then verifies `HEAD == headRefOid` and runs the "current branch" path. The skill never manufactures data.
+
+## Models
+
+| Tier | Requirement | Used for |
+|---|---|---|
+| Hard | the strongest model available for a sub-task | assessor; escalated reviewer |
+| Medium | a mid-cost model | reviewers A, B, C |
+| Easy | the cheapest | summary |
+
+With one model only, record it for every pass; the lenses, the assessor's steel-man and the state file still apply.
+
+## Fan-out primitive
+
+If the runtime can start isolated sub-tasks with their own prompt (and ideally their own model), each reviewer prompt from `references/passes.md` is one sub-task, dispatched together, with no reviewer's output in another's context. The assessor and summary are two more sub-tasks, in sequence. If it cannot, run single mode and record `mode: single (fallback: no isolated sub-agent primitive)` in `findings.md` so the report says so. Do not emulate independence by role-playing three reviewers in one context: that is one reviewer with three hats, and the report would overstate it.
 
 ## Looping primitive
 
-Most coding agents do not have a built-in loop primitive today (Claude Code is the exception — see `claude-code.md`). For everything else, pick the most automation-friendly option your agent supports, in increasing order of automation:
+Most runtimes have no loop primitive (Claude Code is the exception). In increasing order of automation:
 
-1. **Manual** — the user re-invokes `/pr-reviewer [<num>]` after each round until the skill reports convergence or `--rounds=N` is hit.
-2. **Agent task description** — tell the agent in plain language: "Run `/pr-reviewer [<num>]` up to 3 times, stopping early on `converged: true`." Multi-step agents will sequence this correctly.
-3. **External shell driver** — drive the agent from a shell `for` / `while` that breaks on the convergence marker:
+1. **Manual**: re-invoke `/pr-reviewer <num>` after each round until `converged: true` or `--rounds=N`.
+2. **Task phrasing**: "Run `/pr-reviewer <num> --rounds=3` repeatedly until `findings.md` records `converged: true` for the current revision."
+3. **External shell driver**:
    ```bash
    for i in $(seq 1 3); do
-     <agent-invocation-here> "/pr-reviewer [<num>]"
-     grep -q '^- converged: true$' "<base-dir>/findings.md" && break
+     <agent-invocation> "/pr-reviewer <num> --rounds=3"
+     awk '/^## Revision/{c=0} /^- converged: true$/{c=1} END{exit !c}' "<base-dir>/findings.md" && break
    done
    ```
 
-`--rounds=N` is the universal hard stop. Always pass it.
+The `awk` resets at every `## Revision` header, so only the latest revision's convergence stops the loop. Always pass `--rounds=N`; an invocation that finds the cap already reached renders the report without running a pass.
 
-## Posting the final report
+## Posting
 
-The skill prints the report by default. If the agent has the ability to post to the source platform, confirm with the user first, then use whichever tool the agent provides. Otherwise print the report and let the user post it manually.
+Step 11 of the skill, after the report, with explicit confirmation, through whatever the runtime offers. Without a posting path, print the report and let the user post it.

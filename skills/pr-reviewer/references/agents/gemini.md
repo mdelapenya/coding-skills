@@ -1,39 +1,34 @@
 # Gemini CLI
 
-Topic file for running `pr-reviewer` from inside the Gemini CLI (with the coding-skills extension installed).
+Topic file for running `pr-reviewer` from the Gemini CLI with the coding-skills extension installed. Not yet exercised in staged mode.
 
 ## Fetch tooling
 
-The skill drives its own fetch. Gemini CLI has shell access and is competent with `gh` (GitHub) and `glab` (GitLab).
+Gemini CLI has shell access and is competent with `gh` and `glab`. Steps 2 to 5 run as written.
+
+## Models
+
+Gemini CLI does not expose a per-subagent model choice at the time of writing. Record `gemini` as the model for every pass and the effort you asked for in prose. If your setup offers sub-task model selection, map Hard to the strongest, Medium to a mid-cost, Easy to the cheapest, and record the choice.
+
+## Fan-out primitive
+
+No isolated sub-agent primitive at the time of writing. Run single mode and record `mode: single (fallback: no isolated sub-agent primitive)` in `findings.md` so the report says so. If one becomes available, each reviewer prompt from `references/passes.md` is one isolated sub-task, and no reviewer's context may contain another's output.
 
 ## Looping primitive
 
-As of writing, **Gemini CLI does not have a `/loop` primitive** — it is an open feature request ([gemini-cli#22653](https://github.com/google-gemini/gemini-cli/issues/22653); recurring-task scheduling is requested separately at [gemini-cli#25415](https://github.com/google-gemini/gemini-cli/issues/25415)). The official recommendation today is to run Gemini CLI from an **external `cron`** for recurring use cases.
+No `/loop` yet ([gemini-cli#22653](https://github.com/google-gemini/gemini-cli/issues/22653); scheduling at [gemini-cli#25415](https://github.com/google-gemini/gemini-cli/issues/25415)). Use:
 
-Until a real loop primitive ships, use one of:
-
-- **Repeat instruction in the prompt** — "Run `/pr-reviewer [<num>]` up to 3 times, stopping when `findings.md` records `converged: true`." Gemini will sequence the rounds itself.
-- **External shell driver** —
+- **Repeat instruction**: "Run `/pr-reviewer <num> --rounds=3` until `findings.md` records `converged: true` for the current revision."
+- **External shell driver**:
   ```bash
   for i in 1 2 3; do
-    gemini -p "/pr-reviewer [<num>]"
-    grep -q '^- converged: true$' "<base-dir>/findings.md" && break
+    gemini -p "/pr-reviewer <num> --rounds=3"
+    awk '/^## Revision/{c=0} /^- converged: true$/{c=1} END{exit !c}' "<base-dir>/findings.md" && break
   done
   ```
-  Most predictable option for CI or scripted reviews.
-- **External cron** — for periodic re-reviews, schedule the shell driver above with `cron`. Coarser than per-iteration looping but works today.
+  The `awk` resets at every `## Revision` header, so a superseded revision's `converged: true` cannot stop the loop.
+- **External cron** for periodic re-reviews.
 
-`--rounds=N` is the universal hard stop.
+## Posting
 
-## Posting the final report
-
-```bash
-gh pr review <pr-number> --comment --body-file <path-the-skill-printed>
-```
-
-Always confirm with the user before posting.
-
-## References
-
-- [Feature: /loop command for periodic prompts (gemini-cli#22653)](https://github.com/google-gemini/gemini-cli/issues/22653)
-- [Recurring schedule tasks (gemini-cli#25415)](https://github.com/google-gemini/gemini-cli/issues/25415)
+Step 11 of the skill: `gh api … /reviews --input` after the report, with explicit confirmation.

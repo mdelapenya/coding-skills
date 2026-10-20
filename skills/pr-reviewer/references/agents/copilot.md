@@ -1,40 +1,27 @@
 # GitHub Copilot
 
-Topic file for running `pr-reviewer` from inside GitHub Copilot (CLI agent mode, IDE chat, or Copilot Workspace).
+Topic file for running `pr-reviewer` from GitHub Copilot (CLI agent mode, IDE chat, Copilot Workspace). Not yet exercised in staged mode.
 
 ## Fetch tooling
 
-The skill drives its own fetch. Copilot can satisfy it through any of:
+Metadata can come from the GitHub MCP server (`get_pull_request` gives `head.sha` and `base.sha` in one response, which is what Step 2 needs) or from `gh` in a shell. The clone and pin in Step 4 need a shell regardless; `git` is the universal path.
 
-- Native GitHub awareness (Copilot Workspace) — confirm PR context is fully loaded; request full commit bodies if Copilot truncated them.
-- GitHub MCP server — call `get_pull_request`, `list_pull_request_commits`, `get_pull_request_diff`, `get_pull_request_files`, `get_issue`.
-- Shell with `gh` (GitHub) or `glab` (GitLab).
+## Models
 
-For the clone step (Step 2c of the skill), shell access is required regardless — `git clone` is the universal path.
+Copilot does not expose a per-subagent model choice at the time of writing. Record `copilot` as the model for every pass, and record the effort you asked for in prose. If your Copilot does offer model selection for sub-tasks, map Hard to the strongest model available, Medium to a mid-cost one, Easy to the cheapest, and record what you chose.
+
+## Fan-out primitive
+
+Copilot CLI's agent mode can run a task end to end but, at the time of writing, has no primitive to spawn three isolated sub-agents that cannot see each other. Without one, run single mode and record `mode: single (fallback: no isolated sub-agent primitive)` in `findings.md` so the report says so. If a future version adds isolated sub-tasks, each reviewer prompt from `references/passes.md` is one sub-task; the isolation requirement is that no reviewer's context contains another's output.
 
 ## Looping primitive
 
-As of writing, **GitHub Copilot CLI does not have a `/loop` or `/schedule` command** — a `/schedule` slash command is an open feature request ([copilot-cli#2056](https://github.com/github/copilot-cli/issues/2056)). Copilot CLI does ship an **autopilot mode** that runs a single task autonomously through multiple steps, but autopilot is "complete one task end-to-end," not "repeat a prompt on an interval." Don't conflate them.
+No `/loop` or `/schedule` yet ([copilot-cli#2056](https://github.com/github/copilot-cli/issues/2056)). Autopilot completes one task; it does not repeat a prompt. Use:
 
-Until a real loop primitive ships, use one of:
+- **Manual re-invocation** after each round until `converged: true` or `--rounds=N`.
+- **Autopilot task phrasing**: "Run `/pr-reviewer <num> --rounds=3` repeatedly until `findings.md` records `converged: true` for the current revision."
+- **External shell driver** that breaks on the convergence marker (see the `awk` check in `generic.md`).
 
-- **Manual re-invocation** — after each round, the skill reports whether convergence was reached. If not, type `/pr-reviewer [<num>]` again.
-- **Multi-step task description (autopilot)** — phrase the request as: "Run `/pr-reviewer [<num>]` up to 3 times, stopping when `findings.md` records `converged: true`." Copilot's autopilot will sequence the rounds itself.
-- **External shell driver** — wrap the agent invocation in a `while` loop that breaks on the convergence marker. Cap with `--rounds=N`.
+## Posting
 
-The skill's `--rounds` argument is the universal safety net.
-
-## Posting the final report
-
-If the GitHub MCP server is connected, use its review-creation resource. Otherwise:
-
-```bash
-gh pr review <pr-number> --comment --body-file <path-the-skill-printed>
-```
-
-Always confirm with the user before posting.
-
-## References
-
-- [GitHub Copilot CLI: autopilot mode](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot)
-- [Feature request: scheduled/recurring prompts (copilot-cli#2056)](https://github.com/github/copilot-cli/issues/2056)
+Step 11 of the skill. Through the GitHub MCP server's review-creation resource if connected, else `gh api … /reviews --input`. Always after the report, always with explicit confirmation.
