@@ -77,6 +77,7 @@ ln -s $REPO/the-mister ~/.claude/skills/the-mister
 
 # Agents used by the-mister (Claude Code reads ~/.claude/agents/ at session start)
 mkdir -p ~/.claude/agents
+ln -s $REPO/../agents/engineer.md ~/.claude/agents/engineer.md
 ln -s $REPO/../agents/git-operator.md ~/.claude/agents/git-operator.md
 ln -s $REPO/../agents/mechanic.md ~/.claude/agents/mechanic.md
 ln -s $REPO/../agents/the-mister.md ~/.claude/agents/the-mister.md
@@ -143,6 +144,7 @@ coding-skills/
 │               ├── codex.md
 │               └── generic.md
 ├── agents/                          # Claude Code agent definitions (plugin-discovered)
+│   ├── engineer.md                  # the-mister: Hard and Medium nodes
 │   ├── git-operator.md              # the-mister: every Git node
 │   ├── mechanic.md                  # the-mister: Easy nodes
 │   └── the-mister.md                # the-mister: optional no-Bash orchestrator (context: fork)
