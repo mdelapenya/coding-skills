@@ -1,0 +1,1 @@
+Discounted prices are sometimes a cent too low: `price.Apply` must round half up to the nearest cent (995 cents at 10% off is 895.5, so 896; 1 cent at 50% off is 0.5, so 1; 1000 cents at 10% off stays 900). There is already a test for Apply; make sure it covers this.

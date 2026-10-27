@@ -52,6 +52,20 @@ Call `collaboration` tools directly when the runtime requires it. Respect the sl
 
 For a missing verbatim Git report, use the runtime's continuation mechanism on the same worker to request it once. Check that it starts an idle worker: for example, the observed schema provides `followup_task`, whereas `send_message` alone only queues a message. An order gap requires revising the order and logging another dispatch. An interruption is not evidence that a command completed; reconcile before retrying mutations.
 
+## Engineering and independent review
+
+Hard and Medium engineers receive behavioral outcomes, invariants, initial write ownership, and required verification. Inline the canonical Engineer preamble and the complete order, not a mechanical recipe in its place. Related repository exploration and additional focused verification stay within the user's access and execution constraints. Starting file lists do not limit investigation; extra writes still require an ownership amendment from the mister before editing them.
+
+Use the runtime's continuation mechanism for findings outside ownership or a disproven assumption: the engineer supplies the evidence and proposed scope, and the mister checks active writers, semantic dependencies, and protected baseline content before amending the order. Investigation alone is not an implementation retry; a failed implementation attempt still counts toward the existing dispatch budget. Never grant permission through a worker message that the user has not already granted.
+
+Do not downgrade an engineering node merely because the mister supplied exact code. Remaining design uncertainty and the consequences of a wrong choice determine the tier. Literal Easy and Git orders retain their strict command/edit boundaries; engineering freedom does not extend to running git or spawning workers.
+
+Dispatch independent review in a fresh worker, separate from the implementer, using the canonical Reviewer preamble and the [shared review workflow](../review.md). It gets the user outcome, constraints, the assembled change, relevant repository guidance, and verification evidence, with freedom to inspect related unchanged code. Do not reuse a narrow one-question explorer prompt for whole-change review or prime the reviewer with the mister's diagnosis. Reviewers report concrete counterexamples, missing coverage, and evidence limits; reproduction belongs to a separate verification node. Use the shared review-tier policy and explain any permitted tier exception in the order.
+
+When a reviewer has no non-shell file-reading tools, provide the full relevant source with the review package and a way to request further named files or matches from the mister. The mister dispatches a literal read-only collector and returns the raw evidence through a continuation of the same reviewer. Do not treat inability to inspect a dependency as a clean review, or silently give the reviewer verification-command privileges to compensate for missing file tools.
+
+Read-only review is a role instruction in this direct-dispatch schema, not an enforced tool restriction. The Git workers collect revision metadata and diffs; engineers/reviewers never run Git to make their own review package. Include new task files and staged/unstaged content: a commit id alone does not identify an uncommitted change. Bind review and verification to the actual content and modes, and recheck affected evidence after a fix. Hashing a captured diff only checks transport integrity; it cannot establish that the current source or staged result still matches the reviewed change.
+
 ## Enforcement and optional configuration
 
 | Restriction | Observed direct-dispatch guarantee |

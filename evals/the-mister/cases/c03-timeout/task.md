@@ -1,0 +1,1 @@
+Add a configurable request timeout. Operators set it in seconds with `APP_TIMEOUT` (default 30 seconds). The configuration in `config/` must expose it and the HTTP client built in `client/` must use it. Tests for both.

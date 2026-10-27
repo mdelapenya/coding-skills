@@ -1,0 +1,1 @@
+`slug.Make` must drop every character that is not a letter, a digit, a space or a hyphen before building the slug ("Rock & Roll!" becomes "rock-roll"). Tests included. Everything CI checks must be accounted for before this is ready.

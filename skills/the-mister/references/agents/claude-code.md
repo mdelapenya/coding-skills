@@ -14,12 +14,13 @@ Trailer address: `<noreply@anthropic.com>`. The mister runs as Fable; never pass
 
 ## Shipped agents
 
-Four definitions in this repository's root `agents/` directory: `coding-skills:the-mister`, `coding-skills:engineer`, `coding-skills:mechanic`, `coding-skills:git-operator` under the plugin, or `the-mister`, `engineer`, `mechanic`, `git-operator` when symlinked into `~/.claude/agents/`. Definitions load at session start.
+Five definitions in this repository's root `agents/` directory: `coding-skills:the-mister`, `coding-skills:engineer`, `coding-skills:reviewer`, `coding-skills:mechanic`, `coding-skills:git-operator` under the plugin, or `the-mister`, `engineer`, `reviewer`, `mechanic`, `git-operator` when symlinked into `~/.claude/agents/`. Definitions load at session start.
 
 | Agent | Tools | Enforced by the tool list | Instruction only |
 |---|---|---|---|
 | `the-mister` | Read, Grep, Glob, Agent, Write, Edit, SendMessage, AskUserQuestion, EnterPlanMode, ExitPlanMode | no shell | writes only under its state directory |
 | `engineer` | Read, Grep, Glob, Edit, Write, Bash | cannot spawn | never runs git; edits only owned files |
+| `reviewer` | Read, Grep, Glob | cannot spawn; no edit tools and no shell, so read-only and git-free | reviews against the request only; reports counterexamples rather than fixing |
 | `mechanic` | Read, Grep, Glob, Edit, Write, Bash | cannot spawn | never runs git; edits only owned files |
 | `git-operator` | Bash(git *), Bash(gh *), Bash(glab *), Read | cannot spawn; no edit tools; non-git commands that write are denied (observed: `touch`, and `>` redirection on a git command) | runs only the listed commands; never summarises output. Read-only non-git commands such as `ls` were observed to run, and git itself can write (`--output`, `commit`, `switch`) |
 
@@ -41,6 +42,7 @@ Agent(subagent_type: "engineer", model: "sonnet",
 | Role | `subagent_type` | Without the shipped agents |
 |---|---|---|
 | Engineer (Hard, Medium) | `engineer`, with `model` set by tier | `general-purpose` with `model` set by tier; the preamble is then the only fence against spawning |
+| Reviewer (step 7) | `reviewer`, with `model` set by tier (Hard by default; Medium only with the written reason) | `general-purpose` with the same `model`; read-only is then only the preamble. Not `Explore`: its one-question persona is too narrow for a whole-change review |
 | Mechanic | `mechanic` | `general-purpose` with `model: "haiku"`; the preamble is then the only fence |
 | Git operator | `git-operator` | `general-purpose` with `model: "haiku"`; the preamble is then the only fence. Never `Explore`: its read-only persona may refuse `git switch` or `git push` |
 | Explorer | `Explore` | (built in) read-only by construction; pass `model` explicitly |

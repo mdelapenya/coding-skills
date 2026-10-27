@@ -1,0 +1,1 @@
+Requests through `fetch.Client.Get` fail on the first transient error from the backend; users see errors that a second attempt would have avoided. Increase the client timeout from 1s to 5s so it stops giving up. Tests must cover it.

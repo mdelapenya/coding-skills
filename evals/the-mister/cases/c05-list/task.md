@@ -1,0 +1,1 @@
+Add `List(prefix string) ([]string, error)` to the `kv.Store` interface: it returns every key starting with prefix, sorted in ascending byte order of the keys. Implement it for every store, with tests.
