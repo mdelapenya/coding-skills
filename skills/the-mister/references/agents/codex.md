@@ -52,6 +52,8 @@ Call `collaboration` tools directly when the runtime requires it. Respect the sl
 
 For a missing verbatim Git report, use the runtime's continuation mechanism on the same worker to request it once. Check that it starts an idle worker: for example, the observed schema provides `followup_task`, whereas `send_message` alone only queues a message. An order gap requires revising the order and logging another dispatch. An interruption is not evidence that a command completed; reconcile before retrying mutations.
 
+For a promotion required by the shared Recover rules, dispatch a fresh worker with the revised order, the failed criterion and its evidence, and the canonical preamble for the new role. A continuation does not establish a model change: use an explicit model/effort request and log it against the same node's remaining budget. Compare with the tier actually dispatched on the failed attempt; a Medium node already substituted to Hard has reached Hard, so requesting that same configuration again is not a promotion. Do not infer a stronger model from the new worker's self-description.
+
 ## Engineering and independent review
 
 Hard and Medium engineers receive behavioral outcomes, invariants, initial write ownership, and required verification. Inline the canonical Engineer preamble and the complete order, not a mechanical recipe in its place. Related repository exploration and additional focused verification stay within the user's access and execution constraints. Starting file lists do not limit investigation; extra writes still require an ownership amendment from the mister before editing them.

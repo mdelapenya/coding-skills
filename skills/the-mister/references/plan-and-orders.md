@@ -41,7 +41,8 @@ Written once the plan is approved; its existence means approval. If it already e
 
 ## Log
 - N02-widget-model dispatched (1/3, engineer, sonnet).
-- N02-widget-model failed: acceptance 1, CreatedAt missing. Cause: order gap, the field list was prose. Order v2 shows the struct verbatim. Dispatched (2/3, engineer, sonnet).
+- N02-widget-model failed: acceptance 1, CreatedAt missing. Sound order (criterion 1 names CreatedAt). Cause: mechanical slip, the field was skipped. Dispatched (2/3, engineer, sonnet) with the defect named.
+- N02-widget-model failed: the doc comment's example calls `widget.NewWithTTL`, which does not exist (Grep: no match). Sound order (invariant: examples use the actual API). Cause: substantive, unsupported content. Escalated above the model that ran: dispatched (3/3, engineer, opus) with the order rewritten and Previous attempt filled.
 - N02-widget-model ownership amended: + internal/gadget/gadget.go (engineer found the same nil check missing there; no running node owns it; no Baseline change in it).
 ```
 
@@ -69,7 +70,7 @@ Read whatever in the repository helps you get the outcome right, within the acce
 If a fact in this order is false (a file is missing, a signature differs, a test already exists), investigate it first. Stop and report under "Deviations" only when correcting it would change what you own, what you are allowed to do, or what the outcome requires.
 If the order's diagnosis or suggested approach looks wrong but the outcome is reachable within what you own, say so under "Deviations" with the evidence, and pursue the outcome. If the outcome is not reachable within what you own, stop and report what it needs.
 Fix defects of the same kind that you find inside the files you own. Report every defect you find outside them under "Findings outside my scope", with path, line, and why; do not fix those.
-When you write documentation, write only facts you can verify by reading the code named in this order.
+When you write or change documentation, write only facts you can verify in the repository. List each new or changed example and behavioural claim under "Sources" with the location that supports it, or, for a runnable example, the command you ran and its output.
 ```
 
 **Mechanic** (Easy):
@@ -162,6 +163,8 @@ Reply with exactly these sections:
 <anything done differently, found false, or unclear; any ownership amendment you need, with evidence; "None." otherwise>
 ### Findings outside my scope
 <Hard and Medium: each defect seen outside the files you own, with path, line, and why; "None." otherwise>
+### Sources
+<documentation work: each new or changed example and behavioural claim, with `path:line` that supports it, or the command and output that ran it; "None." otherwise>
 
 ## Previous attempt
 <retries only: what the last attempt did, which criterion failed, the state of the files now>
@@ -242,4 +245,4 @@ Conventional Commits subject and body, a blank line, then one `Co-Authored-By: <
 - **Run the acceptance check before you dispatch.** Every criterion you can check with `Grep` or `Read`, check now against the current state: it must measure the value, not the whole line it sits on, and only the lines that matter (a grep over whole files when only added lines count passes or fails for the wrong reason). Note the baseline value it should move from.
 - **Flags exist in the installed version.** A Git order uses only flags you have seen work in this repository's tools; when unsure, a read-only Git node runs `<tool> <subcommand> --help` first.
 - **Easy means literal.** An Easy order's Changes section is exact strings and exact commands. If the worker would have to interpret a sentence, the node is Medium.
-- **Documentation orders say where the facts come from.** Name the files to read, and keep the Engineer preamble's "write only facts you can verify by reading the code named in this order".
+- **Documentation orders say where the facts come from.** Name the files to start from, state the invariant the examples must keep (for example "every example uses the actual API and runs"), and expect a Sources section in the report.

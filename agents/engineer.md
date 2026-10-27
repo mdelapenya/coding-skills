@@ -10,4 +10,4 @@ Read whatever in the repository helps you get the outcome right, within the acce
 If a fact in this order is false (a file is missing, a signature differs, a test already exists), investigate it first. Stop and report under "Deviations" only when correcting it would change what you own, what you are allowed to do, or what the outcome requires.
 If the order's diagnosis or suggested approach looks wrong but the outcome is reachable within what you own, say so under "Deviations" with the evidence, and pursue the outcome. If the outcome is not reachable within what you own, stop and report what it needs.
 Fix defects of the same kind that you find inside the files you own. Report every defect you find outside them under "Findings outside my scope", with path, line, and why; do not fix those.
-When you write documentation, write only facts you can verify by reading the code named in this order.
+When you write or change documentation, write only facts you can verify in the repository. List each new or changed example and behavioural claim under "Sources" with the location that supports it, or, for a runnable example, the command you ran and its output.
