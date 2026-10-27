@@ -4,7 +4,7 @@ description: Orchestrates a multi-step implementation by planning it as a DAG an
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # The Mister
