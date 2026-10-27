@@ -7,6 +7,7 @@ Reusable AI agent skills for software development workflows.
 | Skill | Purpose | Trigger phrases |
 |---|---|---|
 | **ci-detective** | Investigate CI failures by cross-referencing against other recent runs to determine if failures are pre-existing or introduced by the PR | "investigate CI failure", "is this test flaky", "why is this test failing", "ci detective" |
+| **coordinating-agents** | Coordinate one task between two or more agents on the same machine (e.g. Claude Code and Codex) through a file channel under `.git`: single-writer numbered messages, a watcher loop, and terminal markers, with the helpers run in a 2.4 MB busybox container on any host, so the user stops relaying between windows | "coordinate the task with <name>", "coordinate with Astra", "talk to the other agent", "hand this off to Codex" |
 | **pr-lawyer** | Address PR review comments by fixing valid feedback or challenging debatable ones with a reasoned argument | "address PR comments", "respond to review", "challenge this comment", "fight back on review", "pr lawyer" |
 | **pr-nurse** | Monitor CI builds and merge conflicts for a PR, diagnose failures, merge main, and push fixes | "nurse this PR", "check CI", "fix the build", "why is CI failing", "resolve conflicts" |
 | **pr-reviewer** | Staged adversarial review pinned to an exact PR revision: three independent reviewers, an assessor that steel-mans every finding, a summary agent, and a convergence loop that restarts when the PR moves | "review this PR", "adversarial review", "deep PR review", "audit this pull request", "pr reviewer" |
@@ -69,6 +70,7 @@ REPO=/path/to/coding-skills/skills
 
 # Claude Code (user-global)
 ln -s $REPO/ci-detective ~/.claude/skills/ci-detective
+ln -s $REPO/coordinating-agents ~/.claude/skills/coordinating-agents
 ln -s $REPO/pr-lawyer ~/.claude/skills/pr-lawyer
 ln -s $REPO/pr-nurse ~/.claude/skills/pr-nurse
 ln -s $REPO/pr-reviewer ~/.claude/skills/pr-reviewer
@@ -91,7 +93,7 @@ True symlinks require admin rights or Developer Mode. Use directory junctions in
 $repo = "C:\path\to\coding-skills\skills"
 $home_skills = "$env:USERPROFILE\.claude\skills"
 
-foreach ($n in 'ci-detective','pr-lawyer','pr-nurse','pr-reviewer','pr-scribe','the-mister') {
+foreach ($n in 'ci-detective','coordinating-agents','pr-lawyer','pr-nurse','pr-reviewer','pr-scribe','the-mister') {
     New-Item -ItemType Junction -Path (Join-Path $home_skills $n) -Target (Join-Path $repo $n)
 }
 ```
@@ -106,6 +108,9 @@ coding-skills/
 │   │   └── references/
 │   │       ├── github-actions.md
 │   │       └── gitlab-ci.md
+│   ├── coordinating-agents/
+│   │   ├── SKILL.md
+│   │   └── scripts/                 # post, watch, ack, lock (POSIX sh, run in busybox via Docker)
 │   ├── pr-lawyer/
 │   │   ├── SKILL.md
 │   │   └── references/
