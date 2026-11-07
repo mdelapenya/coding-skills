@@ -10,11 +10,11 @@ An Easy node first collects the evidence literally: the CI workflow files, the M
 
 Everything the reviewer reads is the **assembled content**, not `HEAD`, since a commit id says nothing about uncommitted work. With the captures directory created (`plan-and-orders.md`, Captures), Git nodes capture:
 
-- `git -C <dir> diff <base>...HEAD --output=<captures>/<id>.committed.diff`, when the work branch has commits;
+- `git -C <dir> diff <task-base-sha>..HEAD --output=<captures>/<id>.committed.diff`, when the work branch has commits;
 - `git -C <dir> diff --cached --output=<captures>/<id>.staged.diff` and `git -C <dir> diff --output=<captures>/<id>.unstaged.diff`;
 - `git -C <dir> status --porcelain`, whose `??` task paths are new files the reviewer reads directly, and whose `D` paths are deletions.
 
-Unrelated Baseline changes are named in the order as out of scope, not reviewed.
+Use the saved immutable task base SHA from `plan.md`, not the starting HEAD or a newly observed HEAD. If it is missing or ambiguous, the committed comparison is unverified and the commit gate stops. Unrelated Baseline changes are named in the order as out of scope, not reviewed.
 
 ## 3. The content manifest
 

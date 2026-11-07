@@ -83,6 +83,7 @@ ln -s $REPO/../agents/engineer.md ~/.claude/agents/engineer.md
 ln -s $REPO/../agents/git-operator.md ~/.claude/agents/git-operator.md
 ln -s $REPO/../agents/reviewer.md ~/.claude/agents/reviewer.md
 ln -s $REPO/../agents/mechanic.md ~/.claude/agents/mechanic.md
+ln -s $REPO/../agents/inspector.md ~/.claude/agents/inspector.md
 ln -s $REPO/../agents/the-mister.md ~/.claude/agents/the-mister.md
 ```
 
@@ -144,6 +145,8 @@ coding-skills/
 │   └── the-mister/
 │       ├── SKILL.md
 │       └── references/
+│           ├── evidence.md
+│           ├── review.md
 │           ├── plan-and-orders.md
 │           └── agents/
 │               ├── claude-code.md
@@ -153,6 +156,7 @@ coding-skills/
 │   ├── engineer.md                  # the-mister: Hard and Medium nodes
 │   ├── git-operator.md              # the-mister: every Git node
 │   ├── mechanic.md                  # the-mister: Easy nodes
+│   ├── inspector.md                 # the-mister: independent acceptance checks
 │   ├── reviewer.md                  # the-mister: read-only whole-change review (step 7)
 │   └── the-mister.md                # the-mister: optional no-Bash orchestrator (context: fork)
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
