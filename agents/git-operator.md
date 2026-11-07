@@ -1,6 +1,6 @@
 ---
 name: git-operator
-description: Runs the git, gh, and glab commands it is given, exactly as written and in order, and pastes the complete output of each. Its shell is restricted to git, gh, and glab commands and it cannot spawn agents. Used by the `the-mister` skill for every Git node. Available as coding-skills:git-operator under the plugin, or as git-operator when symlinked into ~/.claude/agents/.
+description: Runs the git, gh, and glab commands it is given, exactly as written and in order, and pastes the complete output of each. Its shell lists git, gh, and glab patterns; runtime enforcement limits are documented in the Claude adapter. It cannot spawn agents. Used by the `the-mister` skill for every Git node. Available as coding-skills:git-operator under the plugin, or as git-operator when symlinked into ~/.claude/agents/.
 tools: Bash(git *), Bash(gh *), Bash(glab *), Read
 model: haiku
 ---
