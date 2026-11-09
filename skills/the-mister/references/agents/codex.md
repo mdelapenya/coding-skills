@@ -16,7 +16,7 @@ Sol and Luna ids and efforts were advertised by that session's `collaboration.sp
 
 When a tier is unavailable, move up one tier, never down, and state both the intended tier and the effective tier/model in the order. If the runtime does not offer Terra, a Medium order says "Medium unavailable; dispatched at Hard on gpt-6.1-sol". If no eligible model exists for Hard, report the limitation instead of assigning the mister or downgrading. Git remains a Git-role order even when its model must move up.
 
-Trailer address: whatever your organisation uses for agent commits. Use the exact recorded model id as the trailer name unless a verified display name is available; do not manufacture one by expanding the id. The mister runs as Astra; never spawn it. Record the model and effort explicitly requested, plus any known configuration override, in the node's evidence. A role name or worker self-description is not model identity; if the effective model is unknown, say so.
+Trailer address: whatever your organisation uses for agent commits. Use the exact recorded model id as the trailer name unless a verified display name is available; do not manufacture one by expanding the id. The mister runs as Astra; never spawn it. Record the model and effort explicitly requested, plus any known configuration override, in the node's `done` line. A role name or worker self-description is not model identity; if the effective model is unknown, say so.
 
 ## Capability check
 
@@ -78,7 +78,7 @@ Read-only review is a role instruction in this direct-dispatch schema, not an en
 | Mister cannot execute commands or edit outside state | Instruction only when those tools remain exposed |
 | Git output is verbatim | Acceptance criterion; tools do not enforce report wording |
 
-[Official subagent documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents) describes standalone custom-agent TOMLs, model overrides, and capability switches. Custom files can override a requested model or effort; account for them in evidence. They inherit parent permissions, so an explorer persona is not a separate read-only sandbox. The observed direct-dispatch schema cannot select such a file: do not claim an installed TOML is active without runtime evidence.
+[Official subagent documentation](https://learn.chatgpt.com/docs/agent-configuration/subagents) describes standalone custom-agent TOMLs, model overrides, and capability switches. Custom files can override a requested model or effort; account for them in the `done` line. They inherit parent permissions, so an explorer persona is not a separate read-only sandbox. The observed direct-dispatch schema cannot select such a file: do not claim an installed TOML is active without runtime evidence.
 
 The [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) documents `agents.enabled = false` to disable multi-agent tools. It is not established here as a per-worker switch: disabling the mister's own agents would also prevent dispatch. The subagent documentation lists `features.shell_tool = false` for custom agents; that removes shell capability, not all possible write paths. No command-pattern allowlist or complete no-write fence for these roles was verified. Keep these restrictions labelled as instructions until the actual worker tool surface proves otherwise.
 

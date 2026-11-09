@@ -10,7 +10,7 @@ Named `claude-code.md` on purpose: `claude.md` resolves as `CLAUDE.md` on a case
 | Medium | `sonnet` | Claude Sonnet 5 |
 | Easy, Git | `haiku` | Claude Haiku 4.5 (Git never signs) |
 
-Trailer address: `<noreply@anthropic.com>`. The mister runs as Fable; never pass `fable` to a subagent. Record the `model` alias and `subagent_type` you passed in the node's evidence; the alias is sufficient, and no exact backend generation is claimed beyond this table.
+Trailer address: `<noreply@anthropic.com>`. The mister runs as Fable; never pass `fable` to a subagent. Record the `model` alias and `subagent_type` you passed in the node's `done` line; the alias is sufficient, and no exact backend generation is claimed beyond this table.
 
 ## Shipped agents
 

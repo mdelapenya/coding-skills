@@ -39,24 +39,31 @@ Written once the plan is approved; its existence means approval. If it already e
   acceptance:
     - "widget.go defines `type Widget struct` with fields ID string, Name string, CreatedAt time.Time"
     - "`go test ./internal/widget/...` from the repo root exits 0"
-  status: pending           # pending | running | done | failed
-  dispatches: 0             # never reset on resume or promotion
-  reports: []               # immutable reports/<id>.<attempt>.md paths
-  inspection: ~             # required inspector node id and report, or exemption
-  evidence: ~               # on done: dispatched model identity (alias or id, plus role), acceptance results, commit hash if any
 
 ## Review
 <per round: the content manifest, the reviewers and their tiers with any Medium justification, the verdict per finding; see review.md>
 
 ## Log
-- N02-widget-model dispatched (1/3, engineer, sonnet).
-- N02-widget-model failed: acceptance 1, CreatedAt missing. Sound order (criterion 1 names CreatedAt). Cause: mechanical slip, the field was skipped. Dispatched (2/3, engineer, sonnet) with the defect named.
-- N02-widget-model failed: the doc comment's example calls `widget.NewWithTTL`, which does not exist (Grep: no match). Sound order (invariant: examples use the actual API). Cause: substantive, unsupported content. Escalated above the model that ran: dispatched (3/3, engineer, opus) with the order rewritten and Previous attempt filled.
-- N02-widget-model ownership amended: + internal/gadget/gadget.go (engineer found the same nil check missing there; no running node owns it; no Baseline change in it).
+N02-widget-model | dispatched | 1/3, engineer, sonnet
+N02-widget-model | failed | acceptance 1: CreatedAt missing. Sound order (criterion 1 names CreatedAt). Cause: mechanical slip, the field was skipped. Retry with the defect named. Report: reports/N02-widget-model.1.md
+N02-widget-model | dispatched | 2/3, engineer, sonnet
+N02-widget-model | failed | the doc comment's example calls `widget.NewWithTTL`, which does not exist (Grep: no match). Sound order (invariant: examples use the actual API). Cause: substantive, unsupported content. Escalate above the model that ran, order rewritten, Previous attempt filled. Report: reports/N02-widget-model.2.md
+N02-widget-model | dispatched | 3/3, engineer, opus
+N02-widget-model | done | acceptance 1-2 verified (Read widget.go:12-20; `go test ./internal/widget/...` exit 0); inspection N03-inspect-widget PASS (reports/N03-inspect-widget.1.md); model as dispatched: opus (engineer). Report: reports/N02-widget-model.3.md
+- Ownership amended: N02-widget-model + internal/gadget/gadget.go (engineer found the same nil check missing there; no running node owns it; no Baseline change in it).
 ```
 
 Rules:
 
+- **Node state lives only in the Log.** A node block carries no status, evidence, dispatch count, report list or inspection result, so there is nothing to keep in step with the Log. Every transition is one line appended to `## Log`, never edited, in exactly this form and with no bullet or other prefix: `<id> | <state> | <text>`, where `<state>` is one of:
+  - `dispatched`: `<n/3, role, model>`, appended as soon as the node is sent.
+  - `done`: the acceptance results as you checked them, the inspection and report paths, the model identity as dispatched, and the commit hash if any. Accepting with a caveat (a partial check, an unverified item) is still `done`; the caveat goes in the text.
+  - `failed`: the criterion and the diagnosis, including a decision to go on without a retry.
+  - `superseded`: the node or nodes that replace it, and why (a review round, a split, dropped scope).
+
+  A node's state is its last such line: none is pending, `dispatched` is running. Dispatch counts, attempt reports and inspection results are read from `metrics.jsonl` and `reports/` (`evidence.md`), not copied into the node. Any other Log line (an ownership amendment, a revision note) starts with `- ` so it cannot be mistaken for a transition. The acceptance decision is not made until its line exists: append it before your next tool call.
+- **Every node has an entry before it has a line.** Add a node to `## Nodes` before you dispatch it, including nodes that appear later (review rounds, fixes, inspectors, diagnosis nodes). A node that exists only in the Log, or an entry that never gets a terminal line, is a defect in the plan.
+- **Replanning retires nodes explicitly.** When a node is replaced, append `superseded` for it and point its dependents at the replacement in `deps`.
 - Ids are `N<nn>-<kebab-slug>` in creation order; order file `orders/<id>.md`, message `orders/<id>.msg`.
 - `owns` is exclusive among `running` nodes. A committing Git node owns the paths it stages; read-only Git nodes own nothing. A permitted dependency's manifest and lock files belong to the node allowed to add it.
 - **Disjoint writes are not independence.** Before running two nodes concurrently, check for a shared contract (one defines what the other consumes) or a shared mutable resource (port, database, generated file, global configuration); either needs an edge or serialisation.
@@ -64,7 +71,7 @@ Rules:
 - Git mutations are serialized. A Git node that rewrites the worktree (`switch`, `checkout --`, `clean`, `worktree add`, `merge`) dispatches only when nothing is `running`.
 - A node is ready when every dependency is `done` with still-valid evidence; if a prerequisite is redone, re-check its dependents' evidence.
 - Every dispatch is logged with its count so the three-dispatch budget survives resume. The Log is append-only; order is the timestamp.
-- `evidence` records the model identity as dispatched (Claude Code: the `model` alias and `subagent_type`; Codex: the `model` passed, or the role's configured model), never the worker's self-description and never `tier` after the fact. Trailers derive from it.
+- A `done` line records the model identity as dispatched (Claude Code: the `model` alias and `subagent_type`; Codex: the `model` passed, or the role's configured model), never the worker's self-description and never `tier` after the fact. Trailers derive from it.
 
 ## Preambles
 
@@ -249,7 +256,7 @@ Then `Read` the capture yourself. The file is the evidence; the reports about it
 
 ## The .msg file
 
-Conventional Commits subject and body, a blank line, then one `Co-Authored-By: <display name> <address>` per distinct implementing model recorded in the accepted nodes' `evidence`, with display names and address from the runtime file. Never derive it from `tier` and never invent an identity; if the runtime reports no model, record what you dispatched under Assumptions and use that. The operator never types or edits this file. The reported `git log` body must equal it. When a report's rendering is in doubt, `git log -1 --format=%B | grep -c '<address>'` is a narrow diagnostic for escaped angle brackets only; for whole-message equality use `git log -1 --format=format:%B | diff - '<git-dir>/the-mister/<slug>/orders/<id>.msg'`, which prints nothing and exits 0 when they match (`format:` suppresses the extra terminator that plain `--format=%B` appends; write the `.msg` with one final newline and no trailing blank lines, since `git commit` strips them).
+Conventional Commits subject and body, a blank line, then one `Co-Authored-By: <display name> <address>` per distinct implementing model recorded in the accepted nodes' `done` lines, with display names and address from the runtime file. Never derive it from `tier` and never invent an identity; if the runtime reports no model, record what you dispatched under Assumptions and use that. The operator never types or edits this file. The reported `git log` body must equal it. When a report's rendering is in doubt, `git log -1 --format=%B | grep -c '<address>'` is a narrow diagnostic for escaped angle brackets only; for whole-message equality use `git log -1 --format=format:%B | diff - '<git-dir>/the-mister/<slug>/orders/<id>.msg'`, which prints nothing and exits 0 when they match (`format:` suppresses the extra terminator that plain `--format=%B` appends; write the `.msg` with one final newline and no trailing blank lines, since `git commit` strips them).
 
 ## Writing orders
 
