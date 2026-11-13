@@ -14,6 +14,20 @@ The first discovery of an unknown git dir is the bootstrap exception: reserve th
 
 On resume, read `plan.md`, the orders, every referenced report and `metrics.jsonl` before reconciling outcomes. Missing reports invalidate their summarized evidence. Restore counts from dispatch events and reconcile any gap with the append-only plan log; use the highest reserved count across the node's origin/supersession chain, never reset a count after promotion, rename, compaction or resume. Reconcile uncertain Git mutations before issuing them again. A persisted verdict alone does not establish that today's content still matches the inspected content.
 
+## Budget
+
+Three dispatches per node, each retry with a stated reason to expect improvement. What counts:
+
+- Every worker invocation for the node counts, including a same-worker re-request for missing evidence. A message that makes a worker act again after it reported counts too, however it was delivered; only a message that never starts a turn does not. Recovery, extra scope or a second try sent into a worker that has already reported is a dispatch, never a free continuation.
+- A worker invoked only to stop and save its state (the user paused the run, a stop rule fired) does not count against the implementation budget. Log `failed` with "interrupted" and the partial state, and record the metrics reason `interruption`.
+- A confirmed review finding is new work, not a retry: it becomes a fix node with its own budget, linked to its review round. So does a follow-up that changes the outcome of an accepted node. Inheritance applies only to the same unaccepted outcome.
+- The one re-request happens only within the remaining budget; budget spent, stop and report before any further invocation.
+- **Only the user raises a budget or the review-round limit**, with an answer that names the node, or the slug, and the new limit. Record it once under Assumptions with the user's words; it applies to this slug only, never to later ones. A statement about another limit (message caps, turns, timeouts) or a general "you may increase it" is not budget authority, and you never raise a cap yourself.
+
+## Resume procedure
+
+First locate the git dir with a read-only Git discovery node if unknown, then read `plan.md`, its starting HEAD and task base SHA, reports and metrics. If the saved task base is missing or ambiguous, report committed comparisons as unverified; never substitute the current HEAD. Dispatch a read-only Git reconciliation node for the branch line, `git status --porcelain`, `git diff`, `git diff --cached`, `git rev-parse HEAD`, and `git log -5 --oneline`. When the saved task base is unambiguous, also run `git diff --no-renames --name-status <task-base-sha>..HEAD` and `git diff --no-renames <task-base-sha>..HEAD`. Read the persisted reports and metrics before reconciling nodes; a missing report invalidates its summarized evidence. For each node whose last Log line is `dispatched`, inspect its owned files: verified complete, append `done`; unfinished, append `failed` (interrupted, with the partial state) and write that state into its order. Before retrying any branch, commit, push, or PR node, check whether it already succeeded; if the outcome is unknown, report the uncertainty rather than replay the mutation. Resume neither resets the budget nor rolls anything back.
+
 ## Metrics
 
 The mister appends one JSON object per line to `<git-dir>/the-mister/<slug>/metrics.jsonl` through state-writing tools. No worker writes metrics. Use UTC timestamps and stable node ids; a renamed or split replacement for the same failed outcome records `origin_node` and inherits its dispatch budget. Independent diagnosis, inspection and review nodes have their own ids and budgets.
