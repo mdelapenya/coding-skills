@@ -77,6 +77,18 @@ Before inspecting, bind criteria to a manifest of current owned files and releva
 
 The mister persists and reads the inspector report, compares each result to the literal criterion, and logs reasons to reject. FAIL goes through Recover; unavailability stays unverified. Recheck the manifest before using acceptance downstream, on resume, and at preflight. Any changed input invalidates affected acceptance and requires new inspection; it also invalidates dependent review/check evidence. Passing independent inspection complements the whole-change review in `review.md`.
 
+## Non-deterministic output
+
+A criterion about what a model, a provider or any other non-deterministic system returns ("the reply makes no claim its input does not support") cannot be accepted from passing tests or a static reading of the prompt. Declare the campaign in the order before the first call:
+
+- **Cases**: the fixed set of inputs, each one generation, in a stated order.
+- **Stop rule**: the campaign stops at the first failing case. A failed sample is evidence about the change, not a retry of the same prompt.
+- **Judge**: who decides pass or fail, from what. The full raw reply of each generation is captured to `captures/`, and the judge reads the capture, never a worker's paraphrase.
+- **Pass**: what every case must show, and what is out of scope for this criterion (tone or voice, for example), so a side observation does not fail the campaign.
+- **Ledger**: an append-only capture with one line per generation: case, model, capture path and verdict.
+
+Each generation is one call, counted in metrics. After two failed campaigns with the same root cause, stop varying the prompt: ask the user for the product decision (what the system should do when the data cannot support the claim), and write the answer into the acceptance criterion.
+
 ## Optional run limits
 
 Under Assumptions, record user-supplied deadlines, spend ceilings when observable, and the authorized destructive scope (for example no history rewriting or deletion beyond named generated outputs). Record `not specified` for absent limits and `unavailable` for telemetry the runtime does not expose. Do not invent model prices, cost estimates or new approval gates. Existing session authorization applies.
