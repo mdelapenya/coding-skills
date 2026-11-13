@@ -1,10 +1,10 @@
 ---
 name: pr-scribe
-description: Generate a concise PR description and a Conventional Commits title from a GitHub pull request diff. Auto-detects remotes, honors PR templates, and updates both title and body via gh. Use when user says "describe this PR", "add PR description", "fill in PR body", "describe pull request", "summarize PR changes", or "update the PR title".
-allowed-tools: Read Write Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git remote*) Bash(git branch*) AskUserQuestion
+description: Generates a concise pull or merge request description and a Conventional Commits title from the diff, honoring the repository's PR template and linking related issues found in the branch name, commits and issue search, then updates both title and body through gh or glab and verifies the update. Auto-detects the remote and supports GitHub, GitLab and biomelab workspaces. Use when user says "describe this PR", "describe this MR", "write the PR description", "draft the PR description", "add PR description", "fill in PR body", "describe pull request", "summarize PR changes", or "update the PR title".
+allowed-tools: Read Write Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # PR Scribe
@@ -13,17 +13,10 @@ Generate a concise description for a pull request by analyzing its diff.
 
 ## Supported Platforms
 
-This skill supports multiple code hosting platforms. Each platform has its own reference file under `references/` with platform-specific commands.
-
-Currently supported:
+Each platform has a reference file with its commands:
 - **GitHub** — see `references/github.md`
 - **GitLab** — see `references/gitlab.md`
 - **biomelab** — see `references/biomelab.md` (special context: writes outputs to `.biomelab/` files instead of updating PRs remotely)
-
-Planned:
-- Bitbucket
-
-When invoked, first detect the platform from `git remote -v` and check for biomelab context (`.biomelab/` directory), then load the corresponding reference file for platform-specific commands.
 
 ## Workflow
 
@@ -44,7 +37,7 @@ If the platform is not yet supported, inform the user and stop.
 
 ### Step 2: Determine the PR number
 
-If `$ARGUMENTS` contains a number, use it. Otherwise use `AskUserQuestion` to ask:
+If the invocation's arguments contain a number (in Claude Code, the `ARGUMENTS:` line appended to this skill), use it. Otherwise use `AskUserQuestion` to ask:
 
 > PR number:
 
@@ -52,7 +45,7 @@ If `$ARGUMENTS` contains a number, use it. Otherwise use `AskUserQuestion` to as
 
 Using the platform-specific commands from the loaded reference, fetch the PR metadata (title, body, base/head branches, commits) and the full diff.
 
-Keep the full response — commit messages are reused in Step 5.
+Keep the full response: Step 6 scans its commit messages.
 
 ### Step 4: Check for a PR template
 
@@ -166,3 +159,5 @@ Write the results to the biomelab context directory without updating the PR remo
 
 **Otherwise:**
 Show the generated title and description to the user, then immediately use the platform-specific update command from the loaded reference to apply both. Do not ask for confirmation.
+
+Then verify: fetch the PR again with the metadata command from Step 3 and compare its title and body with what you applied. If the update command failed or either field differs, report the error and print the title and description so the user can apply them by hand; do not report success.
