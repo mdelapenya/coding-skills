@@ -1,6 +1,6 @@
 # Plan and work orders
 
-Everything the mister writes lives at `<git-dir>/the-mister/<slug>/`: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, and `metrics.jsonl`. See `evidence.md` for the report and metric lifecycle. Workers may write `captures/` there (see Captures) and per-run scratch under `scratch/` (see Scratch and caches); the mister only reads them.
+Everything the mister writes lives at `<git-dir>/the-mister/<slug>/`: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, `manifests/<id>.md`, `notes/<topic>.md`, and `metrics.jsonl`. See `evidence.md` for the report and metric lifecycle. Workers may write `captures/` there (see Captures) and per-run scratch under `scratch/` (see Scratch and caches); the mister only reads them.
 
 ## plan.md
 
@@ -41,13 +41,13 @@ Written once the plan is approved; its existence means approval. If it already e
     - "`go test ./internal/widget/...` from the repo root exits 0"
 
 ## Review
-<per round: the content manifest, the reviewers and their tiers with any Medium justification, the verdict per finding; see review.md>
+<per round: the content manifest path and SHA-256, the reviewers and their tiers with any Medium justification, the verdict per finding; see review.md>
 
 ## Log
 N02-widget-model | dispatched | 1/3, engineer, sonnet
 N02-widget-model | failed | acceptance 1: CreatedAt missing. Sound order (criterion 1 names CreatedAt). Cause: mechanical slip, the field was skipped. Retry with the defect named. Report: reports/N02-widget-model.1.md
 N02-widget-model | dispatched | 2/3, engineer, sonnet
-N02-widget-model | failed | the doc comment's example calls `widget.NewWithTTL`, which does not exist (Grep: no match). Sound order (invariant: examples use the actual API). Cause: substantive, unsupported content. Escalate above the model that ran, order rewritten, Previous attempt filled. Report: reports/N02-widget-model.2.md
+N02-widget-model | failed | the doc comment's example calls `widget.NewWithTTL`, which does not exist (Grep: no match). Sound order (invariant: examples use the actual API). Cause: substantive. Escalate above the model that ran; order rewritten. Report: reports/N02-widget-model.2.md
 N02-widget-model | dispatched | 3/3, engineer, opus
 N02-widget-model | done | acceptance 1-2 verified (Read widget.go:12-20; `go test ./internal/widget/...` exit 0); inspection N03-inspect-widget PASS (reports/N03-inspect-widget.1.md); model as dispatched: opus (engineer). Report: reports/N02-widget-model.3.md
 - Ownership amended: N02-widget-model + internal/gadget/gadget.go (engineer found the same nil check missing there; no running node owns it; no Baseline change in it).
@@ -61,7 +61,10 @@ Rules:
   - `failed`: the criterion and the diagnosis, including a decision to go on without a retry.
   - `superseded`: the node or nodes that replace it, and why (a review round, a split, dropped scope).
 
-  A node's state is its last such line: none is pending, `dispatched` is running. Dispatch counts, attempt reports and inspection results are read from `metrics.jsonl` and `reports/` (`evidence.md`), not copied into the node. Any other Log line (an ownership amendment, a revision note) starts with `- ` so it cannot be mistaken for a transition. The acceptance decision is not made until its line exists: append it before your next tool call.
+  A node's state is its last such line: none is pending, `dispatched` is running. No other state word exists: an awaited inspection, peer answer or piece of evidence leaves the node `dispatched`, with the reason in the text. Dispatch counts, attempt reports and inspection results are read from `metrics.jsonl` and `reports/` (`evidence.md`), not copied into the node. Any other Log line (an ownership amendment, a revision note, a user decision) starts with `- ` so it cannot be mistaken for a transition. The acceptance decision is not made until its line exists: append it before your next tool call.
+- **A Log line is one readable sentence.** `<text>` is at most 300 characters: the result, the report path, and any caveat. Command output, hash lists, manifests, review verdicts and relayed messages live in `reports/`, `captures/`, `manifests/` or `## Review`, and the line cites the path; a hash in the Log is shortened to 12 characters. Write ordinary prose with spaces and punctuation, identifiers in backticks. Shorten by dropping detail, never by joining words: `maina1b2c3d,cleantree/indexempty` is a failed write, rewrite it before your next tool call. A Log that someone resuming cannot read is a broken Log, and resume depends on it.
+- **Append at the end, never insert.** Add a Log line with `Edit` anchored on the current last line of the file, or with a tool that appends. Never anchor on an older line: an inserted line changes which line is last, and so the node's state. A line that landed in the wrong place stays where it is; append a correcting `- ` line.
+- **`plan.md` is the only state file.** No `resume-here`, `current-state`, `LATEST`, `checkpoint-*` or `status-*` file, and no section of `plan.md` outside the Log, says what is running, done or next. A note written for a person or another session goes under `notes/<topic>.md`, carries no node state, and is named by a `- ` Log line. Content manifests are files under `manifests/` (`review.md`), cited by path and SHA-256, never tables pasted into `plan.md`.
 - **Every node has an entry before it has a line.** Add a node to `## Nodes` before you dispatch it, including nodes that appear later (review rounds, fixes, inspectors, diagnosis nodes). A node that exists only in the Log, or an entry that never gets a terminal line, is a defect in the plan.
 - **Replanning retires nodes explicitly.** When a node is replaced, append `superseded` for it and point its dependents at the replacement in `deps`.
 - Ids are `N<nn>-<kebab-slug>` in creation order; order file `orders/<id>.md`, message `orders/<id>.msg`.

@@ -4,7 +4,7 @@ description: Orchestrates a multi-step implementation by planning it as a DAG an
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # The Mister
@@ -43,7 +43,7 @@ You are the mister: the manager of a squad of cheaper, specialised agents. Like 
 
 ## State
 
-Your first Git node runs `git rev-parse --absolute-git-dir` and captures the baseline: `git rev-parse HEAD`, `git status --porcelain`, `git diff`, `git diff --cached`. The reported git dir is `<git-dir>`; state lives at `<git-dir>/the-mister/<slug>/` for primary checkouts and linked worktrees alike. Files: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, `metrics.jsonl`, `captures/` and `scratch/` (both written by workers, never by you), in the formats of `references/plan-and-orders.md`. Toolchain caches (`GOCACHE`, `GOMODCACHE`, linter and package-manager caches, installed tools) are never part of it: orders leave them at the user's shared defaults, and per-run temporary output goes under `scratch/`, which is removed at the end (`references/plan-and-orders.md`, Scratch and caches). `Write` and `Edit` are for those paths only. Node state is never a field: it is the last line the Log holds for the node (`references/plan-and-orders.md`, Rules). Read `references/evidence.md` for report persistence, inspector dispatch, metrics, and run limits. Until the plan is approved, orders are inline prompts; copy them into `orders/` afterwards. Reports and metrics may exist before approval; only `plan.md` denotes approval. See `references/evidence.md` for the first git-dir discovery bootstrap exception.
+Your first Git node runs `git rev-parse --absolute-git-dir` and captures the baseline: `git rev-parse HEAD`, `git status --porcelain`, `git diff`, `git diff --cached`. The reported git dir is `<git-dir>`; state lives at `<git-dir>/the-mister/<slug>/` for primary checkouts and linked worktrees alike. Files: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, `manifests/<id>.md`, `notes/<topic>.md`, `metrics.jsonl`, `captures/` and `scratch/` (the last two written by workers, never by you), in the formats of `references/plan-and-orders.md`. Toolchain caches (`GOCACHE`, `GOMODCACHE`, linter and package-manager caches, installed tools) are never part of it: orders leave them at the user's shared defaults, and per-run temporary output goes under `scratch/`, which is removed at the end (`references/plan-and-orders.md`, Scratch and caches). `Write` and `Edit` are for those paths only. Node state is never a field: it is the last line the Log holds for the node, and `plan.md` is the only file that carries it. Each Log line is one readable sentence appended at the end of the Log (`references/plan-and-orders.md`, Rules). Read `references/evidence.md` for report persistence, inspector dispatch, metrics, and run limits. Until the plan is approved, orders are inline prompts; copy them into `orders/` afterwards. Reports and metrics may exist before approval; only `plan.md` denotes approval. See `references/evidence.md` for the first git-dir discovery bootstrap exception.
 
 The slug is `--slug` or a short kebab-case name you derive; print it after approval and in the final report. `plan.md` exists only for approved plans; if one already exists for the slug, you are resuming (Step 6), not overwriting.
 
@@ -127,6 +127,7 @@ Once invoked you stay the mister for the session. A follow-up that continues the
 
 - [ ] I have edited nothing outside `<git-dir>/the-mister/<slug>/` and run no command.
 - [ ] The Log's last line for every node I have accepted, failed or retired says so; nothing I decided exists only in my head.
+- [ ] Every Log line I wrote is one readable sentence of ordinary prose, appended at the end, and no file other than `plan.md` says what is running or done.
 - [ ] Every `git`, `gh`, or `glab` command in this task runs under a Git-tier order, and no two `running` nodes own the same file.
 - [ ] This node's acceptance is checkable from evidence. A Medium node I could make literal is Easy; no design was dictated to make a node cheaper.
 - [ ] Every command carries its directory on the same line (`git -C <dir>`, or `cd <dir> &&`); prose "run from" is not enough.

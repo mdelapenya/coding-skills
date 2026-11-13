@@ -18,7 +18,7 @@ Use the saved immutable task base SHA from `plan.md`, not the starting HEAD or a
 
 ## 3. The content manifest
 
-The review is bound to file content, not to the captures. Before the reviewer is dispatched, a read-only Git node runs `git -C <dir> config --type=bool --default true --get core.filemode` (plain `--get` exits 1 when the key is unset, which would stop the operator) and `git -C <dir> check-attr filter -- <task paths>`, and you record in `## Review`, for every task path:
+The review is bound to file content, not to the captures. Before the reviewer is dispatched, a read-only Git node runs `git -C <dir> config --type=bool --default true --get core.filemode` (plain `--get` exits 1 when the key is unset, which would stop the operator) and `git -C <dir> check-attr filter -- <task paths>`, and you write `manifests/<review id>.md` with one row per task path, then cite its path and SHA-256 in `## Review`:
 
 | Path | Mode | Raw identity (what was reviewed and tested) | Staged identity (what `git add` will store) |
 |---|---|---|---|
