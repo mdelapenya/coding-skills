@@ -126,6 +126,7 @@ coding-skills/
 │   ├── pr-reviewer/
 │   │   ├── SKILL.md
 │   │   └── references/
+│   │       ├── design.md
 │   │       ├── passes.md
 │   │       ├── publication.md
 │   │       ├── report.md

@@ -1,10 +1,10 @@
 ---
 name: pr-reviewer
-description: Performs a staged, multi-pass adversarial review of a pull request pinned to an exact revision. Three independent reviewers (correctness, security, tests) read the full diff concurrently, a separate assessor merges their findings and steel-mans every one of them, and a separate summary agent renders the report. Later rounds re-run the assessor until findings converge; if the PR moves, the review restarts on the new revision instead of silently mixing them. Works from inside the matching repo (bare PR number) or from a barebones directory (PR URL or org/repo#num). Falls back to a single self-challenging reviewer with --single or when the runtime cannot spawn subagents. Use when user says "review this PR", "adversarial review", "deep PR review", "challenge this PR", "audit this pull request", "stress test the PR", or "pr reviewer".
+description: Performs a staged, multi-pass adversarial review of a pull request pinned to an exact revision. Three independent reviewers (correctness, security, tests) read the full diff concurrently, a separate assessor merges their findings and steel-mans every one of them, and a separate summary agent renders the report. Later rounds re-run the assessor until findings converge; if the PR moves, the review restarts on the new revision instead of silently mixing them. Works from inside the matching repo (bare PR number) or from a barebones directory (PR URL or org/repo#num). Falls back to a single self-challenging reviewer with --single or when the runtime cannot spawn subagents. Use when user says "review this PR", "adversarial review", "deep PR review", "challenge this PR", "audit this pull request", "stress test the PR", "review my PR", "critique this PR", or "pr reviewer".
 allowed-tools: Read Grep Glob Write Agent Bash(jq *) Bash(git *) Bash(gh api *) Bash(gh pr view *) Bash(gh pr diff *) Bash(gh issue view *) Bash(gh repo view *) Bash(glab api *) Bash(glab mr view *) Bash(glab issue view *) Bash(mkdir *) Bash(rmdir *) Bash(mv *) Bash(cat *) Bash(awk *) Bash(test *) Bash(ls *) Bash(date *) Bash(basename *) Bash(dirname *) Bash(rm *) EnterPlanMode ExitPlanMode AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "2.0.0"
+  version: "2.0.1"
 ---
 
 # PR Reviewer
@@ -146,7 +146,7 @@ A failed or missing pass gets at most one recovery attempt with the same target.
 
 ### Step 8: Freshness check
 
-Before writing the round, repeat the Step 2 call. If `(head, base)` still matches the target, freshness is `current as of <UTC>`. If it moved and `--historical` was passed, record `superseded` and continue. If it moved otherwise: write the interrupted round's raw findings under the current revision as hints (status `pending-challenge`, round marked `interrupted`), writing that revision's header first if this was its round 1; then **go back to Step 2** with the lock you hold. Step 3 sees the new pair, applies the successor logic exactly once, and either opens the new revision (new pin, new tree, new context, new risk class, round 1) or, when the budget is spent, writes the freshness record and goes to Step 10 with verdict `Latest-state review incomplete`, naming both pairs and the check time. If the platform is unreachable, freshness is `unverified` and no clean verdict may be presented as current.
+Before writing the round, repeat the Step 2 call. If `(head, base)` still matches the target, freshness is `current as of <UTC>`. If it moved and `--historical` was passed, record `superseded` and continue. If it moved otherwise: write the interrupted round's raw findings under the current revision as hints (status `pending-challenge`, round marked `interrupted`), writing that revision's header first if this was its round 1; then **go back to Step 2** with the lock you hold. Step 3 decides what happens to the new pair; when the budget is spent, its verdict names both pairs and the check time. If the platform is unreachable, freshness is `unverified` and no clean verdict may be presented as current.
 
 ### Step 9: Write the round and decide on convergence
 
@@ -180,14 +180,4 @@ Read `references/publication.md`. Re-check freshness, verify the acting login, c
 
 ## Design notes
 
-- **Why pin SHAs instead of cloning the head branch?** Version 1 cloned `--branch <head>` and refreshed with `reset --hard`, so a push between rounds silently changed what round 3 reviewed, and the convergence check compared two different trees. Pinning head, base and merge-base, and verifying them in every pass, is what makes "converged" mean something.
-- **Why three reviewers and an assessor rather than one reviewer who re-checks?** Re-checking your own work is biased toward confirming it. Independent lenses that never see each other find different things; the assessor's steel-man then has to argue against claims it did not make. Single mode keeps the steel-man but loses the independence, which is why it is the fallback and the report says so.
-- **Why does the assessor do the steel-man instead of a separate "challenger"?** Merging and challenging are the same act: to decide whether two reviewers found the same defect you have to decide what the defect really is. Splitting them would double the reads for no extra independence.
-- **Why a separate summary agent?** The assessor's output is evidence; the report is prose for the author. Keeping them apart stops the report drifting from the findings, and the summary agent runs on the cheapest tier.
-- **Why is the PR's text data, not instructions, and why no test runs?** Everything in a PR is author-controlled. A reviewer with a shell that follows "run this to verify" from a PR body has executed the author's code with the user's credentials. Static reading plus read-only `git` is the whole budget unless the user opts in.
-- **Why a refresh budget that resets when a review finishes?** Without a budget, an author pushing every few minutes makes an unfinished review restart forever; a per-invocation budget would reset on every `/loop` tick and protect nothing; a budget that never reset would refuse the third ordinary re-review in a PR's life. Counting only restarts of an unfinished review is the one scope that matches the problem.
-- **Why a state file?** Without one every round starts from scratch and the review never compounds. The revision header is what lets the file hold the history of a moving PR without ever mixing revisions.
-- **Why never start the loop?** Looping is a runtime capability, not a review capability. The skill reports whether another round is warranted; the runtime or the user iterates.
-- **Why a clone instead of `git checkout` or `git worktree`, and never into the cwd or the repo?** Switching the user's branch is a surprising side effect. A shallow clone in the skill's own cache keeps the user's directory untouched, cannot inherit the PR's project files, and cleans up with `rm -rf`.
-- **Why does the report never mention posting?** The report is the artifact. Posting is a separate question, asked after the artifact is printed, with its own revalidation.
-- **Lineage.** The staged structure, pinned revision, freshness record, validation-and-limits section and guided publication borrow from a staged-review workflow by kiview; the steel-man, the convergence loop and the portability are version 1's.
+The reasons behind pinning, the three-reviewer structure, the refresh budget, the state file and the clone, and the lineage of the workflow, are in `references/design.md`.
