@@ -4,7 +4,7 @@ description: Orchestrates a multi-step implementation by planning it as a DAG an
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.6.0"
+  version: "2.6.1"
 ---
 
 # The Mister
@@ -77,7 +77,7 @@ Decompose into nodes, each one independently verifiable outcome for one worker: 
 
 **Decisions before fan-out.** For a new capability that spans more than one service, or needs more than two Hard nodes, the first node is a Hard design node. It returns the contract between the parts and the product decisions still open. Ask the user those decisions with `AskUserQuestion` before any build node; the contract is written after the answers. A design node is `kind: design`: Hard, on the Engineer preamble, owning only the contract file it writes, and exempt from inspection like discovery. A single-service plan may use one whenever a contract is still open; the build nodes after it are tiered against the contract it returns.
 
-Unless the request says "current branch", the first mutating node creates the work branch with the literal branch commands from the reference. Right after the baseline Git node, before any build node, an Easy node records the SHA-256 of every protected untracked path and runs the repository's test command on the task base into a capture, so a later failure can be told apart from one that was already there. A light run skips both. The graph ends with full checks and review (Step 7), then preflight, stage and commit (Step 8); one final commit by default, checkpoints only when partial progress is worth protecting. Tier each node, then run the downgrade question. List any push or PR the user asked for: each is a separate authorisation.
+Unless the request says "current branch", the first mutating node creates the work branch with the literal branch commands from the reference. Right after the baseline Git node, before any build node, an Easy node records the SHA-256 of every protected untracked path and runs the repository's test command on the task base into a capture, so a later failure can be told apart from one that was already there. Every build node lists that node in `deps`. A light run skips both. The graph ends with full checks and review (Step 7), then preflight, stage and commit (Step 8); one final commit by default, checkpoints only when partial progress is worth protecting. Tier each node, then run the downgrade question. List any push or PR the user asked for: each is a separate authorisation.
 
 **Light runs.** A run that changes no tracked file and makes no commit (a question, an investigation, a deployment monitor, a review of someone else's work, a plan written to disk) skips what protects a commit. It has no branch, no baseline diffs (only `git rev-parse --absolute-git-dir` and `HEAD`), no manifest, no preflight, stage or commit, and no cleanup node unless `scratch/` was created. Its Git nodes are the read-only commands it needs, and a document it produces gets one engineering node and, when the document matters, one Hard review. Record the light shape under Assumptions. If the whole task fits one node, tell the user the skill does not apply rather than wrap one node in ceremony.
 
