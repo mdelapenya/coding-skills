@@ -8,22 +8,10 @@ A product manager has filed a feature request (see `inputs/request.md`) for the 
 
 ## Your Task
 
-Initialize a git repository in your working directory if one does not already exist. Then, acting as the engineering lead, write a complete the-mister plan for implementing the feature described in `inputs/request.md`.
+Acting as the engineering lead, write a complete the-mister plan for implementing the feature described in `inputs/request.md`. The plan has been approved in this conversation, so write it now; the slug is `add-user-activity`.
 
-The plan must be written to:
-
-```
-<git-dir>/the-mister/add-user-activity/plan.md
-```
-
-where `<git-dir>` is the absolute path returned by:
-
-```
-git rev-parse --path-format=absolute --git-common-dir
-```
-
-For a freshly initialized repository this will be `.git`, so the plan goes to `.git/the-mister/add-user-activity/plan.md`.
+The service's repository is checked out at `/work/user-service`, and its git dir is `/work/user-service/.git`; use those paths in every command the plan contains. That checkout is not available in this sandbox, so write the plan to `./the-mister/add-user-activity/plan.md` in your working directory, exactly as you would write it under the git dir. Do not run `git init` or create a `.git` directory here.
 
 ## Expected Output
 
-A single file at the path above containing the complete plan. The plan should break the feature into all the work needed — source code, tests, database layer, documentation, and version control operations — in a form that independent workers can execute without further clarification.
+A single file, `./the-mister/add-user-activity/plan.md`, containing the complete plan. The plan should break the feature into all the work needed — source code, tests, database layer, documentation, and version control operations — in a form that independent workers can execute without further clarification.

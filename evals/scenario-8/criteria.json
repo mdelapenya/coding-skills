@@ -54,7 +54,7 @@
     },
     {
       "name": "Plan file at the-mister path",
-      "description": "plan.md is written inside a the-mister/add-user-activity/ directory under the git metadata directory (e.g., .git/the-mister/add-user-activity/plan.md)",
+      "description": "plan.md is written at ./the-mister/add-user-activity/plan.md, records the git dir /work/user-service/.git in its header, and every command in the plan names its directory (git -C /work/user-service or cd /work/user-service &&)",
       "max_score": 5
     },
     {

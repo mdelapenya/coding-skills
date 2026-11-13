@@ -1,10 +1,10 @@
 {
-  "context": "Tests whether the agent correctly initializes a coordinating-agents channel: uses git rev-parse to place the channel under the git-common-dir, constructs the Docker command with the exact required shape (image, mounts, readonly flag, script path), adds the Linux --user uid:gid flag, writes a message draft with correct YAML frontmatter, and uses a valid member name.",
+  "context": "Tests whether the agent correctly initializes a coordinating-agents channel: places the channel in the directory the user names when there is no repository, constructs the Docker command with the exact required shape (image, mounts, readonly flag, script path), adds the Linux --user uid:gid flag, writes a message draft with correct YAML frontmatter, and uses a valid member name.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Git-common-dir channel path",
-      "description": "The channel directory path shown in channel-setup.md or README.md includes '.git/coordination/' — indicating the agent used git rev-parse --path-format=absolute --git-common-dir rather than an arbitrary location",
+      "name": "Channel at the named directory",
+      "description": "The channel is created at ./channel/ in the working directory, the directory the user named because there is no git repository, and the agent neither ran git init nor created a .git directory to place it elsewhere",
       "max_score": 15
     },
     {
