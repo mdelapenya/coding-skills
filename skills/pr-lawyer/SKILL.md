@@ -1,10 +1,10 @@
 ---
 name: pr-lawyer
-description: Review and respond to PR comments by either fixing the code (when feedback is valid) or challenging the reviewer with a reasoned argument (when feedback is debatable or wrong). Use when user says "address PR comments", "respond to review", "challenge this comment", "handle review feedback", "fight back on review", or "pr lawyer".
-allowed-tools: Read Edit Grep Glob Bash(gh *) Bash(git *) AskUserQuestion
+description: Reviews and responds to pull or merge request review comments, judging each one. It fixes the code when the feedback is valid, challenges the reviewer with a reasoned argument when it is debatable or wrong, or answers a question without a code change. It then commits the fixes per cluster after checks pass and replies to every comment with a link to it. Supports GitHub and GitLab. Use when user says "address PR comments", "address MR comments", "respond to review", "reply to review comments", "challenge this comment", "handle review feedback", "fight back on review", or "pr lawyer".
+allowed-tools: Read Edit Grep Glob Bash(gh:*) Bash(glab:*) Bash(git:*) AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # PR Lawyer
@@ -17,9 +17,7 @@ You are the PR's defense attorney. For each review comment, you make a judgment 
 
 ## Supported Platforms
 
-This skill supports multiple code hosting platforms. Each platform has its own reference file under `references/` with platform-specific commands.
-
-Currently supported:
+Each platform has a reference file with its commands:
 - **GitHub** — see `references/github.md`
 - **GitLab** — see `references/gitlab.md`
 
@@ -59,25 +57,15 @@ After triaging all comments, cluster the accepted ones into logical groups. Good
 
 If the user passes `--single-commit`, skip clustering and treat all accepted comments as one group.
 
-Otherwise, present the clusters using `AskUserQuestion` in this format:
+Otherwise, present the clusters with `AskUserQuestion`, in three groups:
 
-> Here's how I've grouped the review feedback:
->
-> **To fix (3 clusters):**
-> 1. `fix` — Null-safety issues (comments by @reviewer in auth.go, session.go)
-> 2. `refactor` — Extract helper methods (comments by @reviewer in parser.go)
-> 3. `style` — Naming conventions (comments by @reviewer in multiple files)
->
-> **To challenge (no code change):**
-> - "Use a factory pattern here" — I'll argue this approach is intentional because…
-> - "This should be split into two PRs" — I'll push back on this as out of scope
->
-> **To clarify (reply only):**
-> - "Why is the timeout set to 30s?" — I'll explain the rationale
->
-> Does this grouping look right? You can adjust clusters, merge them, or skip any. [Y/n or instructions]
+- **To fix**: one numbered line per cluster: `<type>` — theme (reviewer, files)
+- **To challenge**: the quoted comment and the one-line argument you will make
+- **To clarify**: the quoted question and what you will explain
 
-**Important:** Do not prefix numbers with `#` in replies or summaries unless intentionally linking to a real GitHub issue or PR. On GitHub, `#123` auto-links to issue/PR 123. Use the reviewer's name, a quote of the comment, or a plain number without `#`.
+End by asking whether the grouping is right, and say the user may merge, split, reorder or skip clusters.
+
+Never write `#<number>` in a reply or summary unless it links a real issue or PR: GitHub and GitLab turn it into a link.
 
 Wait for the user's response before proceeding. If they suggest changes (merge clusters, skip one, reorder), apply them before moving to Step 3.
 
@@ -87,8 +75,9 @@ For each cluster, in order:
 
 1. Read the relevant file(s)
 2. Apply all fixes in the cluster
-3. Stage the changes: `git add <files>`
-4. Commit with a conventional commit message scoped to the cluster:
+3. **Verify**: run the checks the repository defines for the files you changed (its test command, linter and formatter, from the Makefile, package scripts or CI configuration). If a check fails, fix the cause within the cluster and run it again; if you cannot make it pass, stop and ask the user instead of committing.
+4. Stage the changes: `git add <files>`
+5. Commit with a conventional commit message scoped to the cluster:
    - `fix:` for bug fixes or correctness issues
    - `refactor:` for restructuring or clarity improvements
    - `style:` for formatting or naming changes
@@ -100,7 +89,7 @@ For each cluster, in order:
    git commit -m "fix: handle null session in auth middleware"
    ```
 
-5. Move to the next cluster. Do not push until all clusters are committed.
+6. Move to the next cluster. Do not push until all clusters are committed.
 
 After all clusters are committed, use `AskUserQuestion` to confirm before pushing:
 
