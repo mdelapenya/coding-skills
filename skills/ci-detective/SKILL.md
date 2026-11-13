@@ -1,10 +1,10 @@
 ---
 name: ci-detective
-description: Investigate CI failures on a PR by cross-referencing failing tests against other recent runs to determine if failures are pre-existing or caused by the PR's changes. Use when user says "investigate CI failure", "is this test flaky", "why is this test failing", "cross-reference builds", "check if failure is pre-existing", or "ci detective".
-allowed-tools: Read Grep Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git *)
+description: Investigates CI failures on a pull or merge request by cross-referencing failing jobs and tests against recent runs on other branches, classifying each failure as pre-existing (flaky or broken elsewhere) or introduced by the change, and tracing introduced failures to the diff with a suggested fix. Supports GitHub Actions and GitLab CI. Use when user says "investigate CI failure", "CI is red", "is this test flaky", "why is this test failing", "did my PR break this", "cross-reference builds", "check if failure is pre-existing", or "ci detective".
+allowed-tools: Read Grep Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git:*)
 metadata:
   author: mdelapenya
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # CI Detective
@@ -15,16 +15,9 @@ Investigate CI failures on a PR by cross-referencing failing tests against other
 
 ## Supported CI Systems
 
-This skill supports multiple CI platforms. Each platform has its own reference file under `references/` with platform-specific commands and patterns.
-
-Currently supported:
+Each platform has a reference file with its commands and patterns:
 - **GitHub Actions** — see `references/github-actions.md`
 - **GitLab CI** — see `references/gitlab-ci.md`
-
-Planned:
-- Jenkins
-
-When investigating, first detect which CI system the repository uses, then load the corresponding reference file for platform-specific commands.
 
 ## Arguments
 
@@ -48,6 +41,8 @@ Using the platform-specific commands from the loaded reference, identify the cur
 
 Query the last **N** runs (default: 10) and filter to completed runs on branches other than the current PR's branch. Select 3–5 from the results with a mix of conclusions (prefer at least one passing and one failing if available).
 
+If no completed run on another branch is found, query again with N doubled, up to 50. If there is still none, say so: the failures cannot be cross-referenced, so classify each one as **unverified** rather than pre-existing or introduced, and continue with Step 6 for all of them, stating that limit in the report.
+
 ### Step 4: Check if the same jobs/tests fail in those runs
 
 For each selected run, check whether the same jobs failed. If a job failed in another run, fetch its logs to confirm the same test is failing.
@@ -56,10 +51,11 @@ For each selected run, check whether the same jobs failed. If a job failed in an
 
 - **Pre-existing**: The same test fails in runs on other branches. Flag it and note which tests.
 - **Introduced by this PR**: A test only fails on our PR's run and passes elsewhere. This is the suspect — proceed to Step 6.
+- **Unverified**: No other run could be compared (Step 3). Investigate it as in Step 6, and report the missing comparison.
 
 ### Step 6: Investigate PR-introduced failures
 
-For each failure classified as introduced by this PR:
+For each failure classified as introduced by this PR or unverified:
 
 1. Fetch the full failure output using platform-specific commands.
 2. Get the PR diff.
@@ -77,7 +73,7 @@ Present a summary table:
 | test_bar  | FAIL   | PASS                  | PASS                  | PASS                  | Introduced by PR |
 ```
 
-For each introduced failure, include:
+For each introduced or unverified failure, include:
 - The failing test name and error message
 - The relevant lines from the PR diff
 - A brief explanation of the causal link
