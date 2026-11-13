@@ -4,7 +4,7 @@ description: Coordinates one task between two or more coding agents on the same 
 allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *)
 metadata:
   author: mdelapenya
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Coordinating Agents
@@ -36,7 +36,7 @@ Two agents that read and write in seconds should not wait for a person to carry 
 
 ## Running the scripts: Docker by default
 
-The scripts live in this skill's `scripts/` directory (`${CLAUDE_SKILL_DIR}/scripts` in Claude Code; elsewhere, the `scripts/` folder next to this file). They always run in the `busybox:1.37-uclibc` image (2.4 MB, the smallest BusyBox variant that runs them; published for amd64, arm64 and others), on every host, so nothing depends on the host's shell. One command shape, identical in PowerShell and POSIX shells, with no command substitution; substitute the two absolute host paths literally:
+The scripts live in this skill's `scripts/` directory (`${CLAUDE_SKILL_DIR}/scripts` in Claude Code; elsewhere, the `scripts/` folder next to this file). They always run in the `busybox:1.37-uclibc` image, on every host, so nothing depends on the host's shell. One command shape, identical in PowerShell and POSIX shells, with no command substitution; substitute the two absolute host paths literally:
 
 ```
 docker run --rm --mount "type=bind,source=<absolute scripts dir>,target=/s,readonly" --mount "type=bind,source=<absolute channel dir>,target=/c" busybox:1.37-uclibc sh /s/<script>.sh /c <me> <args>
@@ -44,12 +44,12 @@ docker run --rm --mount "type=bind,source=<absolute scripts dir>,target=/s,reado
 
 - Inside the container the channel is always `/c` and the scripts `/s`, so every path argument is a `/c/...` path: a draft at `<channel>/<me>/drafts/reply.md` on the host is `/c/<me>/drafts/reply.md`.
 - Host paths may contain spaces (keep the quotes). They may not contain a comma, which `--mount` uses as a separator; pick another channel path.
-- Windows: Docker Desktop in **Linux-container mode** (Windows-container mode cannot run BusyBox: report that as the blocker). The source is a Windows path, for example `source=C:\Users\me\repo\.git\coordination\review-gap`. The scripts must have LF line endings: the repository's `.gitattributes` pins them (`text eol=lf`), and a checkout made before that rule needs re-normalising; a read-only mount does not convert CRLF, and a CRLF script fails with `set: illegal option -`.
+- Windows: Docker Desktop in **Linux-container mode** (Windows-container mode cannot run BusyBox: report that as the blocker). The source is a Windows path, for example `source=C:\Users\me\repo\.git\coordination\review-gap`. The scripts need LF line endings (`.gitattributes` pins them; re-normalise an older checkout): a CRLF script fails with `set: illegal option -`.
 - Linux hosts: add `--user <uid>:<gid>` with your numeric ids, written literally (the initiator records them in `README.md`), so the container does not leave root-owned files in the channel.
 - Write drafts and your own markers with your native file tools; removing your own `.done` is `... busybox:1.37-uclibc rm /c/<me>.done`. No host shell is involved anywhere.
 - Docker unavailable: that is a blocker to report to the user, with your request left in place. Fall back to running the scripts with the host's `sh` only if the user explicitly says so.
 
-Tested through bind mounts on macOS Docker Desktop, channel paths with spaces: 22/22 behaviour checks in `busybox:1.37-uclibc` on arm64 and on emulated amd64, and in `busybox:1.37` as root and as a non-root uid; cross-container waking; a two-container lock race with exactly one winner; and the LF rule under `core.autocrlf=true`. Not exercised: native Windows or PowerShell execution (syntax review only), or a Linux host.
+Tested on macOS Docker Desktop (arm64 and emulated amd64); not exercised on native Windows, PowerShell or a Linux host.
 
 | Script (args after `/c`) | Does |
 |---|---|
