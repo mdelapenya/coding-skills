@@ -146,6 +146,7 @@ coding-skills/
 │       ├── SKILL.md
 │       └── references/
 │           ├── evidence.md
+│           ├── peers.md
 │           ├── review.md
 │           ├── plan-and-orders.md
 │           └── agents/
