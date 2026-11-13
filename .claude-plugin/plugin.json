@@ -6,5 +6,13 @@
     "name": "Manuel de la Peña"
   },
   "repository": "https://github.com/mdelapenya/coding-skills",
-  "keywords": ["development", "github", "pull-requests", "workflow", "orchestration", "subagents"]
+  "keywords": ["development", "github", "pull-requests", "workflow", "orchestration", "subagents"],
+  "agents": [
+    "./skills/the-mister/agents/engineer.md",
+    "./skills/the-mister/agents/git-operator.md",
+    "./skills/the-mister/agents/inspector.md",
+    "./skills/the-mister/agents/mechanic.md",
+    "./skills/the-mister/agents/reviewer.md",
+    "./skills/the-mister/agents/the-mister.md"
+  ]
 }

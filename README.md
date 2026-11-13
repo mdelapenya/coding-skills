@@ -79,12 +79,12 @@ ln -s $REPO/the-mister ~/.claude/skills/the-mister
 
 # Agents used by the-mister (Claude Code reads ~/.claude/agents/ at session start)
 mkdir -p ~/.claude/agents
-ln -s $REPO/../agents/engineer.md ~/.claude/agents/engineer.md
-ln -s $REPO/../agents/git-operator.md ~/.claude/agents/git-operator.md
-ln -s $REPO/../agents/reviewer.md ~/.claude/agents/reviewer.md
-ln -s $REPO/../agents/mechanic.md ~/.claude/agents/mechanic.md
-ln -s $REPO/../agents/inspector.md ~/.claude/agents/inspector.md
-ln -s $REPO/../agents/the-mister.md ~/.claude/agents/the-mister.md
+ln -s $REPO/the-mister/agents/engineer.md ~/.claude/agents/engineer.md
+ln -s $REPO/the-mister/agents/git-operator.md ~/.claude/agents/git-operator.md
+ln -s $REPO/the-mister/agents/reviewer.md ~/.claude/agents/reviewer.md
+ln -s $REPO/the-mister/agents/mechanic.md ~/.claude/agents/mechanic.md
+ln -s $REPO/the-mister/agents/inspector.md ~/.claude/agents/inspector.md
+ln -s $REPO/the-mister/agents/the-mister.md ~/.claude/agents/the-mister.md
 ```
 
 **Windows (PowerShell):**
@@ -144,6 +144,13 @@ coding-skills/
 │   │       └── gitlab.md
 │   └── the-mister/
 │       ├── SKILL.md
+│       ├── agents/                  # Claude Code agent definitions, listed in .claude-plugin/plugin.json
+│       │   ├── engineer.md          # Hard and Medium nodes
+│       │   ├── git-operator.md      # every Git node
+│       │   ├── mechanic.md          # Easy nodes
+│       │   ├── inspector.md         # independent acceptance checks
+│       │   ├── reviewer.md          # read-only whole-change review (step 7)
+│       │   └── the-mister.md        # optional no-Bash orchestrator (context: fork)
 │       └── references/
 │           ├── evidence.md
 │           ├── peers.md
@@ -153,13 +160,6 @@ coding-skills/
 │               ├── claude-code.md
 │               ├── codex.md
 │               └── generic.md
-├── agents/                          # Claude Code agent definitions (plugin-discovered)
-│   ├── engineer.md                  # the-mister: Hard and Medium nodes
-│   ├── git-operator.md              # the-mister: every Git node
-│   ├── mechanic.md                  # the-mister: Easy nodes
-│   ├── inspector.md                 # the-mister: independent acceptance checks
-│   ├── reviewer.md                  # the-mister: read-only whole-change review (step 7)
-│   └── the-mister.md                # the-mister: optional no-Bash orchestrator (context: fork)
 ├── .agents/skills -> ../skills      # Codex + Gemini CLI
 ├── .claude/skills -> ../skills      # Claude Code
 ├── .github/skills -> ../skills      # Copilot

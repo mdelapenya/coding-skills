@@ -14,7 +14,7 @@ Trailer address: `<noreply@anthropic.com>`. The mister runs as Fable; never pass
 
 ## Shipped agents
 
-Six definitions in this repository's root `agents/` directory: `coding-skills:the-mister`, `coding-skills:engineer`, `coding-skills:reviewer`, `coding-skills:mechanic`, `coding-skills:inspector`, `coding-skills:git-operator` under the plugin, or `the-mister`, `engineer`, `reviewer`, `mechanic`, `inspector`, `git-operator` when symlinked into `~/.claude/agents/`. Definitions load at session start.
+Six definitions in this skill's `agents/` directory (`skills/the-mister/agents/`), which the plugin manifest lists under `agents`: `coding-skills:the-mister`, `coding-skills:engineer`, `coding-skills:reviewer`, `coding-skills:mechanic`, `coding-skills:inspector`, `coding-skills:git-operator` under the plugin, or `the-mister`, `engineer`, `reviewer`, `mechanic`, `inspector`, `git-operator` when symlinked into `~/.claude/agents/`. Definitions load at session start.
 
 | Agent | Tools | Enforced by the tool list | Instruction only |
 |---|---|---|---|

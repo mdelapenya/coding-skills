@@ -20,6 +20,7 @@ ROLES = {
     "Git operator": "git-operator.md",
 }
 SOURCE = Path("skills/the-mister/references/plan-and-orders.md")
+AGENTS = Path("skills/the-mister/agents")
 
 
 def preambles(source):
@@ -55,7 +56,7 @@ def generated_agents(root):
     for role, filename in ROLES.items():
         if filename is None:
             continue
-        path = root / "agents" / filename
+        path = root / AGENTS / filename
         current = path.read_bytes()
         header = re.match(rb"\A---\r?\n.*?\r?\n---(?:\r?\n|\Z)", current, re.DOTALL)
         if header is None:

@@ -26,7 +26,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
             f"**{role}** (fixture):\n\n```\nCanonical {role}.\n```"
             for role in SYNC.ROLES
         ) + "\n\n## Full template\n", encoding="utf-8")
-        (self.root / "agents").mkdir()
+        (self.root / SYNC.AGENTS).mkdir(parents=True)
         self.headers = {}
         for role, filename in SYNC.ROLES.items():
             if filename is None:
@@ -35,7 +35,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
             header = (f'---\nname: {role.lower()}\nmodel: haiku\n'
                       'tools: Read, Bash\ncustom: "keep: this"\n---\n').encode()
             self.headers[filename] = header
-            (self.root / "agents" / filename).write_bytes(header + b"\nStale body.\n")
+            (self.root / SYNC.AGENTS / filename).write_bytes(header + b"\nStale body.\n")
 
     def run_sync(self, *args):
         return subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root), *args],
@@ -43,14 +43,14 @@ class SyncMisterAgentsTests(unittest.TestCase):
 
     def snapshot(self):
         return {p.name: (p.read_bytes(), p.stat().st_mtime_ns)
-                for p in (self.root / "agents").iterdir()}
+                for p in (self.root / SYNC.AGENTS).iterdir()}
 
     def test_regeneration_preserves_frontmatter_and_is_idempotent(self):
         result = self.run_sync()
         self.assertEqual(result.returncode, 0, result.stderr)
         for role, filename in SYNC.ROLES.items():
             if filename:
-                self.assertEqual((self.root / "agents" / filename).read_bytes(),
+                self.assertEqual((self.root / SYNC.AGENTS / filename).read_bytes(),
                                  self.headers[filename] + f"\nCanonical {role}.\n".encode())
         first = self.snapshot()
         self.assertEqual(self.run_sync().returncode, 0)
@@ -62,7 +62,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
         result = self.run_sync("--check")
         self.assertEqual(result.returncode, 1)
         for filename in self.headers:
-            self.assertIn(f"drift: agents/{filename}", result.stderr)
+            self.assertIn(f"drift: {(SYNC.AGENTS / filename).as_posix()}", result.stderr)
         self.assertEqual(self.snapshot(), before)
 
     def test_canonical_change_requires_regeneration(self):
@@ -73,7 +73,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
         self.assertIn("engineer.md", result.stderr)
         self.assertNotIn("mechanic.md", result.stderr)
         self.assertEqual(self.run_sync().returncode, 0)
-        self.assertIn(b"New policy.", (self.root / "agents/engineer.md").read_bytes())
+        self.assertIn(b"New policy.", (self.root / SYNC.AGENTS / "engineer.md").read_bytes())
         self.assertEqual(self.run_sync("--check").returncode, 0)
 
     def test_missing_role_fails_before_any_write(self):
@@ -98,7 +98,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
         self.assertIn("duplicate canonical role", result.stderr)
 
     def test_missing_agent_and_bad_frontmatter_fail_before_writing(self):
-        inspector = self.root / "agents/inspector.md"
+        inspector = self.root / SYNC.AGENTS / "inspector.md"
         inspector.unlink()
         before = self.snapshot()
         self.assertEqual(self.run_sync().returncode, 1)
@@ -111,7 +111,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
         self.assertEqual(self.snapshot(), before)
 
     def test_crlf_frontmatter_is_preserved_byte_for_byte(self):
-        path = self.root / "agents/engineer.md"
+        path = self.root / SYNC.AGENTS / "engineer.md"
         header = self.headers[path.name].replace(b"\n", b"\r\n")
         path.write_bytes(header + b"\r\nold\r\n")
         self.assertEqual(self.run_sync().returncode, 0)
@@ -128,7 +128,7 @@ class SyncMisterAgentsTests(unittest.TestCase):
         self.assertIn("unknown canonical role", result.stderr)
 
     def test_header_without_final_newline_regenerates_idempotently(self):
-        path = self.root / "agents/engineer.md"
+        path = self.root / SYNC.AGENTS / "engineer.md"
         header = self.headers[path.name].rstrip(b"\n")
         path.write_bytes(header)
         self.assertEqual(self.run_sync().returncode, 0)
