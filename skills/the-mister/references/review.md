@@ -1,6 +1,6 @@
 # Review and checks
 
-Step 7 of the workflow. Per-node acceptance checks what the mister thought of; this step checks the whole change for what nobody thought of, before anything leaves the machine. Skip it only when every node is Easy or Git, all literal.
+Step 7 of the workflow. Per-node acceptance checks what the mister thought of; this step checks the whole change for what nobody thought of, before anything leaves the machine. Skip it only when every node is Easy or Git, all literal, or for a light run (SKILL.md, Step 2).
 
 ## 1. Full checks
 
