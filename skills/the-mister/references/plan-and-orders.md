@@ -159,6 +159,7 @@ For Hard and Medium, the order describes a **behavioural outcome**: what must be
 
 ## Files you own (create or edit these, and only these)
 - <path>   <for a baseline-dirty file: "preserve the existing changes at lines a–b as they are">
+- <path>   <a test, fixture or consumer that asserts the old behaviour: it flips here, or "flips under <node>, read only">
 
 ## Files you may read
 - <path> — <what to look at, e.g. "follow the handler shape at lines 40–88"; for Hard and Medium, a starting point>
@@ -282,6 +283,7 @@ Conventional Commits subject and body, a blank line, then one `Co-Authored-By: <
 - **A permitted dependency owns its manifests**, or the preflight fails the node for doing what it was allowed to do.
 - **Every command names its directory on the same line.** `git -C <dir> status`, `cd <dir> && make test`. A "run from" sentence above the list gets lost, and a worker in the wrong directory fails or, worse, succeeds on the wrong tree.
 - **Old text is re-read, not remembered.** Before writing a replacement, `Read` the file on the branch the worker will edit. Text copied from memory, the base branch, or another checkout can match nothing, or match the wrong version, and costs a retry.
+- **Focused checks reach dependents and lint.** A node's required checks include the repository's linter on the changed packages and the tests of every package that imports a changed symbol, not only a `-run` selection of the node's own tests. Otherwise lint errors and broken dependents surface only at the full checks.
 - **Run the acceptance check before you dispatch.** Every criterion you can check with `Grep` or `Read`, check now against the current state: it must measure the value, not the whole line it sits on, and only the lines that matter (a grep over whole files when only added lines count passes or fails for the wrong reason). Note the baseline value it should move from.
 - **Flags exist in the installed version.** A Git order uses only flags you have seen work in this repository's tools; when unsure, a read-only Git node runs `<tool> <subcommand> --help` first.
 - **Easy means literal.** An Easy order's Changes section is exact strings and exact commands. If the worker would have to interpret a sentence, the node is Medium.
