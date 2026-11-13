@@ -1,11 +1,11 @@
 ---
 name: pr-nurse
-description: Monitor CI builds and mergeable status for the current branch's PR. Diagnoses failures, merges main to resolve conflicts or pick up fixes, and pushes. Use when user says "nurse this PR", "check CI", "fix the build", "why is CI failing", "merge main", or "resolve conflicts".
-allowed-tools: Read Edit Grep Glob Bash(gh *) Bash(glab *) Bash(jq *) Bash(git *) Bash(cd *) AskUserQuestion
+description: Monitors CI builds and mergeable status for the current branch's pull or merge request, diagnoses failing checks, fixes failures caused by the branch, merges main into the branch to pick up upstream fixes or resolve conflicts, and pushes, optionally on a 5-minute loop. Supports GitHub and GitLab. Use when user says "nurse this PR", "babysit this PR", "keep CI green", "check CI on my PR", "fix the build on this PR", "why is CI failing on my PR", "merge main into this PR", or "resolve this PR's conflicts".
+allowed-tools: Read Edit Grep Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git:*) Bash(cd:*) AskUserQuestion
 disable-model-invocation: true
 metadata:
   author: mdelapenya
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # PR Nurse
@@ -16,16 +16,11 @@ Monitor and fix CI failures and merge conflicts for the current branch's pull re
 
 ## Supported Platforms
 
-This skill supports multiple code hosting platforms. Each platform has its own reference file under `references/` with platform-specific commands.
-
-Currently supported:
+Each platform has a reference file with its commands:
 - **GitHub** — see `references/github.md`
 - **GitLab** — see `references/gitlab.md`
 
-Planned:
-- Bitbucket
-
-When invoked, first detect the platform from `git remote -v`, then load the corresponding reference file for platform-specific commands. If the platform is not yet supported, inform the user and stop.
+Detect the platform from `git remote -v` and load its reference. If it is not supported, inform the user and stop.
 
 ## Context: Worktree Setup
 
@@ -35,6 +30,18 @@ This skill is typically invoked from a **git worktree**, not the root repository
 - **Root repo**: the main checkout where `main` branch lives — determined by `git worktree list --porcelain | sed -n '1s/^worktree //p'`
 
 Always return to the workspace after any operation in the root repo.
+
+### Sync with main
+
+Steps 3a and 4 both bring `main` into the branch this way:
+
+1. Save the workspace path: `WORKSPACE=$(pwd)`
+2. Get the root repo: `ROOT=$(git worktree list --porcelain | sed -n '1s/^worktree //p')`
+3. `cd "$ROOT"` and verify no local changes with `git status --porcelain`
+   - If there are local changes, **stop** and ask the user — do not discard their work
+4. `git pull`
+5. `cd "$WORKSPACE"`
+6. `git merge main --no-edit`
 
 ## Looping
 
@@ -75,15 +82,8 @@ Analyze the failure and determine the root cause:
 
 #### 3a: Fix is likely in main (e.g., flaky infra, CI config change, dependency update merged upstream)
 
-1. Save the workspace path: `WORKSPACE=$(pwd)`
-2. Get the root repo: `ROOT=$(git worktree list --porcelain | sed -n '1s/^worktree //p')`
-3. `cd "$ROOT"` and verify no local changes with `git status --porcelain`
-   - If there are local changes, **stop** and ask the user — do not discard their work
-4. `git pull`
-5. `cd "$WORKSPACE"`
-6. `git merge main --no-edit`
-   - If there are conflicts, resolve them (see Step 4 for conflict resolution approach)
-7. `git push`
+1. [Sync with main](#sync-with-main).
+2. If the merge produced conflicts, continue with Step 4, items 2 and 3, which also push. Otherwise run `git push`.
 
 #### 3b: Fix is in the branch (e.g., test failure, lint error, compilation error from PR changes)
 
@@ -97,18 +97,12 @@ After fixing, report what was done. Do not re-check CI — the user can invoke t
 
 If `mergeable` is `CONFLICTING` or the merge in Step 3a produced conflicts:
 
-1. Save the workspace path: `WORKSPACE=$(pwd)`
-2. Get the root repo: `ROOT=$(git worktree list --porcelain | sed -n '1s/^worktree //p')`
-3. `cd "$ROOT"` and verify no local changes with `git status --porcelain`
-   - If there are local changes, **stop** and ask the user
-4. `git pull`
-5. `cd "$WORKSPACE"`
-6. `git merge main --no-edit`
-7. For each conflicted file:
+1. [Sync with main](#sync-with-main), unless Step 3a already did.
+2. For each conflicted file:
    - Read the file and understand both sides of the conflict
    - Resolve by preserving the intent of both the PR changes and the main branch updates
    - If the correct resolution is ambiguous, ask the user
-8. Stage resolved files, commit the merge, and push:
+3. Stage resolved files, commit the merge, and push:
    ```bash
    git add <resolved-files>
    git commit --no-edit
