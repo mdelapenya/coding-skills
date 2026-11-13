@@ -1,4 +1,4 @@
 {
-  "description": "the-mister plan: git-tier nodes, inspector before Hard, append-only log",
+  "description": "the-mister approved plan: git tier, tiering rule, inspections, no fabricated Log state, baseline checks",
   "include": ["./inputs"]
 }

@@ -1,66 +1,71 @@
 {
-  "context": "Tests whether the agent correctly applies the-mister planning conventions when creating a plan.md for a Go web service feature: git operations isolated in Git-tier nodes, inspector nodes required before Hard build nodes, an append-only Log with single-sentence entries, and documented tiering decisions with downgrade reasoning.",
+  "context": "Tests whether the agent applies the-mister planning rules when writing an approved plan.md for a Go web service feature: git work isolated in Git-tier nodes, including questions that need git implicitly; tiers that follow the skill's tiering rule rather than a fixed expectation; the required inspections planned with an inspector that receives no implementer material; a Log that holds no fabricated state at approval; protected-path digests and a baseline test run before any build work; real paths in owns; and every command naming its directory.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Git-tier for all git commands",
-      "description": "Every node that includes git, gh, or glab commands is classified as Git-tier (not Easy, Medium, or Hard tier) in the plan",
+      "name": "Git-tier for all git work",
+      "description": "Every node that runs git, gh or glab is Git-tier, including questions that need git implicitly (whether a file is tracked or ignored, history); no explorer, mechanic or engineer node is asked to answer them",
       "max_score": 10
     },
     {
       "name": "Git nodes are standalone",
-      "description": "No single node mixes git/gh/glab commands with non-git implementation work — any node needing both is split into two or more separate nodes",
+      "description": "No single node mixes git/gh/glab commands with non-git work; any node needing both is split into separate nodes",
       "max_score": 10
     },
     {
-      "name": "Hard implementation node present",
-      "description": "At least one node is explicitly classified as Hard tier for implementing the new user activity endpoint handler",
+      "name": "Tiers follow the skill's rule",
+      "description": "Each node's tier follows the skill's order: Git if it runs git, Easy if every edit and command is literal, Medium if the target is fully specified, otherwise Hard. Where a contract is open, a Hard node (a design node or the build node) settles it; code that must keep a silent-failure invariant is Hard unless its acceptance includes a test that fails when the invariant breaks; no reviewer is below Hard without a written reason",
       "max_score": 10
     },
     {
-      "name": "Inspector precedes Hard node",
-      "description": "An inspector node is listed as a dependency or prerequisite that must complete before each Hard build node is accepted",
+      "name": "Required inspections planned",
+      "description": "Every Hard build node, and every Medium build node whose acceptance includes a command, has a separate inspector node that depends on it, and the plan states the build node is accepted only after the inspector passes. Git, review, discovery, design and verify nodes have no inspector",
       "max_score": 10
     },
     {
       "name": "Inspector uses Easy or Haiku",
-      "description": "The inspector node(s) specify Easy tier or Haiku model — not Medium or Hard",
+      "description": "The inspector nodes are Easy tier or the Haiku model, not Medium or Hard",
+      "max_score": 5
+    },
+    {
+      "name": "Inspector gets no implementer material",
+      "description": "The inspector nodes are not sent the build order's Changes, the implementer's report or claimed results, or the mister's diagnosis or suggested fix",
+      "max_score": 5
+    },
+    {
+      "name": "Log without fabricated state",
+      "description": "plan.md has a Log section. Because the plan was only approved, it holds no transition line (dispatched, done, failed, superseded), at most a note line starting with '- '; no node is planned to receive a done line without being dispatched",
       "max_score": 10
-    },
-    {
-      "name": "Inspector receives only acceptance criteria",
-      "description": "The inspector node description does NOT mention sending the implementer's report, the implementer's claimed results, the mister's diagnosis, or the mister's suggested fix to the inspector",
-      "max_score": 5
-    },
-    {
-      "name": "Log section present",
-      "description": "The plan.md contains a Log section with at least one appended line entry",
-      "max_score": 5
     },
     {
       "name": "Log lines are single sentences",
-      "description": "Every Log entry is a single readable sentence of ordinary prose on one line — not a multi-line block, nested bullet list, or code block",
-      "max_score": 10
-    },
-    {
-      "name": "No status fields in node blocks",
-      "description": "Node definitions in the plan do NOT include a status or state field — node state appears only in the Log section",
+      "description": "Every Log line is a single readable sentence of ordinary prose on one line, not a multi-line block, nested list or code block",
       "max_score": 5
     },
     {
-      "name": "Tiering decisions documented",
-      "description": "The plan includes an Assumptions, Tiering, or similar section that records the downgrade reasoning for each Medium node (whether it was kept as Medium or downgraded to Easy, and why)",
-      "max_score": 10
-    },
-    {
-      "name": "Plan file at the-mister path",
-      "description": "plan.md is written at ./the-mister/add-user-activity/plan.md, records the git dir /work/user-service/.git in its header, and every command in the plan names its directory (git -C /work/user-service or cd /work/user-service &&)",
+      "name": "No state outside the Log",
+      "description": "Node blocks carry no status or state field, and no other section of plan.md says what is running, done or next. Header fields the plan template allows to read `pending, <node id>` (Starting HEAD, Task base SHA) do not count",
       "max_score": 5
     },
     {
-      "name": "Multiple nodes initially dispatched",
-      "description": "The Log section shows dispatched entries for at least 2 distinct nodes in the initial dispatch batch, demonstrating that all initially ready nodes were dispatched together",
+      "name": "Parallel readiness",
+      "description": "The DAG has at least one point where two or more nodes with disjoint owns and no shared contract become ready on the same dependencies, while worktree-rewriting Git nodes run alone",
       "max_score": 10
+    },
+    {
+      "name": "Baseline checks before build work",
+      "description": "Before any build node, a node records SHA-256 digests of the protected untracked paths and runs the repository's test command on the task base into a capture, so later failures can be told apart from pre-existing ones",
+      "max_score": 10
+    },
+    {
+      "name": "Real paths in owns",
+      "description": "Every owns list names real paths only: no placeholders such as '(pending N0x)' and no either-or alternatives",
+      "max_score": 5
+    },
+    {
+      "name": "Plan location and command directories",
+      "description": "plan.md is written at ./the-mister/add-user-activity/plan.md and records the git dir /work/user-service/.git in its header. Every command starts with cd /work/user-service && or git -C /work/user-service, or uses only absolute paths; paths taken from git output are made absolute",
+      "max_score": 5
     }
   ]
 }
