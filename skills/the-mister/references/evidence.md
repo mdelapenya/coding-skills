@@ -22,7 +22,7 @@ Dispatch event (one per invocation, including evidence re-requests):
 {"event":"dispatch","slug":"widget","node":"N02-widget","attempt":1,"at":"2026-11-07T10:00:00Z","kind":"build","tier":"medium","effective_tier":"hard","model":"gpt-6.1-sol","role":"engineer","reason":"initial","origin_node":"N02-widget"}
 ```
 
-`tier` is the intended tier for that attempt; `effective_tier`, `model`, role, and any requested effort or known override come from the actual dispatch, never the worker's self-description. Record unavailable effective-model telemetry as `null` with a reason. Retry reasons distinguish `evidence_request`, `order_gap`, `mechanical`, `substantive_promotion`, `inspection_failure` and `stale_evidence`. Log the inspector's own dispatch too; it is not an extra build dispatch until the implementer is actually invoked again.
+`tier` is the intended tier for that attempt; `effective_tier`, `model`, role, and any requested effort or known override come from the actual dispatch, never the worker's self-description. Record unavailable effective-model telemetry as `null` with a reason. Retry reasons distinguish `evidence_request`, `order_gap`, `mechanical`, `substantive_promotion`, `inspection_failure` and `stale_evidence`; `interruption` (a stop-and-save invocation) and `watch` (a re-run peer watch, `peers.md`) are recorded but never count against a build node's budget. Log the inspector's own dispatch too; it is not an extra build dispatch until the implementer is actually invoked again.
 
 One immutable terminal record per node, after required inspection and reconciliation, or when stopping with the node incomplete:
 
