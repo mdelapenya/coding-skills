@@ -1,0 +1,16 @@
+commit 8f9d012a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e
+Author: Jane Smith <jsmith@example.com>
+Date:   Mon Nov 11 11:30:12 2026 +0000
+
+    feat(query-builder): add connection pool support and raw_filter
+
+    - Accept optional ConnectionPool in constructor; use it in execute()
+    - Add raw_filter() method for advanced SQL fragments
+    - Extend where() with an operator argument (defaults to =)
+    - Guard against None cursor.description in column extraction
+
+commit 2e1f0c9d8b7a6e5f4c3b2a1908f7e6d5c4b3a291
+Author: Jane Smith <jsmith@example.com>
+Date:   Mon Nov 11 09:15:44 2026 +0000
+
+    test: add tests for raw_filter and custom operator in where()

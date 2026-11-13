@@ -1,0 +1,61 @@
+{
+  "context": "Tests whether the agent correctly initializes a coordinating-agents channel: uses git rev-parse to place the channel under the git-common-dir, constructs the Docker command with the exact required shape (image, mounts, readonly flag, script path), adds the Linux --user uid:gid flag, writes a message draft with correct YAML frontmatter, and uses a valid member name.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Git-common-dir channel path",
+      "description": "The channel directory path shown in channel-setup.md or README.md includes '.git/coordination/' — indicating the agent used git rev-parse --path-format=absolute --git-common-dir rather than an arbitrary location",
+      "max_score": 15
+    },
+    {
+      "name": "Docker image",
+      "description": "The Docker command in channel-setup.md uses the image busybox:1.37-uclibc (not busybox:latest, busybox:musl, or any other variant)",
+      "max_score": 10
+    },
+    {
+      "name": "Scripts mount target",
+      "description": "The Docker command includes a --mount (or -v) with target=/s for the scripts directory",
+      "max_score": 8
+    },
+    {
+      "name": "Channel mount target",
+      "description": "The Docker command includes a --mount (or -v) with target=/c for the channel directory",
+      "max_score": 8
+    },
+    {
+      "name": "Scripts mount readonly",
+      "description": "The bind mount for the scripts directory (target=/s) includes the readonly flag",
+      "max_score": 4
+    },
+    {
+      "name": "Script invocation path",
+      "description": "The Docker command ends with (or includes) 'sh /s/post.sh /c' — invoking the script inside the container at the correct path with the channel root as the first argument",
+      "max_score": 10
+    },
+    {
+      "name": "Linux --user flag",
+      "description": "The Docker command includes --user with two numeric values in uid:gid form (e.g. --user 1000:1000), not symbolic names",
+      "max_score": 15
+    },
+    {
+      "name": "YAML frontmatter from/to",
+      "description": "The first message draft (in the channel drafts folder) contains a YAML frontmatter block (between --- delimiters) with both a 'from:' field and a 'to:' field",
+      "max_score": 10
+    },
+    {
+      "name": "YAML frontmatter kind",
+      "description": "The message draft YAML frontmatter contains a 'kind:' field set to one of: request, reply, review, evidence, status, decision-needed",
+      "max_score": 8
+    },
+    {
+      "name": "YAML frontmatter expects",
+      "description": "The message draft YAML frontmatter contains an 'expects:' field set to one of: reply, ack, none",
+      "max_score": 7
+    },
+    {
+      "name": "Valid member name",
+      "description": "The agent's chosen member name (as recorded in README.md or the message draft 'from:' field) contains only lowercase letters and digits — matching [a-z0-9]+",
+      "max_score": 5
+    }
+  ]
+}

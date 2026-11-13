@@ -1,0 +1,66 @@
+{
+  "context": "Tests whether the agent correctly applies the-mister planning conventions when creating a plan.md for a Go web service feature: git operations isolated in Git-tier nodes, inspector nodes required before Hard build nodes, an append-only Log with single-sentence entries, and documented tiering decisions with downgrade reasoning.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Git-tier for all git commands",
+      "description": "Every node that includes git, gh, or glab commands is classified as Git-tier (not Easy, Medium, or Hard tier) in the plan",
+      "max_score": 10
+    },
+    {
+      "name": "Git nodes are standalone",
+      "description": "No single node mixes git/gh/glab commands with non-git implementation work — any node needing both is split into two or more separate nodes",
+      "max_score": 10
+    },
+    {
+      "name": "Hard implementation node present",
+      "description": "At least one node is explicitly classified as Hard tier for implementing the new user activity endpoint handler",
+      "max_score": 10
+    },
+    {
+      "name": "Inspector precedes Hard node",
+      "description": "An inspector node is listed as a dependency or prerequisite that must complete before each Hard build node is accepted",
+      "max_score": 10
+    },
+    {
+      "name": "Inspector uses Easy or Haiku",
+      "description": "The inspector node(s) specify Easy tier or Haiku model — not Medium or Hard",
+      "max_score": 10
+    },
+    {
+      "name": "Inspector receives only acceptance criteria",
+      "description": "The inspector node description does NOT mention sending the implementer's report, the implementer's claimed results, the mister's diagnosis, or the mister's suggested fix to the inspector",
+      "max_score": 5
+    },
+    {
+      "name": "Log section present",
+      "description": "The plan.md contains a Log section with at least one appended line entry",
+      "max_score": 5
+    },
+    {
+      "name": "Log lines are single sentences",
+      "description": "Every Log entry is a single readable sentence of ordinary prose on one line — not a multi-line block, nested bullet list, or code block",
+      "max_score": 10
+    },
+    {
+      "name": "No status fields in node blocks",
+      "description": "Node definitions in the plan do NOT include a status or state field — node state appears only in the Log section",
+      "max_score": 5
+    },
+    {
+      "name": "Tiering decisions documented",
+      "description": "The plan includes an Assumptions, Tiering, or similar section that records the downgrade reasoning for each Medium node (whether it was kept as Medium or downgraded to Easy, and why)",
+      "max_score": 10
+    },
+    {
+      "name": "Plan file at the-mister path",
+      "description": "plan.md is written inside a the-mister/add-user-activity/ directory under the git metadata directory (e.g., .git/the-mister/add-user-activity/plan.md)",
+      "max_score": 5
+    },
+    {
+      "name": "Multiple nodes initially dispatched",
+      "description": "The Log section shows dispatched entries for at least 2 distinct nodes in the initial dispatch batch, demonstrating that all initially ready nodes were dispatched together",
+      "max_score": 10
+    }
+  ]
+}

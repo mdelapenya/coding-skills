@@ -1,0 +1,4 @@
+{
+  "description": "Conventional Commits PR title with breaking change flag, structured description, and gh CLI update command",
+  "include": ["./inputs", "./.github"]
+}

@@ -1,0 +1,66 @@
+{
+  "context": "Tests whether the agent correctly detects biomelab context and writes PR outputs to .biomelab/ files instead of updating a remote PR, handles conflicts with existing note.md content (preserving a user-added custom section), generates a Conventional Commits title, and produces a description that leads with what/why in present tense without including the title in the body.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Title file written",
+      "description": "The file `.biomelab/pr-title.md` exists and contains non-whitespace text (agent detected biomelab context and wrote the title there)",
+      "max_score": 10
+    },
+    {
+      "name": "Note file written",
+      "description": "The file `.biomelab/note.md` exists and contains at least one `## ` section heading (agent wrote a structured description to the biomelab output file)",
+      "max_score": 5
+    },
+    {
+      "name": "No remote PR update",
+      "description": "No file in the working directory contains the substring `gh pr edit` or `glab mr edit` or `glab mr update` (agent did not attempt to update a remote PR instead of writing to .biomelab/ files)",
+      "max_score": 10
+    },
+    {
+      "name": "Conventional Commits format",
+      "description": "The title in `.biomelab/pr-title.md` matches the Conventional Commits pattern: a word type, optional parenthesised scope, optional `!`, then `: ` followed by the subject (e.g. `feat(cache): add redis layer` or `fix!: handle edge case`)",
+      "max_score": 10
+    },
+    {
+      "name": "Lowercase subject",
+      "description": "The subject portion of the title in `.biomelab/pr-title.md` (the text after the first `: `) begins with a lowercase letter",
+      "max_score": 5
+    },
+    {
+      "name": "No trailing period",
+      "description": "The title in `.biomelab/pr-title.md` (stripped of whitespace) does NOT end with a period character `.`",
+      "max_score": 5
+    },
+    {
+      "name": "Title length",
+      "description": "The title in `.biomelab/pr-title.md` is at most 72 characters long (excluding leading/trailing whitespace)",
+      "max_score": 5
+    },
+    {
+      "name": "Title absent from body",
+      "description": "The exact title text from `.biomelab/pr-title.md` does not appear verbatim as a line in `.biomelab/note.md` (the PR title is not repeated inside the description body)",
+      "max_score": 10
+    },
+    {
+      "name": "Present tense",
+      "description": "`.biomelab/note.md` contains at least one of the following present-tense action verbs at the start of a list item or sentence: `Adds`, `Introduces`, `Updates`, `Fixes`, `Removes`, `Improves`, `Extends`, `Replaces`, `Exposes`, `Wraps`",
+      "max_score": 5
+    },
+    {
+      "name": "What/why first",
+      "description": "The first `## ` section heading in `.biomelab/note.md` contains one of: `What`, `Why`, `Summary`, `Overview`, `Changes` (description leads with the purpose or substance of the change, not implementation steps)",
+      "max_score": 5
+    },
+    {
+      "name": "Deployment notes preserved",
+      "description": "`.biomelab/note.md` contains the heading `## Deployment notes` AND contains the string `REDIS_URL` (the user-added custom section from the existing note was preserved during conflict resolution)",
+      "max_score": 15
+    },
+    {
+      "name": "Conflict resolution documented",
+      "description": "A file named `conflicts.md` exists in the working directory, is non-empty, and contains text describing at least one conflict or difference detected between the generated description and the existing content",
+      "max_score": 15
+    }
+  ]
+}

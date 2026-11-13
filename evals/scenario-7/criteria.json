@@ -1,0 +1,56 @@
+{
+  "context": "Tests whether the agent correctly implements the pr-nurse worktree sync-with-main procedure as a shell script: saving the current workspace path before switching directories, detecting the root repository via git worktree list --porcelain, verifying the root is clean before pulling, performing the pull, returning to the workspace, merging main without force, and noting the looping behavior for user awareness.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Save workspace path",
+      "description": "Script captures the current working directory at startup (e.g., WORKSPACE=$(pwd) or equivalent variable assignment) before any directory changes",
+      "max_score": 10
+    },
+    {
+      "name": "Root repo via worktree list",
+      "description": "Gets the root repository path by running git worktree list --porcelain and parsing the first worktree entry — not a hardcoded or manually specified path",
+      "max_score": 12
+    },
+    {
+      "name": "Navigate to root",
+      "description": "Changes directory to the detected root repository path before running git pull",
+      "max_score": 5
+    },
+    {
+      "name": "Check for local changes",
+      "description": "Runs git status --porcelain (or equivalent) in the root repository to detect any uncommitted changes before pulling",
+      "max_score": 12
+    },
+    {
+      "name": "Abort on dirty root",
+      "description": "Exits or halts (non-zero exit code, explicit error message, or early return) without proceeding with the pull when local changes are detected in the root repo",
+      "max_score": 12
+    },
+    {
+      "name": "git pull from root",
+      "description": "Runs git pull from the root repository (without --force, --force-with-lease, or rebase flags that suppress safety checks)",
+      "max_score": 10
+    },
+    {
+      "name": "Return to workspace",
+      "description": "Returns to the saved workspace directory (using the captured path variable) after completing the root repo pull step",
+      "max_score": 7
+    },
+    {
+      "name": "Merge main --no-edit",
+      "description": "Runs git merge with the --no-edit flag to merge main into the worktree branch (not --squash, --rebase, or omitting --no-edit)",
+      "max_score": 12
+    },
+    {
+      "name": "No force push",
+      "description": "sync-with-main.sh does NOT contain git push --force or git push --force-with-lease anywhere in the file",
+      "max_score": 10
+    },
+    {
+      "name": "Loop behavior documented",
+      "description": "sync-with-main.sh or notes.md mentions asking the user whether to run continuously or on a loop after a single sync run completes",
+      "max_score": 10
+    }
+  ]
+}

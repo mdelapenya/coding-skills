@@ -1,0 +1,1 @@
+{ "description": "CI failure classification and root cause analysis", "include": ["./inputs"] }

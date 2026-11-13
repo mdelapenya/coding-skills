@@ -1,0 +1,56 @@
+{
+  "context": "Tests whether the agent correctly authors the-mister work orders: git-tier orders include inline directory on every command and verbatim-output instructions; Hard orders describe behavioral outcomes rather than implementation recipes; Medium orders are either downgraded to Easy (literal steps) or kept as Medium (outcome-based); commit orders use git commit -F with a .msg file, never an inline -m message; and no order leaks cache-env redirections or worktree-isolation calls.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Inline dirs all commands",
+      "description": "Every git/shell command across ALL order files (orders/N01-baseline.md through orders/N04-commit.md) carries its working directory inline on the same line using 'git -C <dir>' or 'cd <dir> &&'; no order uses a bare command whose only directory context is a preceding 'run from <dir>' sentence",
+      "max_score": 20
+    },
+    {
+      "name": "Verbatim output required",
+      "description": "orders/N01-baseline.md explicitly instructs the git operator to paste the complete, verbatim (not summarized or excerpted) output of every command in their report",
+      "max_score": 8
+    },
+    {
+      "name": "Output labelled by command",
+      "description": "orders/N01-baseline.md instructs the git operator to label each block of output by the specific command that produced it",
+      "max_score": 5
+    },
+    {
+      "name": "Hard = behavioral outcome",
+      "description": "orders/N02-cache.md describes a behavioral outcome (what must be true when the node is accepted), NOT a step-by-step recipe of edits, function signatures to write, or specific implementation instructions",
+      "max_score": 12
+    },
+    {
+      "name": "Medium/Easy N03 coherent",
+      "description": "orders/N03-tests.md is internally coherent: either written as an Easy node (literal, executable step-by-step commands with explicit paths) OR as a Medium node (outcome-based acceptance criteria), not a mixture of both styles",
+      "max_score": 8
+    },
+    {
+      "name": "git commit -F syntax",
+      "description": "orders/N04-commit.md uses 'git commit -F <path>' syntax to perform the commit, NOT 'git commit -m \"...\"' with an inline typed message",
+      "max_score": 15
+    },
+    {
+      "name": ".msg file reference",
+      "description": "orders/N04-commit.md references a file with a .msg extension that contains the commit message content",
+      "max_score": 8
+    },
+    {
+      "name": "Explicit git add paths",
+      "description": "orders/N04-commit.md uses 'git add' with explicit file or directory paths, NOT '-A', '.', or '--all'",
+      "max_score": 10
+    },
+    {
+      "name": "No worktree isolation",
+      "description": "No order file contains the string 'isolation: \"worktree\"' or invokes the EnterWorktree tool",
+      "max_score": 7
+    },
+    {
+      "name": "No cache env redirection",
+      "description": "No order file sets GOCACHE, GOMODCACHE, npm_config_cache, CARGO_HOME, or similar tool cache variables to paths inside the state directory, scratch/, or captures/",
+      "max_score": 7
+    }
+  ]
+}

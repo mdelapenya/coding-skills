@@ -1,0 +1,44 @@
+diff --git a/src/cart.py b/src/cart.py
+index 2d8e1a4..7f3c09b 100644
+--- a/src/cart.py
++++ b/src/cart.py
+@@ -14,7 +14,7 @@ class ShoppingCart:
+     def remove_item(self, item_id):
+         self.items = [i for i in self.items if i["id"] != item_id]
+
+-    def get_cart_total(self):
++    def compute_cart_total(self):
+         """Calculate total cost including all items and applicable discounts."""
+         subtotal = sum(item["price"] * item["qty"] for item in self.items)
+         discount = self._apply_discount(subtotal)
+@@ -26,7 +26,7 @@ class ShoppingCart:
+     def _apply_discount(self, subtotal):
+         if subtotal >= 100:
+             return subtotal * self.BULK_DISCOUNT_RATE
+-        return 0
++        return 0.0
+
+ diff --git a/src/checkout.py b/src/checkout.py
+index 4a1b2c3..9d8e7f6 100644
+--- a/src/checkout.py
++++ b/src/checkout.py
+@@ -8,7 +8,7 @@ class CheckoutSession:
+     def __init__(self, cart):
+         self.cart = cart
+
+-    def calculate_order_total(self):
++    def compute_order_total(self):
+         """Compute the final order total with tax and shipping."""
+-        base = self.cart.get_cart_total()
++        base = self.cart.compute_cart_total()
+         tax = base * TAX_RATE
+         shipping = self._get_shipping_cost(base)
+         return base + tax + shipping
+@@ -20,7 +20,7 @@ class CheckoutSession:
+     def finalize(self):
+         """Finalize the checkout and return an order summary."""
+-        total = self.calculate_order_total()
++        total = self.compute_order_total()
+         return {
+             "total": total,
+             "items": self.cart.items,

@@ -1,0 +1,56 @@
+{
+  "context": "Tests whether the agent produces a Conventional Commits title with a breaking-change marker, writes a description that leads with what/why in present tense without echoing the title, uses the correct closing keyword for the linked issue, and constructs the gh pr edit command correctly with --body-file.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Breaking change marker",
+      "description": "The title in `pr-title.md` contains `!` after the scope or type to signal a breaking change (e.g. `feat(auth)!:` or `fix!:`)",
+      "max_score": 15
+    },
+    {
+      "name": "Conventional Commits format",
+      "description": "The title in `pr-title.md` follows the pattern `<type>(<scope>): <subject>` or `<type>: <subject>` — a recognized type keyword followed by an optional parenthesised scope, a colon, and a subject",
+      "max_score": 10
+    },
+    {
+      "name": "Title style rules",
+      "description": "The title in `pr-title.md` is imperative mood, all-lowercase type/scope/subject, has no trailing period, and is 72 characters or fewer in total length",
+      "max_score": 10
+    },
+    {
+      "name": "Title absent from body",
+      "description": "The description in `pr-description.md` does NOT contain the title text from `pr-title.md` verbatim (title is not repeated in the body)",
+      "max_score": 10
+    },
+    {
+      "name": "What and why lead",
+      "description": "The description in `pr-description.md` opens with sections explaining WHAT changed and WHY (the motivation), not how the implementation was done",
+      "max_score": 10
+    },
+    {
+      "name": "Present tense verbs",
+      "description": "The description in `pr-description.md` uses present tense verbs throughout (e.g. 'Replaces', 'Removes', 'Adds', 'Requires') rather than past tense ('Replaced', 'Removed', 'Added')",
+      "max_score": 10
+    },
+    {
+      "name": "Closing keyword for issue #42",
+      "description": "The description in `pr-description.md` contains a closing keyword linking issue 42: one of `Closes #42`, `Fixes #42`, or `Resolves #42` (not `Related to #42`)",
+      "max_score": 15
+    },
+    {
+      "name": "No empty related-issues section",
+      "description": "The description in `pr-description.md` does NOT contain a `## Related issues` (or equivalent) section heading with no content beneath it",
+      "max_score": 5
+    },
+    {
+      "name": "Uses --body-file with temp path",
+      "description": "`update-pr.sh` passes `--body-file` to `gh pr edit` with a path under `/tmp/` (e.g. `/tmp/pr-description-73.md`), rather than using `--body` with inline text",
+      "max_score": 10
+    },
+    {
+      "name": "Single gh pr edit call",
+      "description": "`update-pr.sh` applies both the title (`--title`) and the body (`--body-file`) in a single `gh pr edit 73` command, not two separate calls",
+      "max_score": 5
+    }
+  ]
+}

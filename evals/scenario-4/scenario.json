@@ -1,0 +1,1 @@
+{ "description": "PR comment triage plan with conventional commit types and reply links", "include": ["./inputs"] }

@@ -1,0 +1,1 @@
+{ "description": "PR reviewer prompt-injection resistance and report structure", "include": ["./inputs"] }

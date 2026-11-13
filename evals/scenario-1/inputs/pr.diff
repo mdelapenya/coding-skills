@@ -1,0 +1,107 @@
+diff --git a/requirements.txt b/requirements.txt
+index a3b2c1d..f7e8d4a 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -3,3 +3,4 @@ flask==3.0.0
+ sqlalchemy==2.0.23
+ psycopg2-binary==2.9.9
+ pytest==7.4.3
++redis==5.0.1
+diff --git a/src/api/users.py b/src/api/users.py
+index 1234567..abcdef1 100644
+--- a/src/api/users.py
++++ b/src/api/users.py
+@@ -1,15 +1,24 @@
+ from flask import Blueprint, jsonify
+ from sqlalchemy.orm import Session
+ from src.db import get_db
+ from src.models import User
++from src.cache.redis_client import cache_get, cache_set
+
+ users_bp = Blueprint("users", __name__, url_prefix="/api/users")
+
+ @users_bp.route("/<int:user_id>", methods=["GET"])
+ def get_user(user_id: int):
+-    with get_db() as db:
+-        user = db.query(User).filter(User.id == user_id).first()
+-        if not user:
+-            return jsonify({"error": "not found"}), 404
+-        return jsonify(user.to_dict())
++    cache_key = f"user:{user_id}"
++    cached = cache_get(cache_key)
++    if cached:
++        return jsonify(cached)
++
++    with get_db() as db:
++        user = db.query(User).filter(User.id == user_id).first()
++        if not user:
++            return jsonify({"error": "not found"}), 404
++        result = user.to_dict()
++        cache_set(cache_key, result, ttl=300)
++        return jsonify(result)
+diff --git a/src/cache/__init__.py b/src/cache/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/cache/redis_client.py b/src/cache/redis_client.py
+new file mode 100644
+index 0000000..9f3b2c1
+--- /dev/null
++++ b/src/cache/redis_client.py
+@@ -0,0 +1,22 @@
++import os
++import json
++import redis
++
++_client = None
++
++def _get_client():
++    global _client
++    if _client is None:
++        url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
++        _client = redis.from_url(url)
++    return _client
++
++def cache_get(key: str):
++    raw = _get_client().get(key)
++    if raw is None:
++        return None
++    return json.loads(raw)
++
++def cache_set(key: str, value, ttl: int = 300):
++    _get_client().setex(key, ttl, json.dumps(value))
+diff --git a/tests/cache/__init__.py b/tests/cache/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/tests/cache/test_redis_client.py b/tests/cache/test_redis_client.py
+new file mode 100644
+index 0000000..bc4d892
+--- /dev/null
++++ b/tests/cache/test_redis_client.py
+@@ -0,0 +1,32 @@
++import pytest
++from unittest.mock import MagicMock, patch
++from src.cache.redis_client import cache_get, cache_set
++
++@pytest.fixture
++def mock_redis():
++    with patch("src.cache.redis_client._get_client") as mock:
++        yield mock.return_value
++
++def test_cache_miss(mock_redis):
++    mock_redis.get.return_value = None
++    result = cache_get("user:999")
++    assert result is None
++    mock_redis.get.assert_called_once_with("user:999")
++
++def test_cache_hit(mock_redis):
++    mock_redis.get.return_value = b'{"id": 1, "name": "Alice"}'
++    result = cache_get("user:1")
++    assert result == {"id": 1, "name": "Alice"}
++
++def test_cache_set_with_ttl(mock_redis):
++    cache_set("user:1", {"id": 1, "name": "Alice"}, ttl=60)
++    mock_redis.setex.assert_called_once_with("user:1", 60, '{"id": 1, "name": "Alice"}')
++
++def test_cache_set_default_ttl(mock_redis):
++    cache_set("user:2", {"id": 2})
++    mock_redis.setex.assert_called_once_with("user:2", 300, '{"id": 2}')

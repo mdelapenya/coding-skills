@@ -1,0 +1,71 @@
+{
+  "workflow_name": "CI",
+  "queried_branch_exclude": "feature/checkout-refactor",
+  "runs": [
+    {
+      "id": 9000000901,
+      "branch": "main",
+      "head_sha": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-12T22:40:00Z",
+      "html_url": "https://github.com/acme-corp/storefront/actions/runs/9000000901",
+      "test_results": [
+        {
+          "name": "test_A",
+          "suite": "OrderSuite",
+          "status": "failed",
+          "error": "AssertionError: Expected tax_amount=8.50 for order total 100.00, got tax_amount=0.00"
+        },
+        {
+          "name": "test_B",
+          "suite": "CartSuite",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "id": 9000000851,
+      "branch": "develop",
+      "head_sha": "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-11-12T18:05:00Z",
+      "html_url": "https://github.com/acme-corp/storefront/actions/runs/9000000851",
+      "test_results": [
+        {
+          "name": "test_A",
+          "suite": "OrderSuite",
+          "status": "failed",
+          "error": "AssertionError: Expected tax_amount=8.50 for order total 100.00, got tax_amount=0.00"
+        },
+        {
+          "name": "test_B",
+          "suite": "CartSuite",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "id": 9000000799,
+      "branch": "release/v2.1",
+      "head_sha": "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-11-11T14:20:00Z",
+      "html_url": "https://github.com/acme-corp/storefront/actions/runs/9000000799",
+      "test_results": [
+        {
+          "name": "test_A",
+          "suite": "OrderSuite",
+          "status": "passed"
+        },
+        {
+          "name": "test_B",
+          "suite": "CartSuite",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

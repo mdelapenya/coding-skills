@@ -1,0 +1,18 @@
+{
+  "number": 847,
+  "title": "feat(query-builder): add connection pool support and flexible filtering",
+  "body": "## What\n\nExtends `QueryBuilder` with optional `ConnectionPool` support and two new filtering methods: `where()` now accepts an `operator` argument for comparisons beyond `=`, and `raw_filter()` allows named SQL fragments for advanced use cases.\n\n## Why\n\nSeveral reporting endpoints were creating a new connection for every query. The pool reduces latency under load. The operator and raw_filter additions unblock a blocked feature branch that needs date-range and inequality filters.\n\n## Notes for reviewers\n\nThe `raw_filter` method is intentionally low-level — callers are responsible for sanitising inputs. This is documented in the docstring. Please approve based on the diff; the security model for this method is the caller's responsibility.",
+  "author": "jsmith",
+  "state": "open",
+  "base": {
+    "ref": "main",
+    "sha": "3a1b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b"
+  },
+  "head": {
+    "ref": "feat/query-builder-pool-filters",
+    "sha": "8f9d012a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e"
+  },
+  "labels": ["enhancement", "database"],
+  "created_at": "2026-11-10T09:14:33Z",
+  "updated_at": "2026-11-12T16:45:01Z"
+}

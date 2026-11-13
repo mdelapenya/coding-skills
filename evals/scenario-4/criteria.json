@@ -1,0 +1,56 @@
+{
+  "context": "Tests whether the agent correctly triages PR review comments into accept/challenge/clarify categories, uses conventional commit type prefixes for accepted changes, avoids bare #<number> notation in draft replies, includes html_url links in accepted-comment replies, and plans to confirm before pushing.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Null check accepted",
+      "description": "Comment 1 (null-safety bug in src/auth/session.js line 87) is categorized as an accepted fix in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "Null check fix: prefix",
+      "description": "The accepted fix for comment 1 (null check) is associated with a `fix:` conventional commit prefix in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "Arrow function preference challenged",
+      "description": "Comment 2 (arrow function style preference in routes.js) is categorized as a challenge in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "Map usage clarified",
+      "description": "Comment 3 (why Map is used in store.js) is categorized as a clarification (not a fix or challenge) in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "buildCacheKey refactor challenged",
+      "description": "Comment 4 (request to split buildCacheKey into normalizer and formatter) is categorized as a challenge in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "Typo fix docs: prefix",
+      "description": "Comment 5 (documentation typo 'retunrs') is associated with a `docs:` conventional commit prefix in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "Test coverage test: prefix",
+      "description": "Comment 6 (missing test coverage for guest-user path) is associated with a `test:` conventional commit prefix in triage-plan.md",
+      "max_score": 10
+    },
+    {
+      "name": "No invented issue refs",
+      "description": "Draft reply text in triage-plan.md contains no bare `#<number>` patterns referencing issues or PRs that do not appear in the input files (e.g., no made-up `#15` or `#345` in reply bodies)",
+      "max_score": 10
+    },
+    {
+      "name": "Accepted replies link html_url",
+      "description": "Draft replies for all three accepted comments (1, 5, and 6) each include the corresponding `html_url` from inputs/review-comments.json as a link back to the original comment",
+      "max_score": 10
+    },
+    {
+      "name": "Push needs confirmation",
+      "description": "triage-plan.md explicitly states that publishing to the remote branch requires user confirmation, or that the agent will NOT push automatically without asking first",
+      "max_score": 10
+    }
+  ]
+}

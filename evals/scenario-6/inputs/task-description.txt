@@ -1,0 +1,18 @@
+Code Review Coordination: Auth Module Error Handling
+
+The auth.go file needs an independent review focused on:
+
+1. Error handling quality — are errors wrapped with sufficient context? Are bare
+   returns acceptable or do they obscure the call site?
+
+2. Security patterns — timing-safe comparisons, input validation before writes,
+   error messages that do not leak credentials or internal state.
+
+3. Ignored results — calls where return values (errors, ids) are discarded without
+   justification.
+
+Goal: produce a prioritized list of issues, ranked by severity (critical / major /
+minor). Both agents should review independently, then compare and agree on the final
+ranking before writing up recommendations.
+
+The final deliverable is a markdown file summarising the agreed issues.

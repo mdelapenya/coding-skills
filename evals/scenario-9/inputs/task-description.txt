@@ -1,0 +1,25 @@
+Feature: LRU Cache for User Lookup Service
+Repository: /home/dev/projects/userdb (Go module: github.com/example/userdb)
+Branch: feature/lru-cache
+
+The userdb service performs frequent database lookups for user objects by user ID.
+Under sustained load, these queries are a bottleneck. The goal is to add an in-process
+LRU cache with the following properties:
+
+  - Package location: internal/cache/
+  - Capacity: configurable, default 500 entries
+  - TTL: configurable, default 5 minutes
+  - API: Get(id string) (*User, bool), Set(id string, u *User), Invalidate(id string)
+
+The main lookup path is in internal/users/lookup.go. The LookupUser function should
+check the cache before hitting the database, and populate the cache on a miss.
+
+Existing test suite: go test ./... (run from the repository root)
+Entry point: cmd/userdb/main.go
+
+Intended commit message:
+  feat(cache): add LRU cache layer to user lookup service
+
+  Adds an in-process LRU cache (internal/cache) with configurable capacity
+  and TTL. The LookupUser path checks the cache before querying the database,
+  reducing repeated round-trips for active users.

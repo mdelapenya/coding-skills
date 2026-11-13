@@ -1,0 +1,4 @@
+{
+  "description": "Write correct the-mister work orders for a multi-node plan",
+  "include": ["./inputs"]
+}

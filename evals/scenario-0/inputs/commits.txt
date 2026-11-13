@@ -1,0 +1,3 @@
+c3f9a1b Replace session-based auth with stateless JWT - fixes #42
+81d4e22 Update /auth/login to issue JWT and /auth/logout to no-op
+b7a0231 Remove express-session and connect-mongo from dependencies

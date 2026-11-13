@@ -1,0 +1,61 @@
+{
+  "context": "Tests whether the agent correctly classifies CI failures using provided run data: identifying pre-existing failures (fail on other branches), PR-introduced failures (pass on other branches), and unverified failures (no other-branch data). Also tests that the agent uses the correct summary table format, performs root-cause analysis by comparing the diff against error output, and does not make unsupported assumptions about failure causes.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Summary table present",
+      "description": "ci-report.md contains a markdown table with at least the 3 failing test names as rows",
+      "max_score": 5
+    },
+    {
+      "name": "Our PR column",
+      "description": "The summary table includes a column showing the PR run result for each test (e.g. 'Our PR' or similar label showing FAIL)",
+      "max_score": 10
+    },
+    {
+      "name": "Run ID columns with branch names",
+      "description": "The summary table has separate columns for each reference branch run, with the column headers identifying the run ID and branch name (e.g. 'Run 9000000901 (main)' or similar format pairing a numeric ID with a branch)",
+      "max_score": 10
+    },
+    {
+      "name": "Verdict column",
+      "description": "The summary table includes a 'Verdict' column (or equivalent) with a classification for each test",
+      "max_score": 5
+    },
+    {
+      "name": "test_A: pre-existing verdict",
+      "description": "test_A is classified as pre-existing (or flaky, or existing failure) — indicating it fails on other branches and is not caused by this PR",
+      "max_score": 10
+    },
+    {
+      "name": "test_B: introduced verdict",
+      "description": "test_B is classified as introduced by this PR (or new failure, or regression) — indicating it passes on all other branches but fails on the PR",
+      "max_score": 10
+    },
+    {
+      "name": "test_C: unverified verdict",
+      "description": "test_C is classified as unverified (or indeterminate, or unknown) — NOT classified as pre-existing or introduced",
+      "max_score": 10
+    },
+    {
+      "name": "test_C: no cross-reference explanation",
+      "description": "The report explicitly notes that test_C does not appear in any of the other branch run results and therefore cannot be cross-referenced or given a definitive classification",
+      "max_score": 10
+    },
+    {
+      "name": "test_B root cause: function rename",
+      "description": "The root cause analysis for test_B identifies that the get_cart_total method was renamed to compute_cart_total in the diff, which caused the AttributeError in the test",
+      "max_score": 15
+    },
+    {
+      "name": "pr.diff cited as evidence",
+      "description": "The root cause section references or quotes the pr.diff (or the specific lines showing the rename) as the evidence for why test_B fails",
+      "max_score": 10
+    },
+    {
+      "name": "Suggested fix for test_B",
+      "description": "A concrete fix is suggested for test_B (e.g. update the test to call compute_cart_total instead of get_cart_total, or add a compatibility alias)",
+      "max_score": 5
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{ "description": "Coordinating-agents channel initialization with correct Docker shape and message format", "include": ["./inputs"] }

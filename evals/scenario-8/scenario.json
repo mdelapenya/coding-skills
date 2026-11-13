@@ -1,0 +1,4 @@
+{
+  "description": "the-mister plan: git-tier nodes, inspector before Hard, append-only log",
+  "include": ["./inputs"]
+}

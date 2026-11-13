@@ -1,0 +1,41 @@
+{
+  "workflow_run": {
+    "id": 9000001001,
+    "workflow_name": "CI",
+    "head_branch": "feature/checkout-refactor",
+    "head_sha": "f3a9c72b1d04e568a2101fe8b6c3d94a1b0e77f2",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-11-13T09:15:00Z",
+    "html_url": "https://github.com/acme-corp/storefront/actions/runs/9000001001"
+  },
+  "failed_tests": [
+    {
+      "name": "test_A",
+      "suite": "OrderSuite",
+      "file": "tests/test_order.py",
+      "line": 45,
+      "status": "failed",
+      "duration_ms": 320,
+      "error": "AssertionError: Expected tax_amount=8.50 for order total 100.00, got tax_amount=0.00\n  File \"tests/test_order.py\", line 45, in test_A\n    assert order.tax_amount == pytest.approx(8.50)\nAssertionError: assert 0.0 == 8.5 ± 8.5e-06"
+    },
+    {
+      "name": "test_B",
+      "suite": "CartSuite",
+      "file": "tests/test_cart.py",
+      "line": 112,
+      "status": "failed",
+      "duration_ms": 58,
+      "error": "AttributeError: 'ShoppingCart' object has no attribute 'get_cart_total'\n  File \"tests/test_cart.py\", line 112, in test_B\n    total = cart.get_cart_total()\nAttributeError: 'ShoppingCart' object has no attribute 'get_cart_total'"
+    },
+    {
+      "name": "test_C",
+      "suite": "PaymentSuite",
+      "file": "tests/test_payment.py",
+      "line": 78,
+      "status": "failed",
+      "duration_ms": 5003,
+      "error": "TimeoutError: Payment gateway mock did not respond within 5000ms\n  File \"tests/test_payment.py\", line 78, in test_C\n    result = payment_client.charge(amount=50.00, token=\"tok_test_visa\")\ntests.conftest.PaymentGatewayTimeoutError: Timed out waiting for mock response"
+    }
+  ]
+}

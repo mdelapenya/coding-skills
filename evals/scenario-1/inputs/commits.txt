@@ -1,0 +1,3 @@
+abc1234 feat(cache): add Redis cache layer for user profile queries
+def5678 test(cache): add unit tests for cache hit, miss, and TTL behavior
+ghi9012 chore(deps): add redis 5.0.1 to requirements.txt
