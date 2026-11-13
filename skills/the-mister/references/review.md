@@ -41,7 +41,7 @@ Capture SHA-256s remain transport integrity only: they prove a capture did not c
 - The reviewer gets: the request verbatim; the constraints; the captures and the new files to read; verification evidence from accepted nodes; the repository's review and lint guidance verbatim (whatever instructions it gives its reviewers, human or automated: review guidelines, contribution rules, review-tool configuration, lint configs). It does **not** get the plan, the orders, or your diagnosis.
 - With more than one reviewer, one Hard **assessor** merges the findings and steel-mans each one against the current content: `confirmed`, `weakened`, or `refuted`, with the reason. With one reviewer, you do that yourself, from evidence.
 - A finding that needs a command to confirm becomes a **verify** node (Easy if the command is literal), never a write by the reviewer.
-- Review, assessor and verify nodes are not downgraded by the downgrade question. They do not consume a build node's dispatch budget, but each keeps its own three-dispatch budget, and a replacement node for the same question inherits the count of the one it replaces; the two-round cap above still applies.
+- Review, assessor and verify nodes are not downgraded by the downgrade question. They do not consume a build node's dispatch budget, but each keeps its own three-dispatch budget, and a replacement node for the same question inherits the count of the one it replaces; the round rules in section 5 still apply.
 
 Review order (Full-template shape, these sections):
 
@@ -69,7 +69,18 @@ Review order (Full-template shape, these sections):
 
 ## 5. Rounds
 
-Confirmed findings become build nodes with behavioural orders, owning what they need to fix. After they are accepted, take a new manifest and review again; the next review covers the delta and its interactions with the rest. A round converges only when no confirmed finding is unresolved, not merely when it found nothing new. Before the stage node, and before reporting `complete`, two things must hold: every confirmed correctness finding is fixed and re-reviewed, or the user accepted it; and every required check that is unverified has the user's explicit acceptance. If either fails after the second round, dispatch a read-only diagnosis node and re-plan, or report `incomplete` with the open findings and their severity; never continue to commit quietly.
+Confirmed findings become build nodes with behavioural orders, owning what they need to fix. After they are accepted, take a new manifest and review again; the next review covers the delta and its interactions with the rest. A round converges only when no confirmed finding is unresolved, not merely when it found nothing new.
+
+How many rounds is set by what they find, not by a fixed cap. Later rounds often find real defects, including ones the previous round's fixes introduced, and a fixed cap invites renaming a round to escape it.
+
+- **Another round follows** any round that confirmed a medium-or-higher correctness finding.
+- **Stop reviewing** when a round confirms nothing above low. Fixes for low findings get one verify node on their hunks, not another full round.
+- **Every re-review is a round,** however narrow, and is counted as one. Never relabel it.
+- **The same invariant twice** (a round confirms a finding in the invariant an earlier fix addressed): before another fix, dispatch a read-only diagnosis node on whether the approach can satisfy it. If it cannot, decide the degraded behaviour with the user and write it as the acceptance criterion.
+- **Past five rounds, ask the user** whether to continue, with the open findings and their severity.
+- A delta round may continue the same reviewer, which keeps its context, while one of its blocking findings is open.
+
+Before the stage node, and before reporting `complete`, two things must hold: every confirmed correctness finding is fixed and re-reviewed, or the user accepted it; and every required check that is unverified has the user's explicit acceptance. If either fails and the user does not decide, dispatch a read-only diagnosis node and re-plan, or report `incomplete` with the open findings and their severity; never continue to commit quietly.
 
 ## 6. Commit against the manifest
 
