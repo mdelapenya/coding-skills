@@ -4,7 +4,7 @@ For the operator who runs the cases. It says how to run them, not what should ha
 
 ## Variants
 
-A variant is everything the runtime loads for the mister, not only the skill folder: `skills/the-mister/` with its references and runtime adapters, the shipped `agents/*.md`, and any installed agent or configuration the runtime would pick up.
+A variant is everything the runtime loads for the mister, not only the skill folder: `skills/the-mister/` with its references and runtime adapters, the shipped agent definitions (`skills/the-mister/agents/*.md`; the root `agents/*.md` at commits before they moved, such as `184e8d4`), and any installed agent or configuration the runtime would pick up.
 
 - **current**: all of those as of commit `184e8d4`.
 - **revised**: all of those from the working tree under evaluation.
