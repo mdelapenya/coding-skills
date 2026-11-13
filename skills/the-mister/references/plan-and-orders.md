@@ -261,14 +261,16 @@ Cheap workers asked to paste long output summarise it, and a re-request often br
 
 Then `Read` the capture yourself. The file is the evidence; the reports about it are not.
 
-`captures/` holds only `<id>.<n>.out` files. Caches, temporary directories, build outputs and source copies never go there.
+`captures/` holds only `<id>.<n>.out` files and, for visual evidence, the few screenshots a reviewer looked at (`<id>.<n>.png`). Caches, browser profiles, temporary directories, build outputs, binaries and source copies never go there.
 
 ## Scratch and caches
 
 The state directory lives inside `.git`, where `git status`, `git worktree remove` and the user's usual cleanup never see it, so anything left there stays forever. Keep it small:
 
 - **Toolchain caches are shared.** Orders leave `GOCACHE`, `GOMODCACHE`, `GOPATH`, the golangci-lint cache, npm/pnpm/yarn/cargo caches and installed tools at the user's defaults; never point them into the state directory, `captures/` or `scratch/`. Go's build and module caches are content-addressed and safe for concurrent processes, so a private cache adds no correctness, only a cold build and gigabytes per run. Use `go test -count=1` to defeat test result caching. If a worker cannot write a default cache (sandboxed or read-only home), use one shared path outside the git dir, such as `${XDG_CACHE_HOME:-$HOME/.cache}/the-mister/<tool>`, reused by every run, and record it under Assumptions.
-- **Per-run scratch goes under `scratch/`.** `TMPDIR`, `go test -work` directories, built binaries, downloaded fixtures and anything an order lists under "Allowed test outputs" live at `<git-dir>/the-mister/<slug>/scratch/<id>/`. Prefer a worktree (a Git node) to copying the source tree; when a copy is unavoidable, it goes under `scratch/` too.
+- **Per-run scratch goes under `scratch/`.** `TMPDIR`, `go test -work` directories, built binaries, downloaded fixtures and anything an order lists under "Allowed test outputs" live at `<git-dir>/the-mister/<slug>/scratch/<id>/`. Prefer a worktree (a Git node) to copying the source tree; when a copy is unavoidable, it goes under `scratch/` too. Every output path in an order is absolute: a relative one has landed in the repository.
+- **Large artefacts are scratch, never captures.** Caches are not the only large artefacts: browser profiles, compiled binaries, copied source trees, archives and downloaded tools can each reach hundreds of megabytes. Browsers run with `--user-data-dir=<git-dir>/the-mister/<slug>/scratch/<id>/profile`. Built binaries, downloaded tools, extracted archives and tree copies go under `scratch/<id>/`. When one of them is evidence, its size and SHA-256 go in a capture, not the artefact.
+- **Image builds never see the git dir.** A `docker build` whose context contains `.git` sweeps in the state directory and can break the image. Build from a context under `scratch/<id>/`, or confirm first that `.dockerignore` excludes `.git` and `**/.git`.
 - **Scratch is removed at the end.** At any terminal state, before the report (Step 9), an Easy node runs `rm -rf '<git-dir>/the-mister/<slug>/scratch'` and `du -sh '<git-dir>/the-mister/<slug>'`, and the size goes in the report. When stopping `incomplete` and a resume needs the scratch, keep it and name its size and path under Open items.
 
 ## The .msg file

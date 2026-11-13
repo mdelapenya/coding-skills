@@ -24,6 +24,12 @@ Before adopting the shared workflow, check which tools this client actually expo
 
 Use direct file-reading/search tools when available. Otherwise dispatch read-only evidence collection to workers: literal listing, reading, or searching is Easy; interpretation uses the appropriate tier. Require the requested file contents or matches verbatim, with paths and line numbers; fetch chunks when necessary instead of accepting a summary as the file. This also applies to reading state on resume and inspecting captures. Every git-related operation still goes to a Git node.
 
+A worker that retypes a file changes it. An Easy relay can truncate, duplicate or alter what it copies, so a transcript is never the file. Have the worker copy bytes with a literal command (`cp`, or `sed -n '<a>,<b>p'` for a range) into a capture, record its size and SHA-256, and decide from the hashes. Reading the skill's own references through workers is expensive: read `SKILL.md` and the references this run needs once, at the start, in one literal collector node, or have the launcher put them in the initial prompt. Resume reads the Log through a literal command that prints it, not through a worker's transcription of it.
+
+Codex-orchestrated plans have tended to drop the spaces between words in the Log, orders and notes (`maina1b2c3d,cleantree`), which later readers and workers misread. Re-read each line you write against the Log rules in [plan-and-orders.md](../plan-and-orders.md) before your next tool call.
+
+Driving a Claude Code session as an implementer is a peer arrangement: follow [peers.md](../peers.md), including its capability probe before any source edit.
+
 Write the approved plan, orders, immutable reports and append-only metrics through a non-shell file tool, such as `apply_patch`, restricted to the state directory. Shell-only reading is therefore not itself a reason to stop: workers can supply the reads while the mister persists state without executing commands. If no non-shell state-writing tool is available either, report that specific limitation with an inline plan and orders. The September run establishes workflow coverage, not which file-access mechanism a current client exposes; do not infer that mechanism from its success.
 
 Use the client's available planning and user-input controls; do not invent `EnterPlanMode` or `ExitPlanMode` calls. Approval still means an actual user response or existing session authorization, never a timeout or an unanswered question.
