@@ -100,6 +100,24 @@ foreach ($n in 'ci-detective','coordinating-agents','pr-lawyer','pr-nurse','pr-r
 }
 ```
 
+### Option 4: Install with Tessl
+
+The skills are published to the [Tessl registry](https://tessl.io/registry) as the plugin `mdelapenya/coding-skills`. Tessl installs them for every agent it finds in the project (Claude Code, Codex, Cursor, Gemini CLI, Copilot):
+
+```bash
+# All skills, from the registry
+tessl install mdelapenya/coding-skills
+
+# Only some skills, straight from GitHub
+tessl install github:mdelapenya/coding-skills --skill the-mister --skill pr-reviewer
+```
+
+A few things to know:
+
+- The first `tessl install` in a repository also runs `tessl init`, which writes `tessl.json` and agent configuration files (`AGENTS.md`, `CLAUDE.md`, MCP settings for each agent).
+- Skills are linked under a `tessl__` prefix, for example `.claude/skills/tessl__the-mister`.
+- the-mister's agent definitions ship inside the skill, in `the-mister/agents/`, but Tessl does not install agents. Without them the skill falls back to `general-purpose` subagents, so its role fences become instructions only. To get the shipped agents, link them as in Option 3 from `.tessl/plugins/mdelapenya/coding-skills/skills/the-mister/agents/`, or install the repository as a Claude Code plugin.
+
 ## Repo Structure
 
 ```
@@ -167,6 +185,12 @@ coding-skills/
 ├── .gemini/skills -> ../skills      # Gemini CLI
 ├── .claude-plugin/
 │   └── plugin.json                  # Claude Code plugin manifest
+├── .tessl-plugin/
+│   └── plugin.json                  # Tessl plugin manifest (content: skills/)
+├── tessl.json                       # links the repository to its Tessl project
+├── evals/                           # Tessl eval scenarios: task, inputs, weighted rubric
+├── scripts/                         # repository tooling (agent preamble sync)
+├── tests/                           # tooling tests and the-mister A/B cases
 ├── gemini-extension.json            # Gemini CLI extension manifest
 └── README.md
 ```
