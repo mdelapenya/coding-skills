@@ -1,6 +1,6 @@
 # Plan and work orders
 
-Everything the mister writes lives at `<git-dir>/the-mister/<slug>/`: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, and `metrics.jsonl`. See `evidence.md` for the report and metric lifecycle. Workers may write `captures/` there (see Captures); the mister only reads it.
+Everything the mister writes lives at `<git-dir>/the-mister/<slug>/`: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, and `metrics.jsonl`. See `evidence.md` for the report and metric lifecycle. Workers may write `captures/` there (see Captures) and per-run scratch under `scratch/` (see Scratch and caches); the mister only reads them.
 
 ## plan.md
 
@@ -253,6 +253,16 @@ When a report's rendering is in doubt (escaped characters, output that looks tri
 - **Size and hash**: an Easy node runs `wc -c <capture path>` and `shasum -a 256 <capture path>`; record both in the node's evidence. Compare the size with what the doubted report implied: a capture much shorter than the report suggests was truncated or failed.
 
 Then `Read` the capture yourself. The file is the evidence; the reports about it are not.
+
+`captures/` holds only `<id>.<n>.out` files. Caches, temporary directories, build outputs and source copies never go there.
+
+## Scratch and caches
+
+The state directory lives inside `.git`, where `git status`, `git worktree remove` and the user's usual cleanup never see it, so anything left there stays forever. Keep it small:
+
+- **Toolchain caches are shared.** Orders leave `GOCACHE`, `GOMODCACHE`, `GOPATH`, the golangci-lint cache, npm/pnpm/yarn/cargo caches and installed tools at the user's defaults; never point them into the state directory, `captures/` or `scratch/`. Go's build and module caches are content-addressed and safe for concurrent processes, so a private cache adds no correctness, only a cold build and gigabytes per run. Use `go test -count=1` to defeat test result caching. If a worker cannot write a default cache (sandboxed or read-only home), use one shared path outside the git dir, such as `${XDG_CACHE_HOME:-$HOME/.cache}/the-mister/<tool>`, reused by every run, and record it under Assumptions.
+- **Per-run scratch goes under `scratch/`.** `TMPDIR`, `go test -work` directories, built binaries, downloaded fixtures and anything an order lists under "Allowed test outputs" live at `<git-dir>/the-mister/<slug>/scratch/<id>/`. Prefer a worktree (a Git node) to copying the source tree; when a copy is unavoidable, it goes under `scratch/` too.
+- **Scratch is removed at the end.** At any terminal state, before the report (Step 9), an Easy node runs `rm -rf '<git-dir>/the-mister/<slug>/scratch'` and `du -sh '<git-dir>/the-mister/<slug>'`, and the size goes in the report. When stopping `incomplete` and a resume needs the scratch, keep it and name its size and path under Open items.
 
 ## The .msg file
 

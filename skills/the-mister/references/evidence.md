@@ -57,7 +57,7 @@ Inspection order:
 ## Commands and execution permissions
 <exact commands, each carrying its directory; relevant access/network constraints>
 ## Allowed test outputs
-<explicit temporary/cache/build output paths, or None; no source edits>
+<explicit temporary/build output paths under `<git-dir>/the-mister/<slug>/scratch/<id>/`, or None; toolchain caches stay at their shared defaults (plan-and-orders.md, Scratch and caches); no source edits>
 ## Report
 ### Verdict
 <PASS or FAIL for each criterion; unavailable is FAIL/unverified>

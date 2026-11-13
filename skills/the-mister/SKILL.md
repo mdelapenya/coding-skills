@@ -4,7 +4,7 @@ description: Orchestrates a multi-step implementation by planning it as a DAG an
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.3.0"
+  version: "2.4.0"
 ---
 
 # The Mister
@@ -43,7 +43,7 @@ You are the mister: the manager of a squad of cheaper, specialised agents. Like 
 
 ## State
 
-Your first Git node runs `git rev-parse --absolute-git-dir` and captures the baseline: `git rev-parse HEAD`, `git status --porcelain`, `git diff`, `git diff --cached`. The reported git dir is `<git-dir>`; state lives at `<git-dir>/the-mister/<slug>/` for primary checkouts and linked worktrees alike. Files: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, `metrics.jsonl`, and `captures/` (captures are written by workers, never by you), in the formats of `references/plan-and-orders.md`. `Write` and `Edit` are for those paths only. Node state is never a field: it is the last line the Log holds for the node (`references/plan-and-orders.md`, Rules). Read `references/evidence.md` for report persistence, inspector dispatch, metrics, and run limits. Until the plan is approved, orders are inline prompts; copy them into `orders/` afterwards. Reports and metrics may exist before approval; only `plan.md` denotes approval. See `references/evidence.md` for the first git-dir discovery bootstrap exception.
+Your first Git node runs `git rev-parse --absolute-git-dir` and captures the baseline: `git rev-parse HEAD`, `git status --porcelain`, `git diff`, `git diff --cached`. The reported git dir is `<git-dir>`; state lives at `<git-dir>/the-mister/<slug>/` for primary checkouts and linked worktrees alike. Files: `plan.md`, `orders/<id>.md`, `orders/<id>.msg`, `reports/<id>.<attempt>.md`, `metrics.jsonl`, `captures/` and `scratch/` (both written by workers, never by you), in the formats of `references/plan-and-orders.md`. Toolchain caches (`GOCACHE`, `GOMODCACHE`, linter and package-manager caches, installed tools) are never part of it: orders leave them at the user's shared defaults, and per-run temporary output goes under `scratch/`, which is removed at the end (`references/plan-and-orders.md`, Scratch and caches). `Write` and `Edit` are for those paths only. Node state is never a field: it is the last line the Log holds for the node (`references/plan-and-orders.md`, Rules). Read `references/evidence.md` for report persistence, inspector dispatch, metrics, and run limits. Until the plan is approved, orders are inline prompts; copy them into `orders/` afterwards. Reports and metrics may exist before approval; only `plan.md` denotes approval. See `references/evidence.md` for the first git-dir discovery bootstrap exception.
 
 The slug is `--slug` or a short kebab-case name you derive; print it after approval and in the final report. `plan.md` exists only for approved plans; if one already exists for the slug, you are resuming (Step 6), not overwriting.
 
@@ -102,7 +102,7 @@ Stage nothing until step 7's gate holds. When the change was reviewed, the prefl
 
 ### 9. Report
 
-On any terminal state, first re-read the Log: every node in `## Nodes` must end in `done`, `failed` (with the decision logged) or `superseded`; write any missing line. Then append the per-node metric records described in `references/evidence.md` before reporting; resume must not duplicate them:
+On any terminal state, first re-read the Log: every node in `## Nodes` must end in `done`, `failed` (with the decision logged) or `superseded`; write any missing line. Then dispatch the Easy cleanup node that removes `scratch/` and reports the state directory's size (`references/plan-and-orders.md`, Scratch and caches); keep the scratch only when stopping `incomplete` and a resume needs it. Then append the per-node metric records described in `references/evidence.md` before reporting; resume must not duplicate them:
 
 ```markdown
 # <task title>
@@ -113,7 +113,7 @@ On any terminal state, first re-read the Log: every node in `## Nodes` must end 
 ## Evidence
 ## Review              <!-- checks run and unverified; findings per round and their verdicts -->
 ## Recoveries          <!-- cause and fix per retry; mandatory even if empty -->
-## Metrics and limits  <!-- metrics path, supplied limit status, unavailable telemetry -->
+## Metrics and limits  <!-- metrics path, state directory size after cleanup, supplied limit status, unavailable telemetry -->
 ## Open items
 ```
 
@@ -130,6 +130,7 @@ Once invoked you stay the mister for the session. A follow-up that continues the
 - [ ] Every `git`, `gh`, or `glab` command in this task runs under a Git-tier order, and no two `running` nodes own the same file.
 - [ ] This node's acceptance is checkable from evidence. A Medium node I could make literal is Easy; no design was dictated to make a node cheaper.
 - [ ] Every command carries its directory on the same line (`git -C <dir>`, or `cd <dir> &&`); prose "run from" is not enough.
+- [ ] No order points a toolchain cache into the state directory; its temporary and build output goes under `scratch/<id>/`, never `captures/`.
 - [ ] Every quoted old text in a replacement was re-read from the branch the worker will edit, not from memory or another checkout.
 - [ ] I ran every acceptance check I can (`Grep`, `Read`) against the current state, and it measures what it claims with the baseline value I expect.
 - [ ] Every CLI flag in a Git order is one the installed version supports; when unsure, a read-only Git node ran `--help` first. A branch-creating node is preceded by `git branch --list <name>` and `git worktree list`.
