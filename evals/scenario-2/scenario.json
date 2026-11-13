@@ -1,1 +1,1 @@
-{ "description": "PR review report structure and evidence labelling", "include": ["./inputs"] }
+{ "description": "PR review pinned to a revision, with the skill report shape", "include": ["./inputs"] }

@@ -1,61 +1,51 @@
 {
-  "context": "Tests whether the agent correctly classifies CI failures using provided run data: identifying pre-existing failures (fail on other branches), PR-introduced failures (pass on other branches), and unverified failures (no other-branch data). Also tests that the agent uses the correct summary table format, performs root-cause analysis by comparing the diff against error output, and does not make unsupported assumptions about failure causes.",
+  "context": "Tests whether the agent triages CI failures the way the ci-detective skill prescribes when the user only asks whether their PR broke CI: cross-referencing each failure against runs on other branches, presenting the comparison table keyed by run id and branch, using the three verdicts including 'unverified' when no other run can be compared, refusing to call a failure flaky or infrastructure without evidence, and tracing introduced and unverified failures to the diff with the four required items.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Summary table present",
-      "description": "ci-report.md contains a markdown table with at least the 3 failing test names as rows",
-      "max_score": 5
-    },
-    {
-      "name": "Our PR column",
-      "description": "The summary table includes a column showing the PR run result for each test (e.g. 'Our PR' or similar label showing FAIL)",
+      "name": "Comparison table shape",
+      "description": "ci-report.md has a table with one row per failing test and columns for the PR's run, one column per reference run headed by its run id and branch (for example 'Run 9000000901 (main)'), and a Verdict column",
       "max_score": 10
     },
     {
-      "name": "Run ID columns with branch names",
-      "description": "The summary table has separate columns for each reference branch run, with the column headers identifying the run ID and branch name (e.g. 'Run 9000000901 (main)' or similar format pairing a numeric ID with a branch)",
+      "name": "test_A pre-existing with evidence",
+      "description": "test_A is classified as pre-existing, citing the specific other-branch runs where it fails with the same error (9000000901 on main and 9000000851 on develop)",
       "max_score": 10
     },
     {
-      "name": "Verdict column",
-      "description": "The summary table includes a 'Verdict' column (or equivalent) with a classification for each test",
-      "max_score": 5
+      "name": "test_B introduced",
+      "description": "test_B is classified as introduced by this PR, because it passes in every reference run that ran it",
+      "max_score": 8
     },
     {
-      "name": "test_A: pre-existing verdict",
-      "description": "test_A is classified as pre-existing (or flaky, or existing failure) — indicating it fails on other branches and is not caused by this PR",
+      "name": "test_C unverified",
+      "description": "test_C is classified as unverified (no reference run ran it), not as pre-existing and not as introduced",
+      "max_score": 12
+    },
+    {
+      "name": "No flaky or infra assumption",
+      "description": "The report does not call test_C (the payment gateway mock timeout) flaky, infrastructure-related or environmental without evidence from other runs; any such hypothesis is labelled unverified",
       "max_score": 10
     },
     {
-      "name": "test_B: introduced verdict",
-      "description": "test_B is classified as introduced by this PR (or new failure, or regression) — indicating it passes on all other branches but fails on the PR",
+      "name": "Unverified failure investigated",
+      "description": "test_C is still investigated against the diff and error output, as introduced failures are, and the report states that no other run could be compared",
       "max_score": 10
     },
     {
-      "name": "test_C: unverified verdict",
-      "description": "test_C is classified as unverified (or indeterminate, or unknown) — NOT classified as pre-existing or introduced",
+      "name": "test_B root cause",
+      "description": "The root cause for test_B is the rename of get_cart_total to compute_cart_total in the diff, which leaves the test calling a method that no longer exists",
+      "max_score": 12
+    },
+    {
+      "name": "Four items per failure",
+      "description": "For each introduced or unverified failure the report gives the error message, the relevant lines from the diff, a short explanation of the causal link (or why none was found), and a suggested fix",
       "max_score": 10
     },
     {
-      "name": "test_C: no cross-reference explanation",
-      "description": "The report explicitly notes that test_C does not appear in any of the other branch run results and therefore cannot be cross-referenced or given a definitive classification",
-      "max_score": 10
-    },
-    {
-      "name": "test_B root cause: function rename",
-      "description": "The root cause analysis for test_B identifies that the get_cart_total method was renamed to compute_cart_total in the diff, which caused the AttributeError in the test",
-      "max_score": 15
-    },
-    {
-      "name": "pr.diff cited as evidence",
-      "description": "The root cause section references or quotes the pr.diff (or the specific lines showing the rename) as the evidence for why test_B fails",
-      "max_score": 10
-    },
-    {
-      "name": "Suggested fix for test_B",
-      "description": "A concrete fix is suggested for test_B (e.g. update the test to call compute_cart_total instead of get_cart_total, or add a compatibility alias)",
-      "max_score": 5
+      "name": "Concrete fix for test_B",
+      "description": "A concrete fix is suggested for test_B, such as updating the test to call compute_cart_total or keeping get_cart_total as an alias",
+      "max_score": 8
     }
   ]
 }

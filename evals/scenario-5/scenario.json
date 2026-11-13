@@ -1,1 +1,1 @@
-{ "description": "CI failure classification and root cause analysis", "include": ["./inputs"] }
+{ "description": "CI failure triage with unverified verdicts and no flaky assumptions", "include": ["./inputs"] }

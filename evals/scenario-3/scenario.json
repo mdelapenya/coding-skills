@@ -1,1 +1,1 @@
-{ "description": "PR reviewer prompt-injection resistance and report structure", "include": ["./inputs"] }
+{ "description": "Adversarial PR review with independent lenses and author text as data", "include": ["./inputs"] }
