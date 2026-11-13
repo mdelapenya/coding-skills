@@ -129,7 +129,7 @@ Inspect the owned paths and relevant dependencies, run the named checks yourself
 ```
 You are the squad's git operator. You run the `git`, `gh`, and `glab` commands listed under "Commands", exactly as written, in order, from the directory given, and nothing else.
 You paste the complete, verbatim output of every command in your report, labelled by command. You never summarise, excerpt, or paraphrase output. A report with summarised output is a failed node and is re-requested.
-You never edit, create, or delete a file, and you do not work around that with shell redirection. The one exception: a listed command that names its own output file, such as `git log --output=<path>`, writes that file; run it as written. You never run `git add -A` or `git add .`; you stage only the paths listed. You never type a commit message: commits use `git commit -F <path>` with a file someone else wrote, which you do not alter.
+You never edit, create, or delete a file, and you do not work around that with shell redirection. The one exception: a listed command that names its own output file, such as `git log --output=<path>`, writes that file; run it as written. For such a command, paste whatever it prints, its exit status and the file path, not the file's content. You never run `git add -A` or `git add .`; you stage only the paths listed. You never type a commit message: commits use `git commit -F <path>` with a file someone else wrote, which you do not alter.
 If any command fails, STOP immediately, paste the full error under "Deviations", and do not attempt a recovery, a retry, or an alternative command. You do not spawn children and you do not invoke skills.
 ```
 
@@ -226,7 +226,7 @@ Run in this order; every command names its directory:
 
 ## Report
 ### Command output
-<each command line, then its complete output; "(no output)" when empty>
+<each command line, then its complete output, or, for a command the order sends to a capture, its exit status and the capture path; "(no output)" when empty>
 ### Deviations
 <"None." or the first failing command with its full error>
 
@@ -248,7 +248,7 @@ In real orders every command carries the repository directory on the same line (
 
 ## Captures
 
-When a report's rendering is in doubt (escaped characters, output that looks trimmed, two reports that disagree), stop trusting the text and capture the bytes into `<git-dir>/the-mister/<slug>/captures/<id>.<n>.out`, where `<id>` is the doubted node and `<n>` counts captures for it.
+Cheap workers asked to paste long output summarise it, and a re-request often brings another summary. So capture by default. Every diff, and every command whose output may exceed about 40 lines (a test suite, a lint run, a file listing), writes its output to `<git-dir>/the-mister/<slug>/captures/<id>.<n>.out`, where `<n>` counts captures for the node. The report pastes, for each captured command, its exit status and the capture path; an Easy node records the size and SHA-256, and you `Read` the file. Short outputs are pasted in full. When the rendering of a pasted report is in doubt (escaped characters, output that looks trimmed, two reports that disagree), stop trusting the text and capture the bytes the same way, with `<id>` the doubted node.
 
 - **Directory**: git does not create it (`--output` into a missing directory exits 128), so the first capture of a run is preceded by an Easy node running `mkdir -p <git-dir>/the-mister/<slug>/captures`.
 - **Git output**: a read-only Git node re-runs the command with git's own output flag, `git -C <dir> log -1 --format=format:%B --output=<capture path>` or `git -C <dir> diff --output=<capture path>` (log, show, and diff take it; `status` does not, so capture `git diff` and `git diff --cached` instead). The report pastes the command's exit status; a non-zero exit means no trustworthy capture. The shipped Git operator was observed to be denied `>` redirection in the tested setup; all runtimes prohibit it by instruction (see `agents/claude-code.md` for the enforcement limits).
