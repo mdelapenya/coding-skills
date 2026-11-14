@@ -1,0 +1,12 @@
+{
+  "number": 58,
+  "title": "feat(invoice): add rounding options to totals",
+  "headRefName": "feat/invoice-totals",
+  "baseRefName": "main",
+  "mergeable": "CONFLICTING",
+  "statusCheckRollup": [
+    { "name": "build", "status": "COMPLETED", "conclusion": "SUCCESS" },
+    { "name": "lint", "status": "COMPLETED", "conclusion": "FAILURE" },
+    { "name": "unit-tests", "status": "COMPLETED", "conclusion": "FAILURE" }
+  ]
+}

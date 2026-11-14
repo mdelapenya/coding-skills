@@ -1,0 +1,3 @@
+9c41e0a ci(lint): replace the removed gomnd linter with mnd in .golangci.yml
+5b2d7f3 feat(config): add Currency to Config
+1f0a9e8 docs: describe invoice totals in the README

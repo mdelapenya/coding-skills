@@ -1,3 +1,1 @@
-{
-  "description": "Worktree sync-with-main shell script"
-}
+{ "description": "PR nursing: a failure fixed on main, a branch-caused failure, and a conflict", "include": ["./inputs"] }

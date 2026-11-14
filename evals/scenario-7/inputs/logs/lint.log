@@ -1,0 +1,6 @@
+Run golangci/golangci-lint-action@v8
+  with:
+    version: v2.4.0
+level=error msg="[linters_context] unknown linter: gomnd (deprecated since v1.58.0, removed: use mnd)"
+Error: golangci-lint exit with code 3
+Error: Process completed with exit code 3.

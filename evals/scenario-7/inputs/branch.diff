@@ -1,0 +1,24 @@
+diff --git a/invoice/invoice.go b/invoice/invoice.go
+--- a/invoice/invoice.go
++++ b/invoice/invoice.go
+@@ -12,9 +12,15 @@ type Line struct {
+ // Total applies the discount to the subtotal, then adds tax.
+-func Total(subtotal, discount, tax float64) float64 {
+-	return (subtotal - discount) * (1 + tax)
++func Total(subtotal, discount, tax float64, mode RoundingMode) float64 {
++	net := subtotal - discount
++	if discount > 0 {
++		return round(net, mode)
++	}
++	return round(net*(1+tax), mode)
+ }
++
++func round(v float64, mode RoundingMode) float64 { return roundTo(v, 2, mode) }
+diff --git a/config/config.go b/config/config.go
+--- a/config/config.go
++++ b/config/config.go
+@@ -5,4 +5,5 @@ package config
+ type Config struct {
+ 	Locale       string
++	RoundingMode string
+ }

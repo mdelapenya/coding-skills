@@ -14,8 +14,8 @@ For each comment, include:
 
 - **Your verdict**: whether you will make a code change, push back with a precise argument, or simply provide an explanation
 - **Your reasoning**: why you reached that verdict, with reference to the code, the PR goals, or the design decisions where relevant
-- **Your draft reply**: the exact text you plan to post back to the reviewer, including a reference back to their original comment
+- **Your draft reply**: the exact text you plan to post back to the reviewer
 
-For comments you plan to fix, also note what kind of commit it falls into and how you would group related fixes together if there are multiple changes to make.
+For comments you plan to fix, say how you will make and commit the changes.
 
-Close the plan with a section on what happens after all fixes are ready — specifically, how the changes get published to the remote branch.
+Close the plan with how the fixes reach the PR.

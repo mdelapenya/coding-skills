@@ -8,6 +8,6 @@ The diff of all changes is in `pr.diff` and the commit history for this branch i
 
 ## Output Specification
 
-Use the pr-scribe skill to generate the PR title and description from the diff and commits. Output them using whatever mechanism is appropriate for this repository's setup.
+Write the PR title and description from the diff and commits, and put them wherever this repository's setup expects them.
 
 If you encounter conflicts between the generated description and any existing repository content, document your resolution decisions in a `conflicts.md` file.

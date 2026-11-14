@@ -1,0 +1,9 @@
+commit b21f7a9c3e5d8f0a1b2c3d4e5f6a7b8c9d0e1f2a
+Author: Rosa Garcia <rgarcia@example.com>
+
+    feat(client): retry transient failures with capped exponential backoff
+
+    Retries retryable errors up to MaxRetries, doubling the delay from Base
+    and capping it at MaxDelay. Each attempt runs in its own goroutine so a
+    cancelled context returns immediately. Outcomes are counted for the
+    dashboard.

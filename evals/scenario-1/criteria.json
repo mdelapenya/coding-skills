@@ -43,8 +43,8 @@
       "max_score": 10
     },
     {
-      "name": "Present tense",
-      "description": "`.biomelab/note.md` contains at least one of the following present-tense action verbs at the start of a list item or sentence: `Adds`, `Introduces`, `Updates`, `Fixes`, `Removes`, `Improves`, `Extends`, `Replaces`, `Exposes`, `Wraps`",
+      "name": "Imperative verbs",
+      "description": "`.biomelab/note.md` states its changes with imperative verbs: at least one list item or sentence starts with Add, Introduce, Update, Fix, Remove, Improve, Extend or Replace, and none starts with the third-person form (Adds, Introduces, Updates, Fixes, Removes, Improves, Extends, Replaces)",
       "max_score": 5
     },
     {

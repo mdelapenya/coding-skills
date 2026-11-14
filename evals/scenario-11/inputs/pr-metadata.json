@@ -1,0 +1,10 @@
+{
+  "number": 312,
+  "title": "feat(client): retry transient failures with capped exponential backoff",
+  "body": "## What\n\n`Client.Do` now retries transient failures with exponential backoff capped at `MaxDelay`, and returns as soon as the context is cancelled. Attempt outcomes are counted in the `attempts` table for the dashboard.\n\n## Why\n\nThe billing sync fails a few times a day on transient 503s from the upstream API.",
+  "author": "rgarcia",
+  "state": "open",
+  "base": { "ref": "main", "sha": "4c8e1d2a9b7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d" },
+  "head": { "ref": "feat/client-retry", "sha": "b21f7a9c3e5d8f0a1b2c3d4e5f6a7b8c9d0e1f2a" },
+  "labels": ["enhancement"]
+}

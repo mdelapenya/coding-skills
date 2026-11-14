@@ -1,0 +1,135 @@
+diff --git a/client/retry.go b/client/retry.go
+new file mode 100644
+--- /dev/null
++++ b/client/retry.go
+@@ -0,0 +1,52 @@
++package client
++
++import (
++	"context"
++	"errors"
++	"time"
++)
++
++var ErrRetriesExhausted = errors.New("client: retries exhausted")
++
++type result struct {
++	resp *Response
++	err  error
++}
++
++// Do sends req, retrying retryable errors with capped exponential backoff.
++// It returns as soon as ctx is cancelled.
++func (c *Client) Do(ctx context.Context, req *Request) (*Response, error) {
++	results := make(chan result)
++	for attempt := 0; attempt <= c.MaxRetries; attempt++ {
++		go func() {
++			resp, err := c.send(req)
++			results <- result{resp, err}
++		}()
++
++		select {
++		case r := <-results:
++			c.stats.Record(outcomeOf(r.err))
++			if r.err == nil {
++				return r.resp, nil
++			}
++			if !retryable(r.err) {
++				return nil, r.err
++			}
++		case <-ctx.Done():
++			return nil, ctx.Err()
++		}
++
++		delay := c.Base << attempt
++		if delay > c.MaxDelay {
++			delay = c.MaxDelay
++		}
++		time.Sleep(delay)
++	}
++	return nil, ErrRetriesExhausted
++}
++
++func retryable(err error) bool {
++	var se *StatusError
++	return errors.As(err, &se) && (se.Code == 503 || se.Code == 429)
++}
+diff --git a/client/stats.go b/client/stats.go
+new file mode 100644
+--- /dev/null
++++ b/client/stats.go
+@@ -0,0 +1,44 @@
++package client
++
++import (
++	"database/sql"
++	"fmt"
++)
++
++// Outcome is the result of one attempt.
++type Outcome int
++
++const (
++	OutcomeOK Outcome = iota
++	OutcomeRetry
++	OutcomeFailed
++)
++
++func (o Outcome) String() string {
++	switch o {
++	case OutcomeOK:
++		return "ok"
++	case OutcomeRetry:
++		return "retry"
++	case OutcomeFailed:
++		return "failed"
++	}
++	return "unknown"
++}
++
++func outcomeOf(err error) Outcome {
++	switch {
++	case err == nil:
++		return OutcomeOK
++	case retryable(err):
++		return OutcomeRetry
++	}
++	return OutcomeFailed
++}
++
++type Stats struct{ db *sql.DB }
++
++// Record counts one attempt outcome for the dashboard.
++func (s *Stats) Record(o Outcome) {
++	q := fmt.Sprintf("UPDATE attempts SET n = n + 1 WHERE outcome = '%s'", o.String())
++	_, _ = s.db.Exec(q)
++}
+diff --git a/client/retry_test.go b/client/retry_test.go
+new file mode 100644
+--- /dev/null
++++ b/client/retry_test.go
+@@ -0,0 +1,30 @@
++package client
++
++import (
++	"context"
++	"testing"
++	"time"
++)
++
++func TestDo_SucceedsAfterTransientFailures(t *testing.T) {
++	c := newTestClient(t, []int{503, 503, 200})
++	c.Base, c.MaxDelay, c.MaxRetries = time.Millisecond, 10*time.Millisecond, 3
++	resp, err := c.Do(context.Background(), &Request{Path: "/sync"})
++	if err != nil || resp.Code != 200 {
++		t.Fatalf("got %v, %v; want 200, nil", resp, err)
++	}
++}
++
++func TestDo_StopsOnPermanentError(t *testing.T) {
++	c := newTestClient(t, []int{400})
++	c.Base, c.MaxDelay, c.MaxRetries = time.Millisecond, 10*time.Millisecond, 3
++	if _, err := c.Do(context.Background(), &Request{Path: "/sync"}); err == nil {
++		t.Fatal("want an error for a 400")
++	}
++}

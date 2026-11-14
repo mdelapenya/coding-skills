@@ -1,55 +1,55 @@
 {
-  "context": "Tests whether the agent correctly implements the pr-nurse worktree sync-with-main procedure as a shell script: saving the current workspace path before switching directories, detecting the root repository via git worktree list --porcelain, verifying the root is clean before pulling, performing the pull, returning to the workspace, merging main without force, and noting the looping behavior for user awareness.",
+  "context": "Tests whether the agent nurses a pull request the way the pr-nurse skill prescribes when the user only asks to get it green: each failing check is diagnosed from its log, a failure already fixed on main is handled by bringing main in rather than patching the branch, a failure the branch caused is fixed in the branch, main is synced through the main checkout after verifying it is clean, the merge conflict keeps both sides' intent, pushes are never forced, CI is not re-checked, and the monitoring loop is offered rather than started.",
   "type": "weighted_checklist",
   "checklist": [
     {
-      "name": "Save workspace path",
-      "description": "Script captures the current working directory at startup (e.g., WORKSPACE=$(pwd) or equivalent variable assignment) before any directory changes",
+      "name": "Lint failure comes from main",
+      "description": "nursing-report.md attributes the lint failure to the removed gomnd linter and identifies main commit 9c41e0a as its fix, and handles it by bringing main into the branch; fix.patch does not edit .golangci.yml",
+      "max_score": 12
+    },
+    {
+      "name": "Test failure comes from the branch",
+      "description": "nursing-report.md attributes TestTotal_DiscountThenTax to the branch's change in invoice.go, where a discount now skips tax, and names that test",
       "max_score": 10
     },
     {
-      "name": "Root repo via worktree list",
-      "description": "Gets the root repository path by running git worktree list --porcelain and parsing the first worktree entry — not a hardcoded or manually specified path",
+      "name": "Branch fix is correct",
+      "description": "fix.patch changes invoice/invoice.go so the discount is applied and tax is then added in every case (Total(100, 10, 0.10, ...) gives 99.00), keeping the RoundingMode parameter",
       "max_score": 12
     },
     {
-      "name": "Navigate to root",
-      "description": "Changes directory to the detected root repository path before running git pull",
-      "max_score": 5
-    },
-    {
-      "name": "Check for local changes",
-      "description": "Runs git status --porcelain (or equivalent) in the root repository to detect any uncommitted changes before pulling",
-      "max_score": 12
-    },
-    {
-      "name": "Abort on dirty root",
-      "description": "Exits or halts (non-zero exit code, explicit error message, or early return) without proceeding with the pull when local changes are detected in the root repo",
-      "max_score": 12
-    },
-    {
-      "name": "git pull from root",
-      "description": "Runs git pull from the root repository (without --force, --force-with-lease, or rebase flags that suppress safety checks)",
+      "name": "Root checkout verified before pull",
+      "description": "Before pulling, the commands check the main checkout at /work/invoices with git status --porcelain, the report notes root-status.txt is empty, and it states it would stop and ask if that checkout had local changes",
       "max_score": 10
     },
     {
-      "name": "Return to workspace",
-      "description": "Returns to the saved workspace directory (using the captured path variable) after completing the root repo pull step",
-      "max_score": 7
-    },
-    {
-      "name": "Merge main --no-edit",
-      "description": "Runs git merge with the --no-edit flag to merge main into the worktree branch (not --squash, --rebase, or omitting --no-edit)",
-      "max_score": 12
-    },
-    {
-      "name": "No force push",
-      "description": "sync-with-main.sh does NOT contain git push --force or git push --force-with-lease anywhere in the file",
+      "name": "Sync through the main checkout",
+      "description": "The commands pull in /work/invoices and then merge main into the branch in /work/invoices-feat with git merge main --no-edit (no rebase, no reset), each command naming its directory with cd or git -C",
       "max_score": 10
     },
     {
-      "name": "Loop behavior documented",
-      "description": "sync-with-main.sh or notes.md mentions asking the user whether to run continuously or on a loop after a single sync run completes",
+      "name": "Conflict keeps both intents",
+      "description": "resolved/config.go has no conflict markers and keeps both RoundingMode and Currency fields in Config",
+      "max_score": 12
+    },
+    {
+      "name": "Merge committed and pushed normally",
+      "description": "After resolving, the commands stage the resolved file by path, commit the merge, and push with a plain git push; no --force or --force-with-lease appears anywhere",
+      "max_score": 10
+    },
+    {
+      "name": "No CI re-check",
+      "description": "The report does not wait for or poll CI after pushing; it reports what was done and leaves re-checking for a later run",
+      "max_score": 6
+    },
+    {
+      "name": "Loop offered, not started",
+      "description": "The report offers to keep monitoring the PR on a loop (for example every 5 minutes) and asks, rather than starting a loop on its own",
+      "max_score": 8
+    },
+    {
+      "name": "Final report contents",
+      "description": "nursing-report.md summarises which checks failed and why, that main was merged in, which conflict was resolved, which code fix was applied, and the expected CI and mergeable status",
       "max_score": 10
     }
   ]

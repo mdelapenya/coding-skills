@@ -1,0 +1,51 @@
+{
+  "context": "Tests whether the agent's review finds the defects that matter in a retry change and avoids a tempting false positive: a goroutine leak when the context is cancelled, a backoff that overflows into a negative delay and bypasses the cap, a sleep that ignores cancellation, tests that could not catch any of these, and an fmt.Sprintf SQL statement whose only input is a fixed enum string, which is not injectable.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Goroutine leak found",
+      "description": "The report finds that when ctx is cancelled the in-flight goroutine blocks forever sending on the unbuffered results channel (client/retry.go), a leak, and places it under Blockers or Major with file and line",
+      "max_score": 12
+    },
+    {
+      "name": "Backoff overflow found",
+      "description": "The report finds that c.Base << attempt can overflow time.Duration for large MaxRetries, producing a zero or negative delay that passes the MaxDelay check, so retries run with no wait; it gives a concrete trigger and a reachability of plausible or proven",
+      "max_score": 12
+    },
+    {
+      "name": "Sleep ignores cancellation",
+      "description": "The report finds that time.Sleep(delay) cannot be interrupted by ctx, so a cancelled request still waits out the backoff, contradicting the PR's claim that Do returns as soon as the context is cancelled",
+      "max_score": 8
+    },
+    {
+      "name": "No false SQL injection",
+      "description": "The fmt.Sprintf query in client/stats.go is not reported as an injection blocker or major: its only input is Outcome.String(), a fixed set of literals. It is either absent, a minor or nit about parameterising, or listed under Retracted on review with that reason",
+      "max_score": 12
+    },
+    {
+      "name": "Tests that could not fail",
+      "description": "The report points out that the tests cover only the happy path and a permanent error, so none would fail for the leak, the overflow or the cancellation behaviour",
+      "max_score": 8
+    },
+    {
+      "name": "Ignored Exec error noted",
+      "description": "The report notes that Stats.Record discards the error from db.Exec, so failed counting is silent",
+      "max_score": 4
+    },
+    {
+      "name": "Pinned revision",
+      "description": "The report states the reviewed revision as head b21f7a9c3e5d and base 4c8e1d2a9b7f",
+      "max_score": 6
+    },
+    {
+      "name": "Verdict and no approval",
+      "description": "The verdict reflects blocking findings (for example 'Potential blockers' or 'Potential blockers; follow-ups') and the report does not recommend approval",
+      "max_score": 6
+    },
+    {
+      "name": "Report shape",
+      "description": "The report has the sections Blockers, Major, Minor and nits, Retracted on review, Validation and limits, and Open questions for the author, in that order, and nothing follows the last one",
+      "max_score": 6
+    }
+  ]
+}

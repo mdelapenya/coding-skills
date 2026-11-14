@@ -12,12 +12,12 @@ This working directory is not a git repository, and you must not create one (no 
 
 Produce the following:
 
-1. **Channel directory** — create the channel at `./channel/`. The channel must include a `README.md` documenting the task (in the user's words), the participating members and their roles, what each agent is and is not authorized to do, the round cap, the poll interval, the idle limit, and any platform-specific parameters needed to run coordination scripts correctly.
+1. **Channel directory** — create the channel at `./channel/`. The channel needs a `README.md` that tells codex what the task is, who takes part, what each agent may do, and how the channel works.
 
-2. **First message draft** — write a draft of your opening message to codex, placed in your drafts folder within the channel. The message should tell codex what the task is and what you need from them.
+2. **First message** — prepare your opening message to codex: what the task is and what you need from them.
 
 3. **`channel-setup.md`** — a file in your working directory containing:
-   - The exact command codex's operator should run to execute the `post.sh` coordination script (so the command works identically on any supported OS, with no shell-specific substitution)
+   - The exact command codex's operator runs to publish a message to the channel
    - A self-contained paragraph that the operator can paste directly into codex's terminal session to have codex join the channel
    - A brief explanation of the channel directory layout
 

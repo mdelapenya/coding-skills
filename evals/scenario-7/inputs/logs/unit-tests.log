@@ -1,0 +1,7 @@
+go test ./... -count=1
+--- FAIL: TestTotal_DiscountThenTax (0.00s)
+    invoice_test.go:41: Total(100, discount=10, tax=0.10) = 90.00, want 99.00
+FAIL
+FAIL	acme/invoices/invoice	0.004s
+ok  	acme/invoices/config	0.003s
+FAIL

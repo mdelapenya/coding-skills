@@ -1,0 +1,1 @@
+{ "description": "the-mister commit gate: an unowned go.sum change and a baseline-dirty task path at preflight", "include": ["./inputs"] }

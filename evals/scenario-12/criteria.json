@@ -1,0 +1,51 @@
+{
+  "context": "Tests whether the agent accepts and recovers nodes the way the-mister prescribes: a Git report that summarises instead of pasting gets one evidence re-request, a failed verification whose cause is unclear gets a read-only diagnosis node before any rewrite or escalation, a mechanical slip gets one retry at the same tier with the defect named, and every decision is written to the Log and metrics before more work, without the mister touching source.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Git summary re-requested once",
+      "description": "N03-git-status is not accepted. It gets one re-request for the verbatim output (or a capture of it) from the same Git tier, logged as dispatch 2/3 with an evidence-request reason; nothing else is inferred from the summary",
+      "max_score": 12
+    },
+    {
+      "name": "Port collision goes to diagnosis",
+      "description": "N04-healthz-handler is not accepted, and its failure is not treated as a code defect or an order gap: a new read-only Easy diagnosis node is created to find what holds port 8080 (for example lsof or ss on that port), before any rewrite, retry or escalation of N04",
+      "max_score": 12
+    },
+    {
+      "name": "No inspection yet",
+      "description": "N06-inspect-healthz is not dispatched while N04's own required command fails",
+      "max_score": 6
+    },
+    {
+      "name": "Mechanical slip retried at the same tier",
+      "description": "N05-readme-route is classified as a mechanical slip (it edited docs/README.md instead of README.md) and retried once at the Easy tier with the defect named in the order's Previous attempt, logged as dispatch 2/3",
+      "max_score": 10
+    },
+    {
+      "name": "Diagnosis budget kept apart",
+      "description": "The diagnosis node has its own budget and does not count against N04's three dispatches",
+      "max_score": 4
+    },
+    {
+      "name": "New nodes declared first",
+      "description": "Every new node (the diagnosis node at least) has an entry in ## Nodes, with tier, kind, deps, owns and acceptance, before its first Log line",
+      "max_score": 8
+    },
+    {
+      "name": "Log lines appended correctly",
+      "description": "New Log lines are appended at the end of the Log, use only dispatched, done, failed or superseded, are one sentence each, and cite the report path for each failed node",
+      "max_score": 10
+    },
+    {
+      "name": "Metrics recorded",
+      "description": "metrics.jsonl gains one dispatch event per new invocation, with the attempt number and a reason such as evidence_request or mechanical; no event is duplicated",
+      "max_score": 6
+    },
+    {
+      "name": "Mister stays out of source",
+      "description": "No file outside the state directory is created or changed, and the agent does not claim to have run commands against /work/svc",
+      "max_score": 8
+    }
+  ]
+}

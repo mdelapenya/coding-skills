@@ -14,7 +14,7 @@
     },
     {
       "name": "Title style rules",
-      "description": "The title in `pr-title.md` is imperative mood, all-lowercase type/scope/subject, has no trailing period, and is 72 characters or fewer in total length",
+      "description": "The title in `pr-title.md` is imperative mood, has a lowercase type and scope, a subject that starts with a lowercase letter (acronyms such as JWT keep their case), no trailing period, and is 72 characters or fewer in total length",
       "max_score": 10
     },
     {
@@ -28,8 +28,8 @@
       "max_score": 10
     },
     {
-      "name": "Present tense verbs",
-      "description": "The description in `pr-description.md` uses present tense verbs throughout (e.g. 'Replaces', 'Removes', 'Adds', 'Requires') rather than past tense ('Replaced', 'Removed', 'Added')",
+      "name": "Imperative verbs",
+      "description": "The description in `pr-description.md` states its changes with imperative verbs (for example Add, Replace, Remove, Require), not past tense or third person; describing the previous behaviour in past tense is fine",
       "max_score": 10
     },
     {
