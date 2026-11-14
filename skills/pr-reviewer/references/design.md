@@ -2,6 +2,14 @@
 
 Why pr-reviewer works the way it does. Read this when changing the skill, not when running a review.
 
+## The three ideas
+
+1. **One reviewer is biased.** Three reviewers with different lenses, who never see each other's findings, catch what one misses. A separate assessor who steel-mans every finding drops what they got wrong.
+2. **Reviews get stronger with iteration.** Each round re-challenges what survived; false positives fall out, real issues get sharper.
+3. **A review is of a revision, not of a branch.** Every pass reads the same pinned head and base. If the author pushes, the old rounds are superseded and the new revision gets its own review; nothing is ever counted across revisions.
+
+## Notes
+
 - **Why pin SHAs instead of cloning the head branch?** Version 1 cloned `--branch <head>` and refreshed with `reset --hard`, so a push between rounds silently changed what round 3 reviewed, and the convergence check compared two different trees. Pinning head, base and merge-base, and verifying them in every pass, is what makes "converged" mean something.
 - **Why three reviewers and an assessor rather than one reviewer who re-checks?** Re-checking your own work is biased toward confirming it. Independent lenses that never see each other find different things; the assessor's steel-man then has to argue against claims it did not make. Single mode keeps the steel-man but loses the independence, which is why it is the fallback and the report says so.
 - **Why does the assessor do the steel-man instead of a separate "challenger"?** Merging and challenging are the same act: to decide whether two reviewers found the same defect you have to decide what the defect really is. Splitting them would double the reads for no extra independence.
@@ -13,3 +21,4 @@ Why pr-reviewer works the way it does. Read this when changing the skill, not wh
 - **Why a clone instead of `git checkout` or `git worktree`, and never into the cwd or the repo?** Switching the user's branch is a surprising side effect. A shallow clone in the skill's own cache keeps the user's directory untouched, cannot inherit the PR's project files, and cleans up with `rm -rf`.
 - **Why does the report never mention posting?** The report is the artifact. Posting is a separate question, asked after the artifact is printed, with its own revalidation.
 - **Lineage.** The staged structure, pinned revision, freshness record, validation-and-limits section and guided publication borrow from a staged-review workflow by kiview; the steel-man, the convergence loop and the portability are version 1's.
+- **Why no positional placeholders?** This file deliberately contains no positional placeholders: runtimes substitute them inconsistently (Claude Code numbers them from zero, so "the first one" would be the second argument).

@@ -91,3 +91,15 @@ Reviewers in staged mode carry one lens each, so the three first passes overlap 
 | C | tests, validation, API contract, scope and hygiene | whether new branches are actually executed by new tests, mocks that fake away the thing under test, always-true asserts, backward compatibility and error-shape changes, diff versus description and linked issues, commit messages that contradict the diff |
 
 Every reviewer reads the whole diff. A finding outside a reviewer's lens is still a valid finding.
+
+## Successor rules
+
+Applied once per invocation, in Step 3, after reading `findings.md`:
+
+- Same `(head, base)` pair as its current revision → this is the next round of that revision. If that revision converged, or its stored round count is already at this invocation's `--rounds`, run no pass: go to Step 10 and render from the file.
+- Different pair, and the current revision is **finished** (converged, or its round count reached the cap recorded on its last round) → the PR moved after a complete review. Reset `refreshes-used` to 0, mark the old revision `superseded`, open a new revision at round 1.
+- Different pair, and the current revision is unfinished → the PR moved mid-review. If `refreshes-used` is below `--max-refresh`, increment it, mark the old revision `superseded`, open a new revision at round 1. Otherwise run no pass: write the freshness record and go to Step 10 with verdict `Latest-state review incomplete`.
+
+## Base dir on Windows
+
+PowerShell: `$env:LOCALAPPDATA\pr-reviewer\<repo-slug>\<num>\`.
