@@ -144,6 +144,8 @@ coding-skills/
 │   │       └── gitlab-ci.md
 │   ├── coordinating-agents/
 │   │   ├── SKILL.md
+│   │   ├── references/
+│   │   │   └── hosts.md             # Windows hosts and tested platforms
 │   │   └── scripts/                 # post, watch, ack, lock (POSIX sh, run in busybox via Docker)
 │   ├── pr-lawyer/
 │   │   ├── SKILL.md
@@ -159,6 +161,7 @@ coding-skills/
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── design.md
+│   │       ├── gitlab.md
 │   │       ├── passes.md
 │   │       ├── publication.md
 │   │       ├── report.md
@@ -185,6 +188,7 @@ coding-skills/
 │       │   ├── reviewer.md          # read-only whole-change review (step 7)
 │       │   └── the-mister.md        # optional no-Bash orchestrator (context: fork)
 │       └── references/
+│           ├── commit.md
 │           ├── evidence.md
 │           ├── peers.md
 │           ├── review.md
