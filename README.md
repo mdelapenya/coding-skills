@@ -102,7 +102,7 @@ foreach ($n in 'ci-detective','coordinating-agents','pr-lawyer','pr-nurse','pr-r
 
 ### Option 4: Install with the skills CLI
 
-The [skills CLI](https://github.com/vercel-labs/skills) installs skills for Claude Code, Codex, Cursor, Copilot, Gemini CLI and many other agents, and lists them on [skills.sh](https://skills.sh):
+The [skills CLI](https://github.com/vercel-labs/skills) installs skills for Claude Code, Codex, Cursor, Copilot, Gemini CLI and many other agents. This repository is listed at [skills.sh/mdelapenya/coding-skills](https://skills.sh/mdelapenya/coding-skills):
 
 ```bash
 # All skills
@@ -116,7 +116,7 @@ As with Tessl, the-mister's `agents/` folder is copied with the skill but not in
 
 ### Option 5: Install with Tessl
 
-The skills are published to the [Tessl registry](https://tessl.io/registry) as the plugin `mdelapenya/coding-skills`. Tessl installs them for every agent it finds in the project (Claude Code, Codex, Cursor, Gemini CLI, Copilot):
+The skills are published to the Tessl registry as the plugin [`mdelapenya/coding-skills`](https://tessl.io/registry/mdelapenya/coding-skills), with its quality review, security scan and eval results. Tessl installs them for every agent it finds in the project (Claude Code, Codex, Cursor, Gemini CLI, Copilot):
 
 ```bash
 # All skills, from the registry
