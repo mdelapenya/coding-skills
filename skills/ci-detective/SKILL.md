@@ -1,10 +1,10 @@
 ---
 name: ci-detective
 description: Investigates CI failures on a pull or merge request by cross-referencing failing jobs and tests against recent runs on other branches, classifying each failure as pre-existing (flaky or broken elsewhere) or introduced by the change, and tracing introduced failures to the diff with a suggested fix. Supports GitHub Actions and GitLab CI. Use when user says "investigate CI failure", "CI is red", "is this test flaky", "why is this test failing", "did my PR break this", "cross-reference builds", "check if failure is pre-existing", or "ci detective".
-allowed-tools: Read Grep Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git:*)
+allowed-tools: Read Grep Glob Bash(gh run *) Bash(gh pr view *) Bash(gh pr diff *) Bash(glab ci *) Bash(glab pipeline *) Bash(glab mr view *) Bash(glab mr diff *) Bash(jq:*)
 metadata:
   author: mdelapenya
-  version: "1.1.1"
+  version: "1.1.2"
 ---
 
 # CI Detective
