@@ -4,7 +4,7 @@ description: Coordinates one task between two or more coding agents on the same 
 allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *)
 metadata:
   author: mdelapenya
-  version: "1.0.1"
+  version: "1.0.2"
 ---
 
 # Coordinating Agents
@@ -44,12 +44,11 @@ docker run --rm --mount "type=bind,source=<absolute scripts dir>,target=/s,reado
 
 - Inside the container the channel is always `/c` and the scripts `/s`, so every path argument is a `/c/...` path: a draft at `<channel>/<me>/drafts/reply.md` on the host is `/c/<me>/drafts/reply.md`.
 - Host paths may contain spaces (keep the quotes). They may not contain a comma, which `--mount` uses as a separator; pick another channel path.
-- Windows: Docker Desktop in **Linux-container mode** (Windows-container mode cannot run BusyBox: report that as the blocker). The source is a Windows path, for example `source=C:\Users\me\repo\.git\coordination\review-gap`. The scripts need LF line endings (`.gitattributes` pins them; re-normalise an older checkout): a CRLF script fails with `set: illegal option -`.
+- Windows hosts: see `references/hosts.md` (Linux-container mode, Windows paths, LF line endings).
 - Linux hosts: add `--user <uid>:<gid>` with your numeric ids, written literally (the initiator records them in `README.md`), so the container does not leave root-owned files in the channel.
 - Write drafts and your own markers with your native file tools; removing your own `.done` is `... busybox:1.37-uclibc rm /c/<me>.done`. No host shell is involved anywhere.
 - Docker unavailable: that is a blocker to report to the user, with your request left in place. Fall back to running the scripts with the host's `sh` only if the user explicitly says so.
 
-Tested on macOS Docker Desktop (arm64 and emulated amd64); not exercised on native Windows, PowerShell or a Linux host.
 
 | Script (args after `/c`) | Does |
 |---|---|
