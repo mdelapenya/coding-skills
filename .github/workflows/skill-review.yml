@@ -1,0 +1,56 @@
+name: Skill review
+
+# Runs Tessl's quality review on every skill a pull request changes and
+# fails the check when a skill scores below the threshold.
+
+on:
+  pull_request:
+    paths:
+      - "skills/**"
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    env:
+      TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
+      THRESHOLD: "90"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install the Tessl CLI
+        run: |
+          curl -fsSL https://get.tessl.io | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Find changed skills
+        id: changed
+        run: |
+          skills=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- skills/ \
+            | cut -d/ -f2 | sort -u \
+            | while read -r s; do [ -f "skills/$s/SKILL.md" ] && echo "$s"; done \
+            | tr '\n' ' ')
+          echo "skills=$skills" >> "$GITHUB_OUTPUT"
+          echo "Changed skills: ${skills:-none}"
+
+      - name: Review changed skills
+        if: steps.changed.outputs.skills != ''
+        run: |
+          if [ -z "$TESSL_TOKEN" ]; then
+            echo "::warning title=Skill review::TESSL_TOKEN is not available (fork pull request?); review skipped"
+            exit 0
+          fi
+          status=0
+          for s in ${{ steps.changed.outputs.skills }}; do
+            echo "::group::$s"
+            if ! tessl review run "skills/$s" --workspace mdelapenya --threshold "$THRESHOLD"; then
+              echo "::error title=Skill review::$s scored below $THRESHOLD"
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $status
