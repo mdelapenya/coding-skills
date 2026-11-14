@@ -66,7 +66,7 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 - NEEDS_INFO_ITEMS or "None"
 ```
 
-`MODE` is one of `staged`, `single (requested)`, `single (fallback: REASON)`.
+`MODE` is one of `staged (risk: consequential)`, `staged (requested)`, `single (risk: routine)`, `single (risk: complex)`, `single (requested)`, `single (fallback: REASON)`.
 
 ## Rendering rules
 

@@ -12,6 +12,7 @@ Tiers follow the convention shared with the `the-mister` skill. The alias for ea
 | Assessor | Hard | Hard | Hard, high effort |
 | Summary | Easy | Easy | Easy |
 
+The reviewer and summary rows apply in staged mode, which by default only consequential diffs run (SKILL.md, Step 6). In single mode you are the reviewer, the assessor and the renderer.
 Triggers, judged from the changed behaviour in the captured diff, never from a filename, label or diff size:
 
 - **Complex**: substantive concurrency or ordering changes, cancellation or resource-lifecycle changes, security-boundary logic, cross-component behaviour that needs more than one file to reason about.
