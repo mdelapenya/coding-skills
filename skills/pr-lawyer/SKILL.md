@@ -45,6 +45,7 @@ If there are no unresolved comments, report that and stop.
 ### Step 2: Triage and cluster comments
 
 For each comment, read the relevant source file and diff context, then classify it on its merits: **Accept** (it is correct; fix it), **Challenge** (it is wrong, subjective or out of scope; push back with a reasoned argument) or **Clarify** (a question; reply without a code change).
+
 After triaging all comments, cluster the accepted ones into logical groups. Good clustering signals:
 - Same file or component
 - Same type of issue (all `fix:`, all `style:`, all `refactor:`, etc.)
