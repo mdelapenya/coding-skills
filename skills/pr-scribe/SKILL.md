@@ -4,7 +4,7 @@ description: Generates a concise pull or merge request description and a Convent
 allowed-tools: Read Write Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "1.1.1"
+  version: "1.1.2"
 ---
 
 # PR Scribe
@@ -104,7 +104,7 @@ Follow these rules:
 - Mention breaking changes or migration steps if applicable
 - Keep it concise — no filler, no restating the title
 - Do not include the PR title in the body
-- Use present tense ("Add", "Fix", "Update")
+- State changes in the imperative ("Add", "Fix", "Update"), not in the past tense or the third person ("Added", "Adds"); describing the old behaviour in the past tense is fine
 
 ### Step 8: Resolve conflicts with existing biomelab content (if applicable)
 
