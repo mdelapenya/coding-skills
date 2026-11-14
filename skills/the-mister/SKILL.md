@@ -4,7 +4,7 @@ description: Orchestrates a multi-step implementation by planning it as a DAG an
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.7.1"
+  version: "2.7.2"
 ---
 
 # The Mister
@@ -127,7 +127,7 @@ Unless every node is Easy or Git, or the run is light (Step 2), run the reposito
 
 ### 8. Commit
 
-Three dependent Git nodes, all dispatched while no worker is running: a read-only **preflight**, then the **stage** node, then the **commit** node. Stage nothing until Step 7's gate holds and the preflight passes. The preflight stops the run, before anything is staged, on any changed path no node owns, any task path that carries the user's baseline changes, an index that already holds unrelated changes, or a lockfile change no node was allowed to make; investigate such changes, do not blame. Commit only when the staged paths, modes and blobs match the review's content manifest, with `git commit -F <msg path>`, and check that the reported message equals the file. Push and PR are further Git nodes, each only if the user asked for it. Read `references/commit.md` at this step: it has the exact commands, the comparisons and the message file.
+Three dependent Git nodes, all dispatched while no worker is running: a read-only **preflight**, then the **stage** node, then the **commit** node. Stage nothing until Step 7's gate holds and the preflight passes. The preflight stops the run, before anything is staged, on any changed path no node owns, any task path that carries the user's baseline changes (even when the node preserved those hunks: committing the file would commit the user's edit, so ask the user whether to include it, leave the file out, or have them stage only the task hunks), an index that already holds unrelated changes, or a lockfile change no node was allowed to make; investigate such changes, do not blame. Commit only when the staged paths, modes and blobs match the review's content manifest, with `git commit -F <msg path>`, and check that the reported message equals the file. Push and PR are further Git nodes, each only if the user asked for it. Read `references/commit.md` at this step: it has the exact commands, the comparisons and the message file.
 
 ### 9. Report
 
