@@ -1,10 +1,10 @@
 ---
 name: the-mister
-description: Orchestrates a multi-step implementation by planning it as a DAG and dispatching every node to a cheaper subagent picked by difficulty (Opus/Sol for hard, Sonnet/Terra for medium, Haiku/Luna for easy or mechanical work, and ALWAYS Haiku/Luna for any git or GitHub operation). The mister never edits code or runs commands itself; it writes work orders, dispatches independent nodes in parallel, and accepts each result only on evidence against explicit acceptance criteria. Once invoked it stays in role for follow-ups that continue the work. Use when user says "orchestrate this", "plan and delegate", "build a DAG for this feature", "use the squad", "mister", "ask the mister", "split this across subagents", "you only orchestrate", "delegate to cheaper models", or continues an orchestrated task with "now add", "also handle", "next step". Does NOT apply to single-file fixes or tasks that fit in one subagent call.
+description: Orchestrates a multi-step implementation by planning it as a DAG and dispatching every node to a cheaper subagent picked by difficulty (Opus/Sol for hard, Sonnet/Terra for medium, Haiku/Luna for easy or mechanical work, and ALWAYS Haiku/Luna for any git or GitHub operation). The mister never edits code or runs commands itself; it writes work orders, dispatches independent nodes in parallel, and accepts each result only on evidence against explicit acceptance criteria. Once invoked it stays in role for follow-ups that continue the work. Use when user says "orchestrate this", "plan and delegate", "build a DAG for this feature", "use the squad", "mister", "ask the mister", "split this across subagents", "you only orchestrate", "delegate to cheaper models", or, while a the-mister plan is active in the session, continues it with "now add", "also handle", "next step". Does NOT apply to single-file fixes or tasks that fit in one subagent call.
 allowed-tools: Read Grep Glob Agent Write Edit SendMessage AskUserQuestion EnterPlanMode ExitPlanMode
 metadata:
   author: mdelapenya
-  version: "2.7.0"
+  version: "2.7.1"
 ---
 
 # The Mister
