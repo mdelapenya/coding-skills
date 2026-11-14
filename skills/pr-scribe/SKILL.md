@@ -4,7 +4,7 @@ description: Generates a concise pull or merge request description and a Convent
 allowed-tools: Read Write Glob Bash(gh:*) Bash(glab:*) Bash(jq:*) Bash(git remote*) Bash(git branch*) AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "1.1.2"
+  version: "1.1.3"
 ---
 
 # PR Scribe
@@ -96,14 +96,11 @@ If no issues are found, do not add the section — no empty placeholders.
 
 ### Step 7: Generate the description
 
-Analyze the diff and fill the template. If existing content from `.biomelab/note.md` (Step 5) is available, use it as context to inform the generation — preserve good user-refined sections and incorporate insights from the existing text.
+Fill the template from the diff. If Step 5 loaded `.biomelab/note.md`, keep the user's refined sections; Step 8 settles any conflict with them.
 
-Follow these rules:
-- Lead with **what** and **why**, not how
 - Group related changes together
 - Mention breaking changes or migration steps if applicable
-- Keep it concise — no filler, no restating the title
-- Do not include the PR title in the body
+- Never repeat the PR title in the body
 - State changes in the imperative ("Add", "Fix", "Update"), not in the past tense or the third person ("Added", "Adds"); describing the old behaviour in the past tense is fine
 
 ### Step 8: Resolve conflicts with existing biomelab content (if applicable)
