@@ -4,7 +4,7 @@ description: Reviews and responds to pull or merge request review comments, judg
 allowed-tools: Read Edit Grep Glob Bash(gh:*) Bash(glab:*) Bash(git:*) AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "1.1.1"
+  version: "1.1.2"
 ---
 
 # PR Lawyer
@@ -44,14 +44,7 @@ If there are no unresolved comments, report that and stop.
 
 ### Step 2: Triage and cluster comments
 
-For each comment, read the relevant source file and diff context, then classify it:
-
-- **Accept**: The feedback is correct — there is a bug, a clarity issue, a better approach, or a legitimate style violation. Fix it.
-- **Challenge**: The feedback is wrong, subjective, based on a misunderstanding, or contradicts the PR's stated goals. Push back.
-- **Clarify**: The comment is a question or ambiguity that doesn't require a code change. Reply with an explanation.
-
-Do not accept feedback just to avoid conflict. Do not challenge feedback just to defend the code. Be honest.
-
+For each comment, read the relevant source file and diff context, then classify it on its merits: **Accept** (it is correct; fix it), **Challenge** (it is wrong, subjective or out of scope; push back with a reasoned argument) or **Clarify** (a question; reply without a code change).
 After triaging all comments, cluster the accepted ones into logical groups. Good clustering signals:
 - Same file or component
 - Same type of issue (all `fix:`, all `style:`, all `refactor:`, etc.)
@@ -106,7 +99,7 @@ git push
 
 For every comment — accepted, challenged, or clarifying — post a reply using the platform-specific reply command from the loaded reference.
 
-Each reply must include a link to the original comment(s) that triggered the response (use the `html_url` or constructed permalink from the fetched comment data). This gives reviewers traceability back to what was addressed.
+Each reply must include a link to the original comment(s) that triggered the response (use the `html_url` or constructed permalink from the fetched comment data).
 
 Reply format by verdict:
 - **Accepted**: acknowledge the fix briefly — `Fixed in <commit-sha>: <one-line description>` with link to original comment
