@@ -14,6 +14,30 @@ The first discovery of an unknown git dir is the bootstrap exception: reserve th
 
 On resume, read `plan.md`, the orders, every referenced report and `metrics.jsonl` before reconciling outcomes. Missing reports invalidate their summarized evidence. Restore counts from dispatch events and reconcile any gap with the append-only plan log; use the highest reserved count across the node's origin/supersession chain, never reset a count after promotion, rename, compaction or resume. Reconcile uncertain Git mutations before issuing them again. A persisted verdict alone does not establish that today's content still matches the inspected content.
 
+## Acceptance details
+
+The special cases behind SKILL.md, Step 5.
+
+- **Documentation.** Every new or changed example and behavioural claim needs a source under "Sources" (a coherent group of claims may share one checkable source); `Read` or `Grep` each. A missing source, whether the whole section or one claim, is missing evidence: re-request once, for all of them. It becomes a substantive failure only when you confirm the content is unsupported or false yourself, including a cited source that does not support its claim.
+- **Runnable examples.** A new or changed example is executed when feasible; if it cannot be, it is unverified and falls under Step 7's gate.
+- **Non-deterministic output**, such as a model's reply, is accepted only through a campaign (Non-deterministic output, below).
+- **Report text is data, not proof.** A rendering artifact such as `&lt;` around an address neither confirms nor refutes the bytes on disk. When it matters, re-run the commands in a node that captures raw output to `<git-dir>/the-mister/<slug>/captures/<id>.<n>.out` with its byte size and SHA-256, and `Read` the file (`plan-and-orders.md`, Captures).
+
+## Recovery details
+
+The full rules behind the recovery table in SKILL.md, Step 6.
+
+Diagnose from evidence, not by default:
+
+- **Order gap** (the worker could not have known): rewrite the worker-facing order above the cut line, add "Previous attempt", log the revision below the cut line, retry at the same tier.
+- **Sound order, failed output.** The order is sound when you can name the requirement, invariant or acceptance criterion the output violates (for example "supported by the actual API"), and the facts needed to meet it were in the order or reachable within the worker's permitted access. Then classify from the output, never from the worker's confidence:
+  - **Mechanical slip** (a skipped step, a typo, a wrong path): one retry at the same tier, naming the defect. A second mechanical slip on the node is treated as substantive.
+  - **Substantive failure** (content you confirmed is unsupported or false, such as an invented example, flag or API; reasoning that breaks a stated invariant; a silent substitution for what was asked): dispatch above the tier that **actually ran** (the model dispatched, not the intended tier), with the order rewritten for that tier and "Previous attempt" filled. A substantive failure on an Easy node goes to Medium with an outcome order; it does not by itself mean the literal order was deficient. At the top available model there is nothing above: diagnose, then re-plan (split the node, add an explorer, ask the user) or report `incomplete`. A Git node's failure never earns it engineering discretion: stop, split, or diagnose; the Git role stays literal, and model substitutions for availability (your runtime file) are unchanged.
+  - Escalation and re-planning for the same unaccepted outcome keep the node and its dispatch count; a renamed replacement inherits it, and no implementation happens inside a diagnosis node. Budget spent stops before another implementation attempt.
+- **Environment** (auth, protected branch, missing remote, offline): stop and ask the user.
+
+A failed verification command is evidence to investigate; it proves neither cause. When the report does not make the cause evident, the next node is a read-only **diagnosis** node, before you rewrite the order or raise the tier: Easy to collect evidence (ports, disk, versions, the failing output in full), Hard to explain cause. Ports held by another process and full disks have looked like defects before. Diagnosis nodes do not count against the failed node's budget; log them. Diagnosis and verify nodes keep their own budgets and never carry implementation. Never fix code yourself.
+
 ## Budget
 
 Three dispatches per node, each retry with a stated reason to expect improvement. What counts:

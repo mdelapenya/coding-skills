@@ -78,6 +78,10 @@ Rules:
 - Every dispatch is logged with its count so the three-dispatch budget survives resume. The Log is append-only; order is the timestamp.
 - A `done` line records the model identity as dispatched (Claude Code: the `model` alias and `subagent_type`; Codex: the `model` passed, or the role's configured model), never the worker's self-description and never `tier` after the fact. Trailers derive from it.
 
+## Baseline and task base
+
+**Baseline** is protected user content, never an ownership exemption: record the starting HEAD SHA, status and both diffs under `## Baseline`, `Read` any relevant untracked file before a node is allowed to edit it, and tell a node that owns a baseline-dirty file which hunks to preserve. Separately record the immutable **task base SHA** in `plan.md` from the Git node immediately after work-branch creation, or from a read-only Git node on the current branch before task work begins. Persist its report and SHA before dispatching task work. It is the starting point for committed task comparisons; it can differ from starting HEAD after a fetch and branch switch. Never replace either SHA on resume. If the task base is missing or ambiguous, report committed comparisons as unverified and stop the commit gate rather than guess.
+
 ## Preambles
 
 Canonical role texts (the fenced block immediately after each role heading is the generator input). After editing them, run `python3 scripts/sync-mister-agents.py` from this repository root to regenerate shipped worker bodies. CI runs the same script with `--check`. Keep any configured Codex TOML role text verbatim from here; no TOMLs are shipped. They are instructions: a worker whose tools include spawning or a shell is not structurally prevented from disobeying. Shipped workers' tool lists exclude spawning; Git denial for engineers with Bash remains an instruction. See the runtime file for observed enforcement limits.
