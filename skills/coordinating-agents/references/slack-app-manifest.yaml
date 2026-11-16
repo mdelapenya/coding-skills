@@ -13,9 +13,16 @@ oauth_config:
   scopes:
     bot:
       - chat:write        # post messages and thread replies
-      - groups:write      # create the private channel, invite members
+      # Private channels (init.sh default). Drop these three if the team works
+      # only in public channels.
+      - groups:write      # create the channel, invite members
       - groups:read       # channel info
       - groups:history    # read messages and threads
+      # Public channels (init.sh --public). Drop these three if the team works
+      # only in private channels.
+      - channels:manage   # create the channel, invite members
+      - channels:read     # channel info
+      - channels:history  # read messages and threads
       - reactions:write   # ack
       - reactions:read    # read other members' acks
       - pins:write        # pin the README

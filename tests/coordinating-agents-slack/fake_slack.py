@@ -15,6 +15,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 
 PAGE_SIZE = int(os.environ.get("PAGE_SIZE", "2"))
+# Bots whose app has only the public-channel scopes (channels:*), not groups:*.
+PUBLIC_ONLY = set(filter(None, os.environ.get("FAKE_PUBLIC_ONLY", "").split(",")))
 # token -> user id; users: id -> {name, is_bot}
 TOKENS = dict(kv.split(":") for kv in os.environ["FAKE_TOKENS"].split(","))
 USERS = {}
@@ -88,11 +90,14 @@ def api(method, me, a):
         u = USERS.get(a.get("user"))
         return {"ok": True, "user": u} if u else err("user_not_found")
     if method == "conversations.create":
+        private = a.get("is_private") == "true"
+        if private and me in PUBLIC_ONLY:
+            return err("missing_scope")
         if any(c["name"] == a["name"] for c in channels.values()):
             return err("name_taken")
         cid = f"C{len(channels) + 1:04d}"
-        channels[cid] = {"name": a["name"], "members": {me}, "messages": []}
-        return {"ok": True, "channel": {"id": cid, "name": a["name"], "is_private": a.get("is_private") == "true"}}
+        channels[cid] = {"name": a["name"], "private": private, "members": {me}, "messages": []}
+        return {"ok": True, "channel": {"id": cid, "name": a["name"], "is_private": private}}
     ch = channels.get(a.get("channel", ""))
     if ch is None:
         return err("channel_not_found")
@@ -173,7 +178,7 @@ class Handler(BaseHTTPRequestHandler):
                     calls.clear()
                     return self.send(200, out)
                 if self.path == "/test/channels":
-                    return self.send(200, {c: v["name"] for c, v in channels.items()})
+                    return self.send(200, {c: {"name": v["name"], "private": v["private"]} for c, v in channels.items()})
             return self.send(404, {})
         a = {k: v[0] for k, v in parse_qs(raw, keep_blank_values=True).items()}
         if "token" in a:

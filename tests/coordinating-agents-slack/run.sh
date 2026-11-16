@@ -17,8 +17,8 @@ trap cleanup EXIT
 docker build -q -t "$img" "$scripts/slack" >/dev/null || { echo "image build failed"; exit 1; }
 docker network create "$net" >/dev/null
 docker run -d --name "$net-fake" --network "$net" --network-alias fake \
-  -e FAKE_TOKENS=t-alpha:UALPHA,t-beta:UBETA,t-rogue:UROGUE \
-  -e FAKE_USERS=UALPHA:coord-alpha:bot,UBETA:coord-beta:bot,UROGUE:rogue:bot,UHUMAN:manu:person,UEVE:eve:person \
+  -e FAKE_TOKENS=t-alpha:UALPHA,t-beta:UBETA,t-rogue:UROGUE,t-gamma:UGAMMA -e FAKE_PUBLIC_ONLY=UGAMMA \
+  -e FAKE_USERS=UALPHA:coord-alpha:bot,UBETA:coord-beta:bot,UROGUE:rogue:bot,UGAMMA:coord-gamma:bot,UHUMAN:manu:person,UEVE:eve:person \
   --mount "type=bind,source=$here/fake_slack.py,target=/fake_slack.py,readonly" \
   python:3.13-alpine python /fake_slack.py >/dev/null
 sleep 2
@@ -55,16 +55,21 @@ members: alpha=UALPHA beta=UBETA
 user: UHUMAN
 Authority: read-only. No commits, pushes, PRs.
 EOF
-out=$(as alpha init.sh demo alpha /d/readme.md); rc=$?
-check "init creates the channel" '^channel C0001 name=#coord-demo' "$out" 0 "$rc"
+out=$(as alpha init.sh coord-demo alpha /d/readme.md); rc=$?
+check "init creates the channel" '^channel C0001 name=#coord-demo private=true' "$out" 0 "$rc"
 check "init prints the README link" '^link https://fake.slack.com/archives/C0001/p' "$out"
 CH=C0001
 
-out=$(as beta init.sh demo beta /d/readme.md); check "init refuses an existing channel" 'already exists: join it' "$out"
+out=$(as beta init.sh coord-demo beta /d/readme.md); check "init refuses an existing channel" 'already exists: join it' "$out"
 printf 'members: alpha=UHUMAN\nuser: UHUMAN\n' > "$work/badreadme.md"
 out=$(as alpha init.sh other alpha /d/badreadme.md); check "init refuses a person as a member" 'is not a bot user' "$out"
 printf "members: alpha=UALPHA alpha2=UALPHA\nuser: UHUMAN\n" > "$work/dupreadme.md"
 out=$(as alpha init.sh dup alpha /d/dupreadme.md); check "init refuses one bot under two names" "listed as both alpha and alpha2" "$out"
+printf 'members: gamma=UGAMMA alpha=UALPHA\nuser: UHUMAN\n' > "$work/pubreadme.md"
+out=$(as gamma init.sh feat-public gamma /d/pubreadme.md); check "a public-only app cannot create a private channel" 'missing_scope. A private channel needs groups:write' "$out"
+out=$(as gamma init.sh --public '#feat-public' gamma /d/pubreadme.md); check "init --public creates a public channel" '^channel C[0-9]+ name=#feat-public private=false' "$out"
+check "the fake recorded it as public" '"feat-public", "private": false' "$(test_api channels '{}')"
+out=$(as alpha init.sh Feat_X alpha /d/readme.md); check "init refuses an invalid channel name" 'channel name must be lowercase' "$out"
 
 out=$(as beta watch.sh $CH beta 1 1); rc=$?
 check "quiet channel times out (joins and the README are not items)" '^timeout' "$out" 3 "$rc"
@@ -173,7 +178,7 @@ out=$(as beta post.sh $CH beta /d/done.md); check "done goes top-level" '^posted
 check "done is not threaded" "$(printf '%s' "$out" | sed -n 's/.* ts=\([0-9.]*\) .*/thread=\1/p')" "$out"
 out=$(as alpha watch.sh $CH alpha 5 1); check "alpha sees beta done" 'state .*beta=done' "$out"
 check "the done message is new for alpha" '^new beta-002 .*kind=done' "$out"
-out=$(as alpha read.sh $CH alpha readme); check "read readme prints the root" '^`coord-readme demo`' "$out"
+out=$(as alpha read.sh $CH alpha readme); check "read readme prints the root" '^`coord-readme coord-demo`' "$out"
 
 stat() { printf '%s' "$1" | docker run --rm -i "$img" jq -r --arg m "$2" '.[$m] // 0'; }
 test_api stats '{}' >/dev/null

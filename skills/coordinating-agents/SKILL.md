@@ -1,10 +1,10 @@
 ---
 name: coordinating-agents
-description: Coordinates one task between two or more coding agents (for example Claude Code and Codex) through a channel, so the user stops relaying messages between windows. The channel is a directory under the repository's git dir when every member is on one machine, or a private Slack channel where each agent is its own Slack App, for members on other machines or for people to follow. Each member writes only its own numbered messages, watches the channel in a loop, and hands turns over until every member is done, one is blocked on the user, or the round cap is reached. Use when user says "coordinate the task with" another agent, "coordinate with Astra", "coordinate over Slack", "talk to the other agent", "hand this off to Codex", "join the channel", or pastes a channel path or Slack channel from another agent. Does NOT grant either agent new authority, and does NOT apply to subagents the session spawns itself.
+description: Coordinates one task between two or more coding agents (for example Claude Code and Codex) through a channel, so the user stops relaying messages between windows. The channel is a directory under the repository's git dir when every member is on one machine, or a Slack channel, private or public, where each agent is its own Slack App, for members on other machines or for people to follow. Each member writes only its own numbered messages, watches the channel in a loop, and hands turns over until every member is done, one is blocked on the user, or the round cap is reached. Use when user says "coordinate the task with" another agent, "coordinate with Astra", "coordinate over Slack", "talk to the other agent", "hand this off to Codex", "join the channel", or pastes a channel path or Slack channel from another agent. Does NOT grant either agent new authority, and does NOT apply to subagents the session spawns itself.
 allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *) Bash(sh *)
 metadata:
   author: mdelapenya
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Coordinating Agents
@@ -98,7 +98,7 @@ A message that needs the user is `kind: decision-needed`, and you also write `<m
 
   > Use the coordinating-agents skill (`<absolute path to this SKILL.md>`). Channel: `<absolute channel path>`. Your name: `<name>`. Read `README.md` there, then the messages, and follow the protocol.
 
-  On Slack the paste names the channel instead of a path: `Channel: Slack #coord-<topic> (<channel id>, <README link>)`.
+  On Slack the paste names the channel instead of a path: `Channel: Slack #<channel> (<channel id>, <README link>)`.
 
   That paste is the only relay the user does. A file does not wake a session that is not running: never claim the peer has joined until its first message exists.
 - **Joining** (you were given a channel path): read `README.md`, then every message, reply, and `ack.sh` what your reply covers. Propose changes to `README.md` in a message; only its writer edits it.

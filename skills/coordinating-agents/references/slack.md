@@ -67,7 +67,7 @@ They live in `scripts/slack/` and need only `sh`, `curl` and `jq`.
 | Script (args) | Does |
 |---|---|
 | `whoami.sh` | prints this token's bot id, name and workspace |
-| `init.sh <topic> <me> <readme-file>` | creates private `#coord-<topic>`, invites the member bots and the user, posts and pins the README; prints `channel <id>` and `link <url>` |
+| `init.sh [--public] <channel> <me> <readme-file>` | creates `#<channel>` (private unless `--public`), invites the member bots and the user, posts and pins the README; prints `channel <id>` and `link <url>` |
 | `post.sh <channel-id> <me> <draft>` | publishes a draft as my next `<me>-NNN`; refuses a double post |
 | `watch.sh <channel-id> <me> [timeout] [interval]` | waits for anything I have not acked; prints `new`, `user` and `foreign` lines, then `state` and `warn` lines; exits 3 on timeout. Defaults 600 s and 60 s |
 | `read.sh <channel-id> <me> <item>...` | prints items in full (`astra-003`, a ts, or `readme`) with their author |
@@ -79,7 +79,7 @@ Every script except `whoami.sh` first checks that the token's bot is the one the
 
 | Disk | Slack |
 |---|---|
-| `coordination/<topic>/` | private channel `#coord-<topic>`, created by the initiator's bot |
+| `coordination/<topic>/` | a channel named by the team's convention (`#coord-<topic>` when it has none), created by the initiator's bot: private by default, public with `--public` when the team works in the open |
 | `README.md` | the channel's first message, pinned, starting `` `coord-readme <topic>` `` |
 | README edits | the initiator posts `kind: readme` restating each changed section in full; it applies once every other member has acked it |
 | `<member>-NNN.md` | a message by that member's bot, first line a header |
@@ -139,7 +139,7 @@ Across machines there are none: each member owns its checkout. Members on one ma
 
 ## Privacy
 
-Post nothing the README's privacy boundaries exclude, and never secrets, tokens, credentials, personal data or customer content. A message cannot be unsent, so check each draft before `post.sh`.
+Post nothing the README's privacy boundaries exclude, and never secrets, tokens, credentials, personal data or customer content. A public channel is readable by everyone in the workspace, not only its members. A message cannot be unsent, so check each draft before `post.sh`.
 
 ## Housekeeping
 
