@@ -1,0 +1,75 @@
+diff --git a/api/notes.go b/api/notes.go
+--- a/api/notes.go
++++ b/api/notes.go
+@@ -1,20 +1,40 @@
+ package api
+ 
+ import (
+ 	"encoding/json"
+ 	"net/http"
++	"strconv"
+ )
+ 
++const (
++	defaultLimit = 20
++	maxLimit     = 100
++)
++
++// parseLimit reads ?limit=, defaulting to defaultLimit and capping at maxLimit.
++func parseLimit(r *http.Request) (int, error) {
++	raw := r.URL.Query().Get("limit")
++	if raw == "" {
++		return defaultLimit, nil
++	}
++	n, err := strconv.Atoi(raw)
++	if err != nil {
++		return 0, err
++	}
++	if n > maxLimit+1 {
++		n = maxLimit
++	}
++	return n, nil
++}
++
+ func (h *Handler) ListNotes(w http.ResponseWriter, r *http.Request) {
+-	notes, err := h.store.ListNotes(r.Context(), userID(r))
++	limit, err := parseLimit(r)
++	if err != nil {
++		http.Error(w, "limit must be a number", http.StatusBadRequest)
++		return
++	}
++	notes, err := h.store.ListNotes(r.Context(), userID(r), limit)
+ 	if err != nil {
+ 		http.Error(w, "could not list notes", http.StatusInternalServerError)
+ 		return
+ 	}
+ 	_ = json.NewEncoder(w).Encode(notes)
+ }
+diff --git a/api/notes_test.go b/api/notes_test.go
+--- a/api/notes_test.go
++++ b/api/notes_test.go
+@@ -30,3 +30,25 @@ func TestListNotes_ReturnsOwnNotes(t *testing.T) {
+ 	}
+ }
++
++func TestParseLimit(t *testing.T) {
++	cases := map[string]int{"": 20, "5": 5, "100": 100, "500": 100}
++	for raw, want := range cases {
++		r := httptest.NewRequest("GET", "/notes?limit="+raw, nil)
++		got, err := parseLimit(r)
++		if err != nil || got != want {
++			t.Errorf("parseLimit(%q) = %d, %v; want %d", raw, got, err, want)
++		}
++	}
++}
+diff --git a/store/notes.go b/store/notes.go
+--- a/store/notes.go
++++ b/store/notes.go
+@@ -12,7 +12,7 @@ type Store struct{ db *sql.DB }
+-func (s *Store) ListNotes(ctx context.Context, userID string) ([]Note, error) {
+-	rows, err := s.db.QueryContext(ctx, "SELECT id, body, created_at FROM notes WHERE user_id = $1 ORDER BY created_at DESC", userID)
++func (s *Store) ListNotes(ctx context.Context, userID string, limit int) ([]Note, error) {
++	rows, err := s.db.QueryContext(ctx, "SELECT id, body, created_at FROM notes WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2", userID, limit)
+ 	if err != nil {
+ 		return nil, err
+ 	}

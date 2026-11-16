@@ -1,0 +1,6 @@
+commit 9f8e7d6c5b4a39281706f5e4d3c2b1a098765432
+Author: Li Chen <lchen@example.com>
+
+    feat(api): add a limit parameter to GET /notes
+
+    Parse an optional limit, default 20, cap 100, and pass it to the store.

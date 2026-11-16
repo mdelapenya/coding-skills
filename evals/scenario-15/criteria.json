@@ -1,0 +1,41 @@
+{
+  "context": "Tests a review of a routine change (an optional limit query parameter): the reviewer should find the off-by-one in the cap and the unhandled zero and negative values, judge their severity proportionately, note what the tests miss, and treat the change as routine rather than inflating it.",
+  "type": "weighted_checklist",
+  "checklist": [
+    {
+      "name": "Off-by-one cap found",
+      "description": "The report finds that `if n > maxLimit+1` lets a limit of 101 through uncapped, so the documented cap of 100 is not enforced, with file and line",
+      "max_score": 14
+    },
+    {
+      "name": "Zero and negative limits found",
+      "description": "The report finds that limit=0 or a negative limit is accepted and passed to the query (LIMIT 0 returns nothing; a negative LIMIT is an error or unbounded depending on the database), and suggests rejecting or defaulting them",
+      "max_score": 12
+    },
+    {
+      "name": "Test gaps named",
+      "description": "The report points out that TestParseLimit does not cover 101, 0, negative or non-numeric input, so it could not catch the defects above",
+      "max_score": 10
+    },
+    {
+      "name": "Proportionate severity",
+      "description": "None of these findings is a Blocker: they are Major at most (the cap) and Minor otherwise; the report does not claim a security or data-loss risk the diff does not have",
+      "max_score": 10
+    },
+    {
+      "name": "No false SQL injection",
+      "description": "The LIMIT $2 parameter is not reported as SQL injection; the query is parameterised",
+      "max_score": 8
+    },
+    {
+      "name": "Pinned revision",
+      "description": "The report states the reviewed revision as head 9f8e7d6c5b4a and base aa11bb22cc33",
+      "max_score": 6
+    },
+    {
+      "name": "Report shape",
+      "description": "The report has the sections Blockers, Major, Minor and nits, Retracted on review, Validation and limits, and Open questions for the author, in that order, and nothing follows the last one",
+      "max_score": 6
+    }
+  ]
+}

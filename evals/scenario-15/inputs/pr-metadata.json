@@ -1,0 +1,10 @@
+{
+  "number": 87,
+  "title": "feat(api): add a limit parameter to GET /notes",
+  "body": "## What\n\n`GET /notes` accepts an optional `limit` query parameter. It defaults to 20 and is capped at 100.\n\n## Why\n\nThe mobile client only shows the latest notes and fetching the whole list is slow for heavy users.",
+  "author": "lchen",
+  "state": "open",
+  "base": { "ref": "main", "sha": "aa11bb22cc33dd44ee55ff660011223344556677" },
+  "head": { "ref": "feat/notes-limit", "sha": "9f8e7d6c5b4a39281706f5e4d3c2b1a098765432" },
+  "labels": ["enhancement"]
+}
