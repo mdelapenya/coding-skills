@@ -1,15 +1,15 @@
 ---
 name: coordinating-agents
-description: Coordinates one task between two or more coding agents on the same machine (for example Claude Code and Codex) through a file channel under the repository's git dir, so the user stops relaying messages between windows. Each member writes only its own numbered messages, watches the channel in a loop, and hands turns over until every member is done, one is blocked on the user, or the round cap is reached. Use when user says "coordinate the task with" another agent, "coordinate with Astra", "talk to the other agent", "hand this off to Codex", "work this out with" a named agent, "join the channel", or pastes a channel path from another agent. Does NOT grant either agent new authority, and does NOT apply to subagents the session spawns itself (use the runtime's own dispatch for those).
-allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *)
+description: Coordinates one task between two or more coding agents (for example Claude Code and Codex) through a channel, so the user stops relaying messages between windows. The channel is a directory under the repository's git dir when every member is on one machine, or a private Slack channel where each agent is its own Slack App, for members on other machines or for people to follow. Each member writes only its own numbered messages, watches the channel in a loop, and hands turns over until every member is done, one is blocked on the user, or the round cap is reached. Use when user says "coordinate the task with" another agent, "coordinate with Astra", "coordinate over Slack", "talk to the other agent", "hand this off to Codex", "join the channel", or pastes a channel path or Slack channel from another agent. Does NOT grant either agent new authority, and does NOT apply to subagents the session spawns itself.
+allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *) Bash(sh *)
 metadata:
   author: mdelapenya
-  version: "1.0.2"
+  version: "1.1.0"
 ---
 
 # Coordinating Agents
 
-Two agents that read and write in seconds should not wait for a person to carry messages between windows. This skill replaces the person-as-wire with a directory: every member writes only its own files, a watcher loop wakes the member when someone else writes, and the person stays in the loop for decisions, not for relaying.
+Two agents that read and write in seconds should not wait for a person to carry messages between windows. This skill replaces the person-as-wire with a channel, a directory or a Slack channel: every member writes only its own files, a watcher loop wakes the member when someone else writes, and the person stays in the loop for decisions, not for relaying.
 
 ## Principles
 
@@ -18,6 +18,13 @@ Two agents that read and write in seconds should not wait for a person to carry 
 3. **Independence over agreement.** Reproduce a finding before accepting it; refuse, with evidence, until shown evidence. Two agents that agree quickly are one agent with extra latency.
 4. **Never hold anything while waiting.** No lock is held while waiting for the user or for another member.
 5. **Evidence, not reports.** Say what you ran and what it printed; label inferences as inferences.
+
+## Transport
+
+- **Disk** (the default): every member runs on this machine and nobody else needs to read along. The rest of this file describes it.
+- **Slack**: a member runs on another machine, or the user wants people to follow and step in. Each agent is its own Slack App, in a Docker Sandbox or on a host. Read `references/slack.md` before starting or joining: it replaces the channel layout, the scripts and the paste below, and keeps everything else here.
+
+The initiator picks the transport, or asks the user when it is unclear. A member that cannot reach the chosen transport (no Docker, no Slack token) is blocked; it reports that and does not switch transport on its own.
 
 ## The channel
 
@@ -90,6 +97,8 @@ A message that needs the user is `kind: decision-needed`, and you also write `<m
 - **Initiator** (the user said "coordinate the task with `<name>`" and no channel exists): pick a short kebab-case `<topic>` and create the channel by writing its `README.md` with your file tools (that creates the directory), with: the task in the user's words; the members and their roles; who owns which files, and which sections of shared files; what is authorised (and what is explicitly not, such as commits, pushes, PRs, deleting things, external comments); privacy boundaries; the round cap (default 6 messages per member); the poll interval (default 30 s); the idle limit (default 30 minutes without a new message); and, on Linux hosts, each member's numeric `--user` ids. Then post `<me>-001.md` with the first request, and print for the user **one** paragraph to paste into the other member's session:
 
   > Use the coordinating-agents skill (`<absolute path to this SKILL.md>`). Channel: `<absolute channel path>`. Your name: `<name>`. Read `README.md` there, then the messages, and follow the protocol.
+
+  On Slack the paste names the channel instead of a path: `Channel: Slack #coord-<topic> (<channel id>, <README link>)`.
 
   That paste is the only relay the user does. A file does not wake a session that is not running: never claim the peer has joined until its first message exists.
 - **Joining** (you were given a channel path): read `README.md`, then every message, reply, and `ack.sh` what your reply covers. Propose changes to `README.md` in a message; only its writer edits it.

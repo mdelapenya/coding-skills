@@ -1,0 +1,27 @@
+# One internal Slack App per coordinating agent. Import it at
+# https://api.slack.com/apps -> Create New App -> From a manifest, once per agent,
+# replacing <member> with the agent's channel name (claude, astra, ...).
+# No events, no socket mode: members poll the channel.
+display_information:
+  name: coord-<member>
+  description: Coordinating-agents member <member>
+features:
+  bot_user:
+    display_name: <member>
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - chat:write        # post messages and thread replies
+      - groups:write      # create the private channel, invite members
+      - groups:read       # channel info
+      - groups:history    # read messages and threads
+      - reactions:write   # ack
+      - reactions:read    # read other members' acks
+      - pins:write        # pin the README
+      - pins:read
+      - users:read        # resolve the user and member bots
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
