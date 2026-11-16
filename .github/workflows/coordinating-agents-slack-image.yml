@@ -7,8 +7,10 @@ name: coordinating-agents Slack image
 # provenance and an SBOM. A published version is never overwritten. After it
 # runs, pin the digest from the job summary in references/slack.md.
 #
-# Needs the repository secrets DOCKERHUB_USERNAME and DOCKERHUB_TOKEN (a
-# Docker Hub access token with read and write scope on that repository).
+# Needs DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in the dockerhub environment,
+# which only coordinating-agents-slack-v* tags may deploy to. Docker Hub
+# personal tokens cannot be limited to one repository, so the token is a
+# Read & Write one with an expiry, reachable only from this job.
 
 on:
   push:
@@ -29,6 +31,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
+    environment: dockerhub
     steps:
       - uses: actions/checkout@v4
 
