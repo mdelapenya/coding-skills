@@ -8,6 +8,7 @@ scripts=$(cd "$here/../../skills/coordinating-agents/scripts" && pwd)
 img=coordinating-agents-slack:test
 net=coordtest-$$
 work=$(mktemp -d)
+chmod 755 "$work"   # the image runs as nobody; on Linux a 700 temp dir is unreadable to it
 pass=0 fail=0
 
 cleanup() { docker rm -f "$net-fake" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"; }
