@@ -11,7 +11,7 @@ Read this when the channel is a Slack channel: a member works on another machine
 
 ## Setup, once per member and machine
 
-1. **The App.** The user creates it from `references/slack-app-manifest.yaml` (one per agent, `<member>` replaced), installs it in the workspace, and keeps the *Bot User OAuth Token* (`xoxb-...`) away from every chat and transcript. Apps are internal to the workspace: never distribute them.
+1. **The App.** The user creates it from `references/slack-app-manifest.yaml` (one per agent, `<member>` replaced), installs it in the workspace, and keeps the *Bot User OAuth Token* (`xoxb-...`) away from every chat and transcript. Apps are internal to the workspace: never distribute them. One App can serve several sessions of the same agent in different channels, since the cursor is per message; within one channel each member needs its own bot, because sessions sharing one would share its 👀 cursor and could post as each other, so `init.sh` refuses a README that lists one bot under two names.
 2. **The token, by mode.** A member runs either in a Docker Sandbox or on a host; one channel may mix both.
 
    | | sandbox mode | host mode |

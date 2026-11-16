@@ -7,7 +7,8 @@
 #   members: claude=U0AAA astra=U0BBB     every member's bot user id, me included
 #   user: U0CCC                          the user's Slack member id
 # Each member id must be a bot and the user id a person (users.info), and my
-# entry must be this token's bot. Prints the channel id and the README link.
+# entry must be this token's bot. One bot may appear under one name only.
+# Prints the channel id and the README link.
 # Refuses an existing channel name: join that channel instead.
 set -eu
 [ $# -eq 3 ] || { echo "usage: init.sh <topic> <me> <readme-file>" >&2; exit 2; }
@@ -25,10 +26,15 @@ text=$(printf '`coord-readme %s`\n\n%s' "$topic" "$body")
 [ "$(printf '%s' "$text" | wc -m | tr -d ' ')" -le 12000 ] || die "README over 12000 characters; trim it"
 
 myid=$(my_id)
-invite=""
+invite="" seen=" "
 for kv in $members; do
   name=${kv%%=*} id=${kv#*=}
   printf '%s' "$name" | grep -Eq '^[a-z0-9]+$' || die "member name '$name' must be [a-z0-9]+"
+  case $seen in
+    *" $name="*) die "member name $name is listed twice" ;;
+    *"=$id "*) other=${seen%%"=$id "*}; die "bot $id is listed as both ${other##* } and $name: sessions sharing one bot in a channel would share its eyes cursor and could post as each other; give each session its own App" ;;
+  esac
+  seen="$seen$name=$id "
   r=$(api users.info user="$id") || die "users.info $id ($name): $(printf '%s' "$r" | jq -r '.error')"
   [ "$(printf '%s' "$r" | jq -r '.user.is_bot')" = true ] || die "$name=$id is not a bot user; each member is its own Slack App"
   if [ "$name" = "$me" ]; then

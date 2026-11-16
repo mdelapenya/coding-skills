@@ -63,6 +63,8 @@ CH=C0001
 out=$(as beta init.sh demo beta /d/readme.md); check "init refuses an existing channel" 'already exists: join it' "$out"
 printf 'members: alpha=UHUMAN\nuser: UHUMAN\n' > "$work/badreadme.md"
 out=$(as alpha init.sh other alpha /d/badreadme.md); check "init refuses a person as a member" 'is not a bot user' "$out"
+printf "members: alpha=UALPHA alpha2=UALPHA\nuser: UHUMAN\n" > "$work/dupreadme.md"
+out=$(as alpha init.sh dup alpha /d/dupreadme.md); check "init refuses one bot under two names" "listed as both alpha and alpha2" "$out"
 
 out=$(as beta watch.sh $CH beta 1 1); rc=$?
 check "quiet channel times out (joins and the README are not items)" '^timeout' "$out" 3 "$rc"
