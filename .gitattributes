@@ -1,2 +1,3 @@
 # coordinating-agents helpers run in a Linux container; CRLF breaks them (set: illegal option -\r).
 skills/coordinating-agents/scripts/*.sh text eol=lf
+skills/coordinating-agents/scripts/slack/*.sh text eol=lf
