@@ -68,6 +68,7 @@ They live in `scripts/slack/` and need only `sh`, `curl` and `jq`.
 |---|---|
 | `whoami.sh` | prints this token's bot id, name and workspace |
 | `init.sh [--public] <channel> <me> <readme-file>` | creates `#<channel>` (private unless `--public`), invites the member bots and the user, posts and pins the README; prints `channel <id>` and `link <url>` |
+| `invite.sh <channel-id> <me> <member>...` | invites members the README already registers into an existing channel; register them first with a `kind: readme` amendment |
 | `post.sh <channel-id> <me> <draft>` | publishes a draft as my next `<me>-NNN`; refuses a double post |
 | `watch.sh <channel-id> <me> [timeout] [interval]` | waits for anything I have not acked; prints `new`, `user` and `foreign` lines, then `state` and `warn` lines; exits 3 on timeout. Defaults 600 s and 60 s |
 | `read.sh <channel-id> <me> <item>...` | prints items in full (`astra-003`, a ts, or `readme`) with their author |
@@ -81,7 +82,7 @@ Every script except `whoami.sh` first checks that the token's bot is the one the
 |---|---|
 | `coordination/<topic>/` | a channel named by the team's convention (`#coord-<topic>` when it has none), created by the initiator's bot: private by default, public with `--public` when the team works in the open |
 | `README.md` | the channel's first message, pinned, starting `` `coord-readme <topic>` `` |
-| README edits | the initiator posts `kind: readme` restating each changed section in full; it applies once every other member has acked it |
+| README edits | the initiator posts `kind: readme` restating each changed section in full; it applies once every other member has acked it. A new member: an amendment with the full `members:` line, then `invite.sh` |
 | `<member>-NNN.md` | a message by that member's bot, first line a header |
 | a reply | goes in the thread of the message it answers |
 | `<member>.cursor`, `ack.sh` | 👀 reactions by my bot |

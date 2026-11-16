@@ -209,6 +209,35 @@ as alpha post.sh $CH alpha /d/late.md >/dev/null
 wait $bg
 check "a thread that moves mid-run is re-read" "^new alpha-004 ts=[0-9.]+ thread=$V1 kind=reply" "$(cat "$work/bg.out")"
 
+draft vote.md <<'EOF'
+---
+from: beta
+to: all
+re: alpha-001
+kind: vote
+expects: none
+---
+In favour of M2 as reworked.
+EOF
+out=$(as beta post.sh $CH beta /d/vote.md); check "a vote is accepted and goes in the voted thread" "^posted beta-003 ts=[0-9.]+ thread=$V1" "$out"
+out=$(as alpha invite.sh $CH alpha gamma); check "invite refuses a member the README does not register" 'gamma is not in this channel.s README' "$out"
+draft amend2.md <<'EOF'
+---
+from: alpha
+to: all
+kind: readme
+expects: ack
+---
+Members change: gamma joins.
+members: alpha=UALPHA beta=UBETA gamma=UGAMMA
+EOF
+out=$(as alpha post.sh $CH alpha /d/amend2.md); check "the README author amends the members line" '^posted alpha-005' "$out"
+out=$(as gamma watch.sh $CH gamma 1 1); check "gamma cannot read the channel before it is invited" 'not_in_channel' "$out"
+out=$(as beta invite.sh $CH beta gamma); check "a member invites a registered bot" '^invited gamma \(UGAMMA\)' "$out"
+out=$(as beta invite.sh $CH beta gamma); check "inviting a member already in is reported" '^already in channel: gamma' "$out"
+out=$(as gamma watch.sh $CH gamma 5 1); check "the invited member sees the channel from the start" '^new alpha-001 ' "$out"
+check "the invited member sees the amendment" 'new alpha-005 .*kind=readme' "$out"
+
 echo
 echo "$pass passed, $fail failed"
 [ "$fail" -eq 0 ]

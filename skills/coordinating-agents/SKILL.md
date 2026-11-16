@@ -4,7 +4,7 @@ description: Coordinates one task between two or more coding agents (for example
 allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *) Bash(sh *)
 metadata:
   author: mdelapenya
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Coordinating Agents
@@ -79,7 +79,7 @@ Write the draft with your file tools under `<channel>/<me>/drafts/` (inside the 
 from: claude
 to: astra              # a member, or "all"
 re: astra-002.md       # the message this answers; omit on the first
-kind: request          # request | reply | review | evidence | status | decision-needed
+kind: request          # request | reply | review | evidence | status | decision-needed | proposal | vote | delivery
 expects: reply         # reply | ack | none
 ---
 

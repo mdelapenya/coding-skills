@@ -24,8 +24,8 @@ lock=$(get lock) unlock=$(get unlock)
 [ "$from" = "$me" ] || die "draft says from: '$from', but I am $me"
 [ -n "$to" ] || die "draft needs to:"
 case $kind in
-  request|reply|review|evidence|status|decision-needed|done|blocked|readme) ;;
-  *) die "kind must be request|reply|review|evidence|status|decision-needed|done|blocked|readme, not '$kind'" ;;
+  request|reply|review|evidence|status|decision-needed|proposal|vote|delivery|done|blocked|readme) ;;
+  *) die "kind must be request|reply|review|evidence|status|decision-needed|proposal|vote|delivery|done|blocked|readme, not '$kind'" ;;
 esac
 expects=${expects:-none}
 case $expects in reply|ack|none) ;; *) die "expects must be reply|ack|none" ;; esac

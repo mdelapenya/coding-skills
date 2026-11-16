@@ -107,6 +107,8 @@ def api(method, me, a):
         for uid in a["users"].split(","):
             if uid not in USERS:
                 return err("user_not_found")
+            if uid in ch["members"]:
+                return err("already_in_channel")
             ch["members"].add(uid)
             post(ch, uid, f"<@{uid}> has joined the channel", subtype="channel_join")
         return {"ok": True}
