@@ -59,7 +59,7 @@ They live in `scripts/slack/` and need only `sh`, `curl` and `jq`.
 - **Host mode**, in the published image, built from `scripts/slack/Dockerfile` (curl and jq only; the scripts are mounted read-only, so what runs is what you can read):
 
   ```
-  docker run --rm --env-file <absolute env file> --mount "type=bind,source=<absolute scripts dir>,target=/s,readonly" --mount "type=bind,source=<absolute drafts dir>,target=/d,readonly" mdelapenya/coordinating-agents-slack:1.0.0@sha256:d928a37710d63894c7b52a6eeb12e4c4934ece0dcff26e88f599734d3b7cc3bb sh /s/slack/<script>.sh <args>
+  docker run --rm --env-file <absolute env file> --mount "type=bind,source=<absolute scripts dir>,target=/s,readonly" --mount "type=bind,source=<absolute drafts dir>,target=/d,readonly" mdelapenya/coordinating-agents-slack:1.0.2@sha256:3aaa24e62431797dabee2ab0101b54a7421354ac30d549c2badb79b5a6dcc44b sh /s/slack/<script>.sh <args>
   ```
 
   Drafts are then `/d/<file>`. On Windows, see `hosts.md`.
