@@ -1,6 +1,6 @@
 {
   "name": "mdelapenya/coding-skills",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Coding-agent skills for pull-request work and orchestration: an adversarial multi-pass PR reviewer, PR description and title writing, answering review comments, CI failure triage and PR nursing, a DAG orchestrator that delegates to cheaper subagents, and coordination between agents through a file channel or, across machines, a Slack channel where each agent is its own Slack App. Supports GitHub and GitLab.",
   "private": false,
   "skills": "skills"
