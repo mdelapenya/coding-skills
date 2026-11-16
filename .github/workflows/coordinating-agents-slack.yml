@@ -1,0 +1,40 @@
+name: coordinating-agents Slack
+
+# Lints the Slack transport scripts and runs them against the fake Slack API
+# (tests/coordinating-agents-slack). Needs only Docker: no Slack workspace,
+# no tokens, no Docker Sandboxes. The release workflow calls it before
+# publishing the image.
+
+on:
+  pull_request:
+    paths:
+      - "skills/coordinating-agents/**"
+      - "tests/coordinating-agents-slack/**"
+      - ".github/workflows/coordinating-agents-slack*.yml"
+  push:
+    branches: [main]
+    paths:
+      - "skills/coordinating-agents/**"
+      - "tests/coordinating-agents-slack/**"
+      - ".github/workflows/coordinating-agents-slack*.yml"
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shellcheck
+        run: |
+          shellcheck --version
+          shellcheck -s sh -x -P SCRIPTDIR -S warning \
+            skills/coordinating-agents/scripts/slack/*.sh \
+            skills/coordinating-agents/scripts/*.sh \
+            tests/coordinating-agents-slack/run.sh
+
+      - name: Run the scripts against the fake Slack API
+        run: sh tests/coordinating-agents-slack/run.sh
