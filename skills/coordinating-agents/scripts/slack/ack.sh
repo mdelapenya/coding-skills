@@ -11,7 +11,7 @@ set -eu
 . "$(dirname "$0")/lib.sh"
 ch=$1 me=$2; shift 2
 snap=$(snapshot "$ch" "$me")
-done_now=" "
+acked_now=" "
 for raw in "$@"; do
   item=$(norm_id "$raw")
   m=$(printf '%s' "$snap" | jq -c --arg i "$item" '[.items[] | select(.id == $i or .ts == $i)] | first // empty')
@@ -19,9 +19,9 @@ for raw in "$@"; do
   [ "$(printf '%s' "$m" | jq -r '.mine')" = false ] || die "not acking your own item: $raw"
   ts=$(printf '%s' "$m" | jq -r '.ts')
   if [ "$(printf '%s' "$m" | jq -r '.class')" = member ]; then
-    gap=$(printf '%s' "$snap" | jq -r --argjson m "$m" --arg done "$done_now" '
+    gap=$(printf '%s' "$snap" | jq -r --argjson m "$m" --arg seen "$acked_now" '
       [.items[] | select(.class == "member" and .name == $m.name and .num < $m.num and (.acked | not)
-        and (.ts as $t | $done | contains(" \($t) ") | not))] | sort_by(.num) | first | .id // empty')
+        and (.ts as $t | $seen | contains(" \($t) ") | not))] | sort_by(.num) | first | .id // empty')
     [ -z "$gap" ] || die "gap: ack $gap first"
   fi
   if [ "$(printf '%s' "$m" | jq -r '.acked')" = true ]; then
@@ -32,5 +32,5 @@ for raw in "$@"; do
       || die "reactions.add $raw: $(printf '%s' "$r" | jq -r '.error')"
     echo "acked $raw"
   fi
-  done_now="$done_now$ts "
+  acked_now="$acked_now$ts "
 done

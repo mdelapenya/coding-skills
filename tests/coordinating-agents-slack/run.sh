@@ -24,11 +24,11 @@ sleep 2
 
 # as <member> <script> <args>: runs a script with that member's token, as host mode does.
 as() {
-  m=$1; shift
+  m=$1 s=$2; shift 2
   docker run --rm --network "$net" -e SLACK_API=http://fake:8080/api -e "SLACK_BOT_TOKEN=t-$m" \
     --mount "type=bind,source=$scripts,target=/s,readonly" \
     --mount "type=bind,source=$work,target=/d,readonly" \
-    "$img" sh "/s/slack/$@" 2>&1
+    "$img" sh "/s/slack/$s" "$@" 2>&1
 }
 # test_api <path> <json>: acts as a person or a rogue bot through /test/.
 test_api() {

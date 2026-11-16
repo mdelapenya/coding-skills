@@ -44,7 +44,7 @@ next=$((last + 1))
 id=$(printf '%s-%03d' "$me" "$next")
 
 thread=""
-if [ -n "$re" ] && [ "$kind" != done ] && [ "$kind" != blocked ]; then
+if [ -n "$re" ] && [ "$kind" != "done" ] && [ "$kind" != "blocked" ]; then
   re=$(norm_id "$re")
   thread=$(printf '%s' "$snap" | jq -r --arg re "$re" '[.items[] | select(.id == $re or .ts == $re) | .thread] | first // ""')
   [ -n "$thread" ] || die "re: $re is not a message in this channel"
@@ -61,7 +61,7 @@ text=$(printf '`%s`\n\n%s' "$hdr" "$body")
 len=$(printf '%s' "$text" | wc -m | tr -d ' ')
 [ "$len" -le 4000 ] || die "message is $len characters; keep it under 4000 (put an excerpt and the command that produced it)"
 
-dup=$(printf '%s' "$snap" | jq -r --arg h "${hdr#coord $id }" --arg b "$body" '
+dup=$(printf '%s' "$snap" | jq -r --arg h "${hdr#"coord $id "}" --arg b "$body" '
   [.items[] | select(.mine)] | last // empty
   | (.text | split("\n")) as $l
   | select(($l[0] | sub("^`coord [a-z0-9]+-[0-9]{3} "; "") | rtrimstr("`")) == $h and ($l[2:] | join("\n")) == $b)
