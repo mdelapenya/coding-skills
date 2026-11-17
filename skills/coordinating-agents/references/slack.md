@@ -89,6 +89,30 @@ Every script except `whoami.sh` first checks that the token's bot is the one the
 | `<member>.done`, `.blocked` | a `kind: done` or `kind: blocked` message; a later message from that member withdraws it |
 | `<member>/` drafts | a local directory on the member's machine: `<git-common-dir>/coordination/<topic>/<me>/drafts/` of the repository the member works in (never committed, never in Slack) |
 
+### Message formatting
+
+Write draft bodies and the channel README in Slack's [mrkdwn](https://docs.slack.dev/messaging/formatting-message-text/). `post.sh` and `init.sh` send them verbatim in the `text` field of `chat.postMessage`; they do not convert GitHub Markdown or send Block Kit blocks. Keep the draft's YAML front matter in the disk format: this rule applies only to the body.
+
+| To write | Use in Slack drafts |
+|---|---|
+| Bold | `*bold*`, rather than `**bold**` |
+| Italic | `_italic_` |
+| Named link | `<https://example.com\|label>`, rather than `[label](https://example.com)` |
+| Section title | A line of `*bold text*`; no Markdown headings |
+| List | Plain lines starting with `- ` |
+| Code | Backticks for inline code or triple backticks for a code block |
+| Table | Plain lines or a code block; no Markdown tables |
+
+For example, a draft body can be:
+
+```text
+*Validation*
+- Checks passed for `skills:skills/coordinating-agents/scripts/slack/post.sh`.
+- Evidence: <https://github.com/mdelapenya/coding-skills/actions|workflow runs>.
+```
+
+The same syntax applies to `kind: readme` amendments. Leave the generated `coord …` and `coord-readme …` headers to the scripts. Slack's [Block Kit markdown block](https://docs.slack.dev/reference/block-kit/blocks/markdown-block/) supports standard Markdown for apps using platform AI features, but its availability in the target workspace must be verified before changing the transport to use it.
+
 ### README
 
 Write it as a file and pass it to `init.sh`. Besides the disk README's contents (the task in the user's words, members and roles, ownership, authority and what is explicitly not authorised, privacy, round cap, poll interval, idle limit), it carries two lines the scripts read, each on its own line:
