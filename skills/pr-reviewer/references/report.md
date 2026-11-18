@@ -8,12 +8,13 @@ A revision's review is **complete** only when all of these hold. Check them befo
 - No open coverage gap from Step 5 (metadata, commits, diff, files, linked issues all loaded). Hosted CI is optional and never a gap.
 - Freshness verified `current` by a successful check after the last pass, or `--historical` was passed and the report says historical.
 - A failed pass had at most one recovery attempt, and the attempt succeeded.
+- For delta scope, the selected delta and required dependencies were covered, and the baseline has a stored complete coverage chain back to a full review. Unknown prior coverage (including an unrecorded `--since` baseline) makes the whole-PR review incomplete even if the delta itself is fully inspected. Carried findings keep their original heads and are included in the verdict.
 
 Anything else makes the review **incomplete**. An incomplete review is still rendered, but its verdict is `Review incomplete`, its findings are labelled provisional, and it never says "No findings". When freshness failed because the refresh budget ran out, the verdict is `Latest-state review incomplete`.
 
 ## Verdict rules
 
-Evaluate top to bottom; the first matching row wins. "Finding" below means a finding whose latest status is `confirmed` or `weakened`; `needs-info` items are questions and never change the verdict.
+Evaluate top to bottom; the first matching row wins. "Finding" below includes both freshly assessed and carried findings whose latest status is `confirmed` or `weakened`; `needs-info` items are questions and never change the verdict.
 
 | Situation | Verdict |
 |---|---|
@@ -35,6 +36,7 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 
 - **Author:** AUTHOR_DISPLAY (@AUTHOR_LOGIN)
 - **Reviewed revision:** head `HEAD_SHA12`, base `BASE_SHA12`
+- **Scope:** full | delta since `PREVIOUS_HEAD_SHA12` (old merge-base `OLD_MERGE_BASE_SHA12`); baseline revision BASELINE_REVISION or external; prior coverage complete | unknown; REASON
 - **Freshness:** current as of UTC_TIME | superseded at UTC_TIME by head `SHA12` base `SHA12` | unverified at UTC_TIME | refresh budget exhausted (REFRESHES_USED of MAX_REFRESH): reviewed head `SHA12` base `SHA12`, latest head `SHA12` base `SHA12` at UTC_TIME
 - **Rounds:** N on this revision, mode MODE, converged YES_OR_NO
 - **Verdict:** VERDICT
@@ -55,8 +57,11 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 ## Retracted on review
 - CLAIM. Retracted: REASON
 
+## Earlier findings not re-reviewed
+- CLAIM (STATUS, SEVERITY), originally reviewed at head `ORIGINAL_HEAD_SHA12`, file:line. Unaffected by this delta; original evidence: EVIDENCE. Or "None".
+
 ## Validation and limits
-- Static inspection: WHAT_WAS_READ (full diff, surrounding code, tests, call sites)
+- Static inspection: WHAT_WAS_READ (selected full diff or delta, comparison commands, dependencies and reasons for widening)
 - Executed locally (read-only): COMMANDS or "none"
 - Hosted CI: STATUS for head `HEAD_SHA12`, or "not consulted"
 - Unverified: CLAIMS_RESTING_ON_REASONING_ALONE, or "none"
@@ -73,6 +78,7 @@ Render directly, headings and order preserved. Short SHAs are 12 characters.
 - Author comes from PR metadata. `AUTHOR_DISPLAY` is the display name when one was fetched, otherwise the login. If metadata could not be read, write `Author: unavailable (REASON)`; never fall back to a commit author.
 - "Reviewed revision" is the pinned head, never a later one. If the PR has moved, say so in Freshness and nowhere else pretend otherwise. On GitLab, where a target-only move is invisible to the metadata, append `(head only)` to the Freshness line.
 - Every section is present. Empty finding sections read `None identified`.
+- Scope names the actual baseline and any full fallback reason. For full scope, show `full` and the reason, omitting baseline and prior-coverage fields. A delta-only result never claims the whole PR was freshly reviewed. Carried findings appear only in "Earlier findings not re-reviewed", retain their original evidence and status, and still affect the verdict; carried `needs-info` items are referenced in the author questions.
 - Each finding shows which reviewers raised it and how its evidence was obtained, so the author can weigh a `static` claim from one reviewer differently from an `executed` claim three reviewers converged on.
 - Every finding shows its reachability next to its severity, never folded into it. A `major` with `reachability: unknown` stays in Major; the reachability line tells the author how much weight to give it.
 - In "Validation and limits", separate the four kinds strictly. Nothing in the review tree was built or run, so "Executed locally" lists read-only git and grep commands only. A test that exists, is skipped, is pending, or ran against another head is not validation of this target. Hosted CI counts only when its result is tied to this exact head.

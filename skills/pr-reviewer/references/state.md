@@ -8,7 +8,14 @@ One file per PR, under the base dir resolved in Step 3. It is the only thing the
 # pr-reviewer - <platform> <org/repo> #<num>: <title>
 refreshes-used: 0                            # restarts of an unfinished review; reset to 0 when a revision finishes
 
-## Revision 1 - head <sha12> base <sha12> merge-base <sha12> - captured <UTC>
+## Revision 1 - head <full-sha> base <full-sha> merge-base <full-sha> - captured <UTC>
+scope: full | delta
+scope-reason: first review | requested --full | follow-up | requested --since | full fallback: <reason>
+baseline: none | revision <R> head <full-sha> merge-base <full-sha> | external head <full-sha> merge-base <full-sha>
+prior-coverage: n/a | complete | unknown    # n/a for full scope; unknown for an explicit baseline without stored coverage
+comparison: <pinned commands and selected hunks/files, including range-diff reconciliation when needed>
+widened: none | <unchanged paths and the delta dependency requiring each>
+carried-findings: none | <ids, original reviewed heads, statuses and evidence; not re-reviewed>
 freshness: current <UTC> | superseded <UTC> by head <sha12> base <sha12> | unverified <UTC>
 finished: false                              # true once converged, or round count reached the last rounds-cap; --no-loop never sets it
 
@@ -39,16 +46,17 @@ disagreements: none | <precise open question the assessor could not settle>
 ### Round 2 - <UTC>
 ...
 
-## Revision 2 - head <sha12> base <sha12> merge-base <sha12> - captured <UTC> (supersedes revision 1)
+## Revision 2 - head <full-sha> base <full-sha> merge-base <full-sha> - captured <UTC> (supersedes revision 1)
 ...
 ```
 
 Rules:
 
-- A **revision** is one `(head, base)` pair. A new pair, even with the same head, is a new revision.
+- A **revision** pins one `(head, base)` pair and one scope selection. A new pair, even with the same head, is a new revision. An explicit scope change can also open a revision on the same pair; see `scope.md`.
 - Rounds number from 1 inside each revision. Convergence compares consecutive rounds of the same revision only.
 - `refreshes-used` is a file-level counter of automatic restarts of an **unfinished** review. It is incremented when the PR moves mid-review and a successor revision is opened, and reset to 0 whenever a revision records `finished: true` (converged, or round count at its last `rounds-cap`). A user re-invoking with a larger `--max-refresh` is the way past it mid-review.
-- Findings of a superseded revision, including an `interrupted` round's raw findings, are read by the next revision's round-1 reviewers as **hints to re-verify**, never copied forward with their status.
+- Select the last completely covered baseline per `scope.md`, not simply the last header. Prior completed coverage can be reused for delta scope, but convergence never crosses revisions. Re-verify findings affected by the delta; carry unaffected findings with their original provenance. An `interrupted` round's raw findings remain hints only.
+- New headers store full commit SHAs. Legacy headers with short SHAs remain readable if they resolve uniquely. Missing scope fields on a legacy revision mean full scope; missing coverage evidence is never assumed complete. A delta baseline's complete coverage must trace back through completed delta revisions to a complete full review.
 - `checks-run`, `limits` and `disagreements` are stored because every round is a separate invocation: the later-round assessor needs the open question, and the summary needs the commands and limits for the validation section.
 - Models, passes and coverage are written **with** the round, after the passes finish; nothing is written before dispatch. Write the round with a temp file and `mv` into place so a crash mid-write cannot leave a half round. The `.lock` directory next to the file guards against two invocations writing at once.
 
@@ -90,14 +98,14 @@ Reviewers in staged mode carry one lens each, so the three first passes overlap 
 | B | security, trust boundaries, persisted state | input validation and injection sinks, authz/authn changes, secret handling, path traversal and SSRF, anything that crosses a privilege or tenant boundary, data migrations and format changes that are hard to roll back |
 | C | tests, validation, API contract, scope and hygiene | whether new branches are actually executed by new tests, mocks that fake away the thing under test, always-true asserts, backward compatibility and error-shape changes, diff versus description and linked issues, commit messages that contradict the diff |
 
-Every reviewer reads the whole diff. A finding outside a reviewer's lens is still a valid finding.
+Every reviewer reads the entire selected scope (full diff or delta plus required dependencies). A finding outside a reviewer's lens is still a valid finding within that scope.
 
 ## Successor rules
 
 Applied once per invocation, in Step 3, after reading `findings.md`:
 
-- Same `(head, base)` pair as its current revision → this is the next round of that revision. If that revision converged, or its stored round count is already at this invocation's `--rounds`, run no pass: go to Step 10 and render from the file.
-- Different pair, and the current revision is **finished** (converged, or its round count reached the cap recorded on its last round) → the PR moved after a complete review. Reset `refreshes-used` to 0, mark the old revision `superseded`, open a new revision at round 1.
+- Same `(head, base)` pair and scope selection as its current revision → this is the next round of that revision. If that revision converged, or its stored round count is already at this invocation's `--rounds`, run no pass: go to Step 10 and render from the file. An explicit scope change opens a new revision at round 1 even on the same pair; identical flags never reset rounds.
+- Different pair, and the current revision is **finished** (converged, or its round count reached the cap recorded on its last round) → reset `refreshes-used` to 0, mark the old revision `superseded`, open a new revision at round 1. Finished does not imply complete coverage: choose its baseline separately under `scope.md`.
 - Different pair, and the current revision is unfinished → the PR moved mid-review. If `refreshes-used` is below `--max-refresh`, increment it, mark the old revision `superseded`, open a new revision at round 1. Otherwise run no pass: write the freshness record and go to Step 10 with verdict `Latest-state review incomplete`.
 
 ## Base dir on Windows
