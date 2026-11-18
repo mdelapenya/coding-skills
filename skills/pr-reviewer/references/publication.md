@@ -6,12 +6,12 @@ Posting happens after the report is printed, as a separate question, and only by
 
 1. Repeat the Step 2 metadata call. If head or base moved since the reviewed revision, do not post against the old one: go back through the refresh logic (Step 3 and Step 8) within the remaining budget and come back here with the new report. An authorized body for an old revision does not authorize it for a new one. With `--historical`, or when the budget is exhausted, a comment may still be posted but must name the reviewed head, and **Approve is never offered**.
 2. `gh api user --jq .login` (GitLab: `glab api user --jq .username`). Record the acting login and confirm it is the account the user intends to post from.
-3. Approval is possible only if the PR is open, not a draft, the author login differs from the acting login, and the revision is current.
+3. Approval is possible only if the PR is open, not a draft, the author login differs from the acting login, the revision is current, and the completion gate (including prior coverage for delta scope) passed.
 4. List the acting account's existing reviews and comments on this PR (`gh api repos/<org>/<repo>/pulls/<num>/reviews`, `gh api repos/<org>/<repo>/issues/<num>/comments`; GitLab: `glab api projects/<id>/merge_requests/<iid>/notes` and `.../approvals`). If an equivalent review on the same head already exists, do not duplicate it; say so and offer to post only what is new.
 
 ## 2. Draft and offer
 
-Draft the exact text before asking. **Findings text** is the finding sections of the report, "Validation and limits", and "Open questions", plus the header lines (author, revision, freshness); "Retracted on review" only if the user wants it. **Summary text** is the header lines plus "Validation and limits" only. Write the draft to `<base-dir>/review-body.md`; never pass Markdown through shell interpolation.
+Draft the exact text before asking. **Findings text** is the finding sections of the report, "Validation and limits", and "Open questions", plus carried findings with provenance and the header lines (author, revision, scope, freshness); "Retracted on review" only if the user wants it. **Summary text** is the header lines plus "Validation and limits" only. Write the draft to `<base-dir>/review-body.md`; never pass Markdown through shell interpolation.
 
 Offer the options the evidence allows, recommending the first:
 

@@ -1,10 +1,10 @@
 ---
 name: pr-reviewer
-description: Performs a multi-pass adversarial review of a pull request pinned to an exact revision. By default one self-challenging reviewer covers correctness, security and tests and then steel-mans every finding; for consequential changes, or with --staged, three independent reviewers read the diff concurrently and an assessor merges and steel-mans their findings. Later rounds re-challenge what survived until findings converge; if the PR moves, the review restarts on the new revision. Works inside the matching repo (bare PR number) or anywhere with a PR URL or org/repo#num. Use when user says "review this PR", "review my PR", "adversarial review", "deep PR review", "challenge this PR", "critique this PR", "audit this pull request", "stress test the PR", or "pr reviewer". Does NOT apply to a quick single-pass review, local uncommitted changes, or code with no pull or merge request; use a plain code-review skill for those.
-allowed-tools: Read Grep Glob Write Agent Bash(jq:*) Bash(git clone *) Bash(git fetch *) Bash(git checkout --detach *) Bash(git rev-parse *) Bash(git merge-base *) Bash(git diff *) Bash(git log *) Bash(git cat-file *) Bash(git status *) Bash(git remote -v) Bash(gh pr view *) Bash(gh pr diff *) Bash(gh issue view *) Bash(gh repo view *) Bash(glab mr view *) Bash(glab issue view *) Bash(mkdir:*) Bash(rmdir:*) Bash(mv:*) Bash(cat:*) Bash(awk:*) Bash(test:*) Bash(ls:*) Bash(date:*) Bash(basename:*) Bash(dirname:*) EnterPlanMode ExitPlanMode AskUserQuestion
+description: Adversarial PR review pinned to exact SHAs, with a full first review and delta reviews on later heads (--since selects a baseline; --full repeats the full review). One self-challenging reviewer by default; consequential changes or --staged use three independent reviewers and an assessor. Rounds re-challenge findings until convergence. Works in the matching repo with a PR number, or anywhere with a PR URL or org/repo#num. Use for "review this PR", "review my PR", "adversarial review", "deep PR review", "challenge this PR", "critique this PR", "audit this pull request", "stress test the PR", or "pr reviewer". Excludes quick single-pass reviews, local uncommitted changes and code without a PR or MR.
+allowed-tools: Read Grep Glob Write Agent Bash(jq:*) Bash(git clone *) Bash(git fetch *) Bash(git checkout --detach *) Bash(git rev-parse *) Bash(git merge-base *) Bash(git diff *) Bash(git range-diff *) Bash(git log *) Bash(git cat-file *) Bash(git status *) Bash(git remote -v) Bash(gh pr view *) Bash(gh pr diff *) Bash(gh issue view *) Bash(gh repo view *) Bash(glab mr view *) Bash(glab issue view *) Bash(mkdir:*) Bash(rmdir:*) Bash(mv:*) Bash(cat:*) Bash(awk:*) Bash(test:*) Bash(ls:*) Bash(date:*) Bash(basename:*) Bash(dirname:*) EnterPlanMode ExitPlanMode AskUserQuestion
 metadata:
   author: mdelapenya
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # PR Reviewer
@@ -22,9 +22,11 @@ The agent drives `gh` / `glab` for metadata and clone. Each runtime's file under
 
 ## Arguments
 
-Take the arguments from the invocation itself (in Claude Code, the `ARGUMENTS:` line appended to this skill). The PR identifier is the first token that does not start with `--`, wherever it appears; everything else is a flag.
+Take the arguments from the invocation itself (in Claude Code, the `ARGUMENTS:` line appended to this skill). Parse flags and consume their values first; the remaining positional token is the PR identifier. In particular, the SHA after `--since` is never a PR identifier.
 
 - PR identifier: **Optional**. Bare number (`123`), URL (`https://github.com/<org>/<repo>/pull/<n>`, GitLab MR URLs including self-managed hosts), shorthand (`<org>/<repo>#<n>` GitHub, `<group>/<project>!<n>` GitLab), or omitted (current branch, inside the repo only).
+- `--since <sha>` (also `--since=<sha>`): Review only the delta from this previously reviewed head. Overrides the stored baseline; reject a missing or invalid commit. See `references/scope.md` for base resolution and coverage limits.
+- `--full`: Review the entire pinned PR diff even if a previous review exists. Mutually exclusive with `--since`.
 - `--rounds=N`: Maximum rounds on one revision (default **3**). The loop also exits early on convergence. An invocation that finds the stored round count already at its `N` renders the report and does not run a pass; a larger `N` on a later invocation runs more rounds.
 - `--no-loop`: Run one round and stop.
 - `--single`: One reviewer (you) does the first pass and the steel-man, no subagents, whatever the risk class. This is the default for routine and complex diffs, and the automatic fallback when the runtime has no fan-out primitive; the report records which.
@@ -78,7 +80,7 @@ Clones never go under `.biomelab/`: the **clone root** is always the cache (or t
 
 Read `findings.md` if present, and decide the revision and round with the successor rules in `references/state.md`.
 
-This is the only place the successor logic runs; a restart from Step 8 comes back through here. The new revision's header is written in Step 9, once the merge-base is known. Nothing from a superseded revision counts toward convergence of the new one; its findings are carried over only as **hints** for the new round-1 reviewers to re-verify from scratch.
+This is the only place the successor logic runs; a restart from Step 8 comes back through here. Resolve the scope using `references/scope.md` after Step 4 makes the commits available. A new revision gets its own convergence rounds; completed earlier coverage can establish a delta baseline. The new header records both target and scope in Step 9. Findings affected by the delta are re-verified; unaffected findings retain their original provenance rather than being presented as freshly reviewed.
 
 ### Step 4: Resolve the review tree
 
@@ -108,12 +110,13 @@ Never clone into the cwd, even when it is empty: `git clone` refuses a directory
 
 ### Step 5: Fetch the PR context
 
+Read `references/scope.md` to select full or delta scope, resolve its baseline and comparison commands, and handle earlier findings. Reuse that scope throughout this revision, including later rounds. Fetch missing baseline objects only in the cache clone, following Step 4's isolation rules.
+
 Everything is read against the pinned target, never against a branch name or the platform's live diff:
 
 - **Metadata**: from Step 2, including `body`.
 - **Commits**: `git log --format='%H %s%n%n%b' <merge-base>..<headRefOid>`; full bodies, never a truncated subject list.
-- **Diff**: `git diff <merge-base> <headRefOid>`.
-- **Files touched**: `git diff --name-only <merge-base> <headRefOid>`.
+- **Diff and files touched**: use the pinned comparison commands from `references/scope.md`; the first review and `--full` use `git diff <merge-base> <headRefOid>` and its `--name-only` variant.
 - **Linked issues**: `#N`, `Closes`, `Fixes`, `Resolves`, full URLs in the PR body and commit messages; `gh issue view <n>` / `glab issue view <n>` for each.
 - **Hosted CI for this head** (optional, never a coverage gap): `gh api "repos/<org>/<repo>/commits/<headRefOid>/check-runs" --jq '.check_runs[] | {name, status, conclusion}'`. Record it for the report's validation section as `ci@<head12>`; if not fetched, the report says "not consulted".
 
@@ -125,23 +128,23 @@ Read `references/passes.md`, section "Model and effort". Classify the diff as **
 
 ### Step 7: Review passes
 
-**Round 1, staged mode (consequential diffs, or `--staged`).** Spawn three independent reviewers concurrently with the reviewer prompt in `references/passes.md`: **A** correctness and regression, **B** security, trust boundaries and persisted state, **C** tests, validation and API contract. Each prompt is self-contained: target SHAs, revision number, review-tree path, PR body, commits, linked issues, hints, the finding schema, and the RULES block. Reviewers never see each other's output, never delegate, never write, never run anything but the read-only commands RULES allows. Each must affirm it inspected the whole diff or return `coverage: partial` with the reason. Wait for all three.
+**Round 1, staged mode (consequential diffs, or `--staged`).** Spawn three independent reviewers concurrently with the reviewer prompt in `references/passes.md`: **A** correctness and regression, **B** security, trust boundaries and persisted state, **C** tests, validation and API contract. Each prompt is self-contained: target SHAs, scope and baseline SHAs, comparison commands, revision number, review-tree path, PR body, commits, linked issues, earlier findings with provenance, the finding schema, and the RULES block. Reviewers never see each other's output, never delegate, never write, never run anything but the read-only commands RULES allows. Each must affirm it inspected the entire selected scope or return `coverage: partial` with the reason. Wait for all three.
 
 Then spawn the **assessor** with the round-1 assessor prompt and all three results. It merges findings by underlying defect (keeping `sources`), re-reads the code around each, steel-mans each one as the PR author would, and classifies it `confirmed` / `weakened` / `retracted` / `needs-info` with the `challenge:` and `verdict:` it wrote. It also runs the cross-reference check: a flagged pattern that is the codebase's established convention is downgraded or retracted; the same bug elsewhere is noted as related risk, not scope creep.
 
 A failed or missing pass gets at most one recovery attempt with the same target. The assessor never stands in for a missing reviewer. If recovery fails, the round is `incomplete`.
 
-**Round 1, single mode (routine and complex diffs, `--single`, or no fan-out primitive).** If the runtime offers plan mode, call `EnterPlanMode`; otherwise just begin. You are the adversarial reviewer across all three lenses; write every concern as a finding in the schema, `status: pending-challenge`, `sources: [self]`. If you entered plan mode, call `ExitPlanMode` with the findings as the plan and make sure plan mode has ended before Step 9 (the state write needs it); continue regardless of approval, since every following step is read-only. Then perform the assessor's steel-man and cross-reference yourself.
+**Round 1, single mode (routine and complex diffs, `--single`, or no fan-out primitive).** If the runtime offers plan mode, call `EnterPlanMode`; otherwise just begin. Apply the selected scope and earlier-finding rules in `references/scope.md` across all three lenses; write every concern as a finding in the schema, `status: pending-challenge`, `sources: [self]`. If you entered plan mode, call `ExitPlanMode` with the findings as the plan and make sure plan mode has ended before Step 9 (the state write needs it); continue regardless of approval, since every following step is read-only. Then perform the assessor's steel-man and cross-reference yourself.
 
 **Rounds 2 and later (both modes).** If round 1 was `incomplete` because a reviewer was missing or partial, this round first re-runs only those reviewers (same target, same prompt) and then the round-1 assessor with all three results; a reviewer gap is never permanent. Otherwise only the assessor runs, with the later-round assessor prompt, on the previous round's surviving findings (`confirmed`, `weakened`, `needs-info`) plus the previous round's `disagreements` as its open question. It re-reads the code once more for each, may add a `fresh` finding if the re-read surfaces one, and flags anything that flipped status between rounds as `unstable` with explicit reasoning for the side it picks.
 
 ### Step 8: Freshness check
 
-Before writing the round, repeat the Step 2 call. If `(head, base)` still matches the target, freshness is `current as of <UTC>`. If it moved and `--historical` was passed, record `superseded` and continue. If it moved otherwise: write the interrupted round's raw findings under the current revision as hints (status `pending-challenge`, round marked `interrupted`), writing that revision's header first if this was its round 1; then **go back to Step 2** with the lock you hold. Step 3 decides what happens to the new pair; when the budget is spent, its verdict names both pairs and the check time. If the platform is unreachable, freshness is `unverified` and no clean verdict may be presented as current.
+Before writing the round, repeat the Step 2 call. If `(head, base)` still matches the target, freshness is `current as of <UTC>`. If it moved and `--historical` was passed, record `superseded` and continue. If it moved otherwise: write the interrupted round's raw findings under the current revision as hints (status `pending-challenge`, round marked `interrupted`), writing that revision's target and scope header first if this was its round 1; then **go back to Step 2** with the lock you hold. Step 3 decides what happens to the new pair; when the budget is spent, its verdict names both pairs and the check time. If the platform is unreachable, freshness is `unverified` and no clean verdict may be presented as current.
 
 ### Step 9: Write the round and decide on convergence
 
-If this is round 1 of a new revision and its header is not written yet, write it first (head, base, merge-base, capture time). Then append the round as specified in `references/state.md` (temp file, then `mv`), including every pass's `checks-run`, `limits` and the assessor's `disagreements`, so later invocations have them.
+If this is round 1 of a new revision and its header is not written yet, write it first (full head, base and merge-base SHAs, capture time, scope and baseline). Then append the round as specified in `references/state.md` (temp file, then `mv`), including every pass's `checks-run`, `limits` and the assessor's `disagreements`, so later invocations have them.
 
 Convergence is decided per revision:
 
@@ -159,7 +162,7 @@ The skill decides whether another round is warranted; it never starts the loop i
 
 ### Step 10: Report
 
-Every invocation ends with a report, so a plain `/pr-reviewer 123` is useful on its own. Apply the completion gate from `references/report.md`, then render the report with its template. The input is the **union of this revision's rounds**: for each finding id, its latest status, so round-1 retractions still appear under "Retracted on review". In staged mode a separate **summary** agent renders it from that union, the stored `checks-run` and `limits`, the CI record, and the freshness record; it may not add, drop or reword a finding's substance. In single mode you render it.
+Every invocation ends with a report, so a plain `/pr-reviewer 123` is useful on its own. Apply the completion gate from `references/report.md`, then render the report with its template. The input is the **union of this revision's rounds**, plus unaffected earlier findings with their provenance: for each finding id, its latest status, so round-1 retractions still appear under "Retracted on review". In staged mode a separate **summary** agent renders it from that union, the stored scope and baseline, `checks-run` and `limits`, the CI record, and the freshness record; it may not add, drop or reword a finding's substance. In single mode you render it.
 
 Print the report and stop. Nothing about posting appears inside it.
 
