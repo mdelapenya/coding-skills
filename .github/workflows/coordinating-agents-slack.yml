@@ -10,12 +10,16 @@ on:
     paths:
       - "skills/coordinating-agents/**"
       - "tests/coordinating-agents-slack/**"
+      - "tests/coordinating-agents-disk/**"
+      - "tests/coordinating-agents-writer/**"
       - ".github/workflows/coordinating-agents-slack*.yml"
   push:
     branches: [main]
     paths:
       - "skills/coordinating-agents/**"
       - "tests/coordinating-agents-slack/**"
+      - "tests/coordinating-agents-disk/**"
+      - "tests/coordinating-agents-writer/**"
       - ".github/workflows/coordinating-agents-slack*.yml"
   workflow_call:
 
@@ -34,7 +38,14 @@ jobs:
           shellcheck -s sh -x -P SCRIPTDIR -S warning \
             skills/coordinating-agents/scripts/slack/*.sh \
             skills/coordinating-agents/scripts/*.sh \
-            tests/coordinating-agents-slack/run.sh
+            tests/coordinating-agents-slack/run.sh \
+            tests/coordinating-agents-disk/run.sh \
+            tests/coordinating-agents-writer/run.sh
+
+      - name: Run disk and writer fixtures
+        run: |
+          sh tests/coordinating-agents-disk/run.sh
+          sh tests/coordinating-agents-writer/run.sh
 
       - name: Run the scripts against the fake Slack API
         run: sh tests/coordinating-agents-slack/run.sh
