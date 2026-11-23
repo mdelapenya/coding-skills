@@ -10,6 +10,8 @@ set -eu
 [ $# -ge 3 ] || { echo "usage: ack.sh <channel-id> <me> <item>..." >&2; exit 2; }
 . "$(dirname "$0")/lib.sh"
 ch=$1 me=$2; shift 2
+. "$(dirname "$0")/../writer-lib.sh"
+writer_enter slack "$ch" "$me"
 snap=$(snapshot "$ch" "$me")
 acked_now=" "
 for raw in "$@"; do

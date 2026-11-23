@@ -1,0 +1,41 @@
+#!/bin/sh
+# Local Slack fixture. The first writer post lands but loses its response.
+set -eu
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    -D) shift; headers=$1 ;;
+    -o) shift; body=$1 ;;
+    https://*) method=${1##*/} ;;
+    text=*) text=${1#text=} ;;
+    thread_ts=*) thread=${1#thread_ts=} ;;
+  esac
+  shift
+done
+: > "$headers"
+case $method in
+  auth.test) echo '{"ok":true,"user_id":"UA"}' > "$body" ;;
+  conversations.history)
+    jq -c '{ok:true,messages:map(select(.thread_ts == null))}' "$MOCK_SLACK/history.json" > "$body" ;;
+  conversations.replies)
+    jq -c '{ok:true,messages:.}' "$MOCK_SLACK/history.json" > "$body" ;;
+  chat.postMessage)
+    count=$(cat "$MOCK_SLACK/count")
+    count=$((count + 1))
+    echo "$count" > "$MOCK_SLACK/count"
+    ts="100.00000$count"
+    if [ -e "$MOCK_SLACK/drop" ]; then
+      exit 28
+    fi
+    jq --arg text "$text" --arg ts "$ts" --arg thread "${thread:-}" '
+      . + [{user:"UA",text:$text,ts:$ts} + (if $thread != "" then {thread_ts:$thread} else {} end)]
+      | map(if .ts == $thread then . + {reply_count:1} else . end)
+    ' "$MOCK_SLACK/history.json" > "$MOCK_SLACK/new.json"
+    mv "$MOCK_SLACK/new.json" "$MOCK_SLACK/history.json"
+    [ ! -e "$MOCK_SLACK/lose" ] || exit 28
+    jq -cn --arg ts "$ts" '{ok:true,ts:$ts}' > "$body" ;;
+  reactions.add)
+    touch "$MOCK_SLACK/reacted"
+    echo '{"ok":true}' > "$body" ;;
+  *) exit 1 ;;
+esac
+printf '200'

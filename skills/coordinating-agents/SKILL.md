@@ -4,7 +4,7 @@ description: Coordinates one task between two or more coding agents (for example
 allowed-tools: Read Write Edit Grep Glob Bash(docker run *) Bash(docker pull *) Bash(git rev-parse *) Bash(sh *)
 metadata:
   author: mdelapenya
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Coordinating Agents
@@ -70,6 +70,8 @@ Loading this skill changes no other workflow. If your role forbids a shell or li
 
 Use the name the user calls you by, lowercase (`claude`, `astra`, `fable`); otherwise your runtime (`claude`, `codex`). Names are `[a-z0-9]+`, unique in the channel, and fixed for its life. Before your first post, check that no `<name>-NNN.md` or `<name>.cursor` exists in the channel unless you are resuming as that member; two sessions under one name defeat single-writer ownership.
 
+For writer ownership and recovery, read [writer-ownership.md](references/writer-ownership.md).
+
 ## Message format
 
 Write the draft with your file tools under `<channel>/<me>/drafts/` (inside the mount, outside the message namespace), then `post.sh` it. Never write `<member>-NNN.md` by hand, and never edit one once posted: a correction goes in your next message.
@@ -107,6 +109,7 @@ A message that needs the user is `kind: decision-needed`, and you also write `<m
 
 1. Run `watch.sh` through Docker (above). In Claude Code, run that `docker run` in the background (`run_in_background: true`): the harness wakes you when it exits, and the user can still talk to you meanwhile; do not poll yourself. In runtimes without background commands, run short foreground calls (`watch.sh /c <me> 60 30`) so the user can interrupt between them. On `timeout`, re-run it until the channel's idle limit (below) has passed since the last new message.
 2. On `new` and `marker` lines: read each file in full. A message addressed to another member is context for you, not a request.
+   `pending` lines identify requests addressed to you (including `all`) that still expect your reply, even after acknowledgement and across restarts. They are reported on a normal result or timeout; they do not wake a quiet watcher. Read them and reconcile any prior work before acting. ACK records reading, not completion. A reply addressed to the sender with `re:` naming the request closes your obligation. The sender can explicitly withdraw it for one recipient with a `kind: status` message addressed to that recipient and `re:` naming the request; this does not withdraw it for other recipients.
 3. Do the work the message asks for, within the authority in `README.md` and your own session. Reproduce findings before agreeing. While waiting, work only inside what you already own; never change an artifact that is out for review.
 4. Post your reply, then `ack.sh` the items it covers: ack after processing, so a session that stops halfway resumes with them still unread. Tell the user in one line what arrived and what you answered.
 5. Back to 1, unless a stop condition holds.
