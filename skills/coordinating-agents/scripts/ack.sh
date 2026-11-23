@@ -9,6 +9,8 @@
 set -eu
 [ $# -ge 3 ] || { echo "usage: ack.sh <channel> <me> <item>..." >&2; exit 2; }
 d=$1 me=$2; shift 2
+. "$(dirname "$0")/writer-lib.sh"
+writer_enter disk "$d" "$me"
 cursor="$d/$me.cursor"
 work="$d/.cursor.$me.$$"
 touch "$cursor"

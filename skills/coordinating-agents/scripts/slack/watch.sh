@@ -34,7 +34,14 @@ def news: .items[] | select(.mine | not) | select(.acked | not)
   | if .class == "member" then "new \(.id) ts=\(.ts) thread=\(.thread) kind=\(.fields.kind // "") to=\(.fields.to // "")"
     elif .class == "user" then "user ts=\(.ts) thread=\(.thread)"
     else "foreign ts=\(.ts) thread=\(.thread) author=\(.user)" end;
-if $mode == "new" then news else (state, warns) end
+def pending: .items as $items | $items[] | select(.class == "member" and (.mine | not))
+  | select(.fields.expects == "reply" and (.fields.to == $me or .fields.to == "all")) as $request
+  | select([$items[] | select(.class == "member" and .ts > $request.ts)
+      | select((.fields.re // "" | rtrimstr(".md")) == $request.id or .fields.re == $request.ts)
+      | select((.name == $me and (.fields.to == $request.name or .fields.to == "all"))
+          or (.name == $request.name and .fields.to == $me and .fields.kind == "status"))] | length == 0)
+  | "pending \($request.id) ts=\($request.ts)";
+if $mode == "new" then news else (state, warns, pending) end
 '
 
 myid=$(my_id) || exit 1
@@ -42,12 +49,12 @@ cache=$(mktemp -d)
 trap 'rm -rf "$cache"' EXIT
 while :; do
   snap=$(snapshot "$ch" "$me" "$cache" "$myid") || exit 1
-  out=$(printf '%s' "$snap" | jq -r --arg mode new "$REPORT")
+  out=$(printf '%s' "$snap" | jq -r --arg me "$me" --arg mode new "$REPORT")
   if [ -n "$out" ]; then
-    echo "$out"; printf '%s' "$snap" | jq -r --arg mode state "$REPORT"; exit 0
+    echo "$out"; printf '%s' "$snap" | jq -r --arg me "$me" --arg mode state "$REPORT"; exit 0
   fi
   if [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
-    echo "timeout"; printf '%s' "$snap" | jq -r --arg mode state "$REPORT"; exit 3
+    echo "timeout"; printf '%s' "$snap" | jq -r --arg me "$me" --arg mode state "$REPORT"; exit 3
   fi
   sleep "$interval"
 done

@@ -21,7 +21,13 @@ docker run -d --name "$net-fake" --network "$net" --network-alias fake \
   -e FAKE_USERS=UALPHA:coord-alpha:bot,UBETA:coord-beta:bot,UROGUE:rogue:bot,UGAMMA:coord-gamma:bot,UHUMAN:manu:person,UEVE:eve:person \
   --mount "type=bind,source=$here/fake_slack.py,target=/fake_slack.py,readonly" \
   python:3.13-alpine python /fake_slack.py >/dev/null
-sleep 2
+# Docker may return before the server has bound its port, especially on a cold pull.
+ready=0
+for _attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+  if docker run --rm --network "$net" "$img" curl -sS -o /dev/null http://fake:8080/ 2>/dev/null; then ready=1; break; fi
+  sleep 1
+done
+[ "$ready" = 1 ] || { echo 'fake Slack server did not become ready'; exit 1; }
 
 # as <member> <script> <args>: runs a script with that member's token, as host mode does.
 as() {
@@ -94,6 +100,9 @@ check "watch prints member state" '^state alpha=active' "$out"
 out=$(as beta read.sh $CH beta alpha-001.md)
 check "read shows author and unescaped body" 'author=alpha' "$out"
 check "read undoes Slack escapes" 'M1-M2 & tell me <what>' "$out"
+as beta ack.sh $CH beta alpha-001 >/dev/null
+out=$(as beta watch.sh $CH beta 1 1); rc=$?
+check "acked request remains pending after restart without waking" '^pending alpha-001 ts=' "$out" 3 "$rc"
 
 draft rep.md <<'EOF'
 ---
@@ -106,7 +115,9 @@ expects: reply
 M2 breaks when the cache is cold.
 EOF
 out=$(as beta post.sh $CH beta /d/rep.md); check "reply goes into alpha-001's thread" "^posted beta-001 ts=[0-9.]+ thread=$V1" "$out"
-out=$(as beta ack.sh $CH beta alpha-001); check "ack alpha-001" '^acked alpha-001' "$out"
+out=$(as beta watch.sh $CH beta 1 1)
+if printf '%s\n' "$out" | grep -q '^pending alpha-001 '; then fail=$((fail + 1)); echo 'FAIL reply did not close pending'; else pass=$((pass + 1)); echo 'ok   reply closes pending'; fi
+out=$(as beta ack.sh $CH beta alpha-001); check "ack alpha-001 again" '^already acked alpha-001' "$out"
 out=$(as beta ack.sh $CH beta alpha-001); check "ack is idempotent" 'already acked alpha-001' "$out"
 out=$(as beta ack.sh $CH beta beta-001); check "acking your own message is refused" 'not acking your own' "$out"
 
@@ -237,6 +248,19 @@ out=$(as beta invite.sh $CH beta gamma); check "a member invites a registered bo
 out=$(as beta invite.sh $CH beta gamma); check "inviting a member already in is reported" '^already in channel: gamma' "$out"
 out=$(as gamma watch.sh $CH gamma 5 1); check "the invited member sees the channel from the start" '^new alpha-001 ' "$out"
 check "the invited member sees the amendment" 'new alpha-005 .*kind=readme' "$out"
+
+# Inject legacy headers directly, including a thread reply and a withdrawal
+# for somebody else. An eyes reaction does not settle an obligation.
+test_api post "{\"channel\":\"$CH\",\"user\":\"UALPHA\",\"text\":\"\`coord alpha-006 to=all kind=request expects=reply\`\n\nPlease answer.\"}" >/dev/null
+test_api post "{\"channel\":\"$CH\",\"user\":\"UBETA\",\"text\":\"\`coord beta-004 to=gamma re=alpha-006 kind=reply expects=none\`\n\nUnrelated recipient.\"}" >/dev/null
+test_api post "{\"channel\":\"$CH\",\"user\":\"UALPHA\",\"text\":\"\`coord alpha-007 to=gamma re=alpha-006 kind=status expects=none\`\n\nWithdrawn for gamma.\"}" >/dev/null
+out=$(as beta watch.sh $CH beta 1 1)
+check "unrelated reply and another recipient withdrawal leave beta pending" '^pending alpha-006 ts=' "$out"
+out=$(as gamma watch.sh $CH gamma 1 1)
+if printf '%s\n' "$out" | grep -q '^pending alpha-006 '; then fail=$((fail + 1)); echo 'FAIL recipient withdrawal'; else pass=$((pass + 1)); echo 'ok   recipient withdrawal'; fi
+test_api post "{\"channel\":\"$CH\",\"user\":\"UBETA\",\"text\":\"\`coord beta-005 to=alpha re=alpha-006 kind=reply expects=none\`\n\nAnswered.\"}" >/dev/null
+out=$(as beta watch.sh $CH beta 1 1)
+if printf '%s\n' "$out" | grep -q '^pending alpha-006 '; then fail=$((fail + 1)); echo 'FAIL addressed reply'; else pass=$((pass + 1)); echo 'ok   addressed reply'; fi
 
 echo
 echo "$pass passed, $fail failed"
