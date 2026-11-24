@@ -32,7 +32,7 @@ Driving a Claude Code session as an implementer is a peer arrangement: follow [p
 
 Write the approved plan, orders, immutable reports and append-only metrics through a non-shell file tool, such as `apply_patch`, restricted to the state directory. Shell-only reading is therefore not itself a reason to stop: workers can supply the reads while the mister persists state without executing commands. If no non-shell state-writing tool is available either, report that specific limitation with an inline plan and orders. The September run establishes workflow coverage, not which file-access mechanism a current client exposes; do not infer that mechanism from its success.
 
-Use the client's available planning and user-input controls; do not invent `EnterPlanMode` or `ExitPlanMode` calls. Approval still means an actual user response or existing session authorization, never a timeout or an unanswered question.
+Use the client's available planning and user-input controls; do not invent `EnterPlanMode` or `ExitPlanMode` calls. Approval still means an actual user response, existing session authorization, or `--autonomous` in the invocation, never a timeout or an unanswered question.
 
 ## Dispatch
 

@@ -11,6 +11,7 @@ Written once the plan is approved; its existence means approval. If it already e
 
 **Slug**: <slug>   **Git dir**: <output of `git rev-parse --absolute-git-dir`>
 **Base branch**: <branch>   **Work branch**: <branch or "current">
+**Approval**: <user | autonomous>
 
 ## Request
 <verbatim>
