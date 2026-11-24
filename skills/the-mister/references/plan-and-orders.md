@@ -13,6 +13,9 @@ Written once the plan is approved; its existence means approval. If it already e
 **Base branch**: <branch>   **Work branch**: <branch or "current">
 **Approval**: <user | autonomous>
 
+<!-- Only when Approval is autonomous, write this note verbatim: -->
+> **Note for humans:** no human approved this plan; it was approved by the mister under `--autonomous`. Because the human is not in the loop, your agents should review this plan, its Assumptions and the decisions under Open items in the final report.
+
 ## Request
 <verbatim>
 
