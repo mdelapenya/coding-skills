@@ -96,7 +96,9 @@ For each cluster, in order:
    git commit -m "fix: handle null session in auth middleware"
    ```
 
-6. Move to the next cluster. Do not push until all clusters are committed.
+6. Move to the next cluster. Never push after a single cluster.
+
+**Push once, at the end of the run.** A run makes exactly one `git push`, after the last cluster is committed: never one per cluster, and never part-way through. If the run stops before the last cluster is committed, nothing is pushed. The push comes before the replies in Step 4, so every `Fixed in <commit-sha>` they cite is already on the remote.
 
 After all clusters are committed, use `AskUserQuestion` to confirm before pushing:
 
